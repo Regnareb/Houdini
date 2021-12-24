@@ -1,31 +1,49 @@
 import os
+import logging
 import hou
+logger = logging.getLogger(__name__)
+
+
+# Support cache with a file per frame
 
 
 FILETYPES = {
-    '.txt': {'nodetype': 'font', 'param': 'fileName'},
-    '.abc': {'nodetype': 'alembic', 'param': 'fileName'},
-    '.usd': {'nodetype': 'usdimport', 'param': 'filepath1'},
-    '.usda': {'nodetype': 'usdimport', 'param': 'filepath1'},
-    '.usdc': {'nodetype': 'usdimport', 'param': 'filepath1'},
-    '.ass': {'nodetype': 'arnold_asstoc', 'param': 'ass_file'},
-    '.rs': {'nodetype': 'redshift_packedProxySOP', 'param': 'RS_proxy_file'}
+    '.txt': {'nodetype': 'font', 'params': {'text': '%CONTENT%'}},
+    '.abc': {'nodetype': 'alembic', 'params': {'fileName': '%FILEPATH%'}},
+    '.usd': {'nodetype': 'usdimport', 'params': {'filepath1': '%FILEPATH%'}},
+    '.usda': {'nodetype': 'usdimport', 'params': {'filepath1': '%FILEPATH%'}},
+    '.usdc': {'nodetype': 'usdimport', 'params': {'filepath1': '%FILEPATH%'}},
+    '.fbx': {'nodetype': 'usdimport', 'params': {'input': 2, 'fbxfile': '%FILEPATH%'}},
+    '.mdd': {'nodetype': 'mdd', 'params': {'file': '%FILEPATH%'}},
+    '.ass': {'nodetype': 'arnold_asstoc', 'params': {'ass_file': '%FILEPATH%'}},
+    '.rs': {'nodetype': 'redshift_packedProxySOP', 'params': {'RS_proxy_file': '%FILEPATH%'}}
 }
 
 
-def create_node(parent, nodetype, param, filepath, name, position):
+def parse_strings(filepath, params):
+    result = {}
+    relpath = filepath.replace(hou.getenv('HIP'), '$HIP')  # Convert to relative path
+    for i in params:
+        result[i] = params[i].replace('%FILEPATH%', relpath)
+        if '%CONTENT%' in result[i]:
+            with open(filepath) as f:
+                result[i] = result[i].replace('%CONTENT%', f.read())
+    return result
+
+
+def create_node(parent, nodetype, params, filepath, name, position):
     try:
-        print(parent, nodetype, param, filepath, name, position)
+        params = parse_strings(filepath, params)
+        logger.debug(parent, nodetype, params, filepath, name, position)
         node = parent.createNode(nodetype, name, force_valid_node_name=True)
         node.setPosition(position)
-        node.setParms({param: filepath})
+        node.setParms(params)
         return node
     except hou.OperationFailed:
         return False
 
 
 def dropAccept(files):
-    print(files)
     pane = hou.ui.paneTabUnderCursor()
     if pane.type() != hou.paneTabType.NetworkEditor:
         return False
@@ -38,30 +56,28 @@ def dropAccept(files):
         parent = parent.createNode('geo', 'Geo')
         parent.setPosition(position)
 
-
     for i, filepath in enumerate(files):
         name, ext = os.path.splitext(os.path.basename(filepath))
-        filepath = filepath.replace(hou.getenv('HIP'), '$HIP')  # Convert to relative path
-        position += hou.Vector2(i * 3, 0)
 
         if ext == '.hip':
             hou.hipFile.load(filepath)
         elif hou.node(filepath):
-            create_node(parent, 'object_merge', 'objpath1', filepath, name, position)
+            create_node(parent, 'object_merge', {'filepath': '%FILEPATH%'}, filepath, name, position)
         elif parent.type().name() == 'geo':
-            infos = FILETYPES.get(ext, {'nodetype': 'file', 'param': 'file'})  # Create a file node if the extension is not in the list
-            nodetype, param = infos['nodetype'], infos['param']
-            create_node(parent, nodetype, param, filepath, name, position)
+            infos = FILETYPES.get(ext, {'nodetype': 'file', 'params': {'file': '%FILEPATH%'}})  # Create a file node if the extension is not in the list
+            nodetype, params = infos['nodetype'], infos['params']
+            create_node(parent, nodetype, params, filepath, name, position)
         elif parent.type().name() in ['mat', 'vopmaterial', 'materialbuilder', 'materiallibrary']:
-            create_node(parent, 'texture::2.0', 'map', filepath, name, position)
+            create_node(parent, 'texture', {'map': '%FILEPATH%'}, filepath, name, position)
         elif parent.type().name() == 'chopnet':
-            create_node(parent, 'file', 'file', filepath, name, position)
+            create_node(parent, 'file', {'file': '%FILEPATH%'}, filepath, name, position)
         elif parent.type().name() in ['img', 'cop2net']:
-            create_node(parent, 'file', 'filename1', filepath, name, position)
+            create_node(parent, 'file', {'filename1': '%FILEPATH%'}, filepath, name, position)
         elif parent.type().name() in ['stage', 'lopnet']:
-            create_node(parent, 'reference', 'filepath1', filepath, name, position)
+            create_node(parent, 'reference', {'filepath1': '%FILEPATH%'}, filepath, name, position)
         elif parent.type().name() == 'redshift_vopnet':
-            create_node(parent, 'redshift::TextureSampler', 'tex0', filepath, name, position)
+            create_node(parent, 'redshift::TextureSampler', {'tex0': '%FILEPATH%'}, filepath, name, position)
         elif parent.type().name() in ['arnold_materialbuilder', 'arnold_vopnet']:
-            create_node(parent, 'arnold::image', 'filename', filepath, name, position)
+            create_node(parent, 'arnold::image', {'filename': '%FILEPATH%'}, filepath, name, position)
+        # position += hou.Vector2(0, i)
     return True

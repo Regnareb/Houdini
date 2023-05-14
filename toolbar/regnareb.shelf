@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <tool name="br_ui_viewports_colour" label="br Change Viewports Colour" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[
+import ui.viewport
+ui.viewport.switch_viewports_colorscheme()  
+    ]]></script>
+  </tool>
+
+  <tool name="br_ui_viewport_colour" label="br Change Current Viewport Colour" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[
+import ui.viewport
+ui.viewport.switch_viewports_colorscheme(True)
+]]></script>
+  </tool>
+
+  <tool name="br_scrub_timeline" label="br Scrub Timeline" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[
+import toolutils
+scene_viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
+current_state = scene_viewer.currentState()
+if current_state !='br_scrub_timeline':
+  scene_viewer.setCurrentState("br_scrub_timeline")
+  toolutils.sceneViewer().runStateCommand('', args={'viewer_state': current_state})
+]]></script>
+  </tool>
+
+  <toolshelf name="Regnareb" label="Regnareb">
+    <memberTool name="br_ui_viewports_colour"/>
+    <memberTool name="br_ui_viewport_colour"/>
+    <memberTool name="br_scrub_timeline"/>
+  </toolshelf>
+</shelfDocument>

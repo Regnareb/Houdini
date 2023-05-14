@@ -1,0 +1,2 @@
+h.pane.parms.copy_parm	"Copy Parameter"	"Copy parameter"	 Ctrl+Shift+C
+h.pane.parms.paste_refs	"Paste Copied References"	"Paste copied references"	 Ctrl+Shift+V

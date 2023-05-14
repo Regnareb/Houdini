@@ -2,15 +2,26 @@ import os
 import re
 import logging
 import hou
+import common.hou_utils
 logger = logging.getLogger(__name__)
 
 
+# TODO: Pouvoir drop une image pour faire une refimage dans /obj/ ou une background image dans /obj/geo
+
+
+IMAGES = ['.als', '.bmp', '.cin', '.dds', '.dsm', '.exr', '.hdr', '.ies', '.jpeg', '.jpg', '.kdk', '.pic', '.pic.gz', '.pic.z', '.pix', '.png', '.psb', '.psd', '.ptex', '.ptx', '.qtl', '.rat', '.rgb', '.rgba', '.rla', '.rla16', '.rlb', '.rlb16', '.sgi', '.si', '.tbf', '.tga']
+DISPLACE_TYPES = {'_bump': 0, '_bmp': 0, '_normal': 1, '_displace':2, '_displacen':2, '_displacev':3}
+REGEX = re.compile('{}'.format('|'.join(DISPLACE_TYPES.keys())))
+
+
+
 FILETYPES = {
-    '.txt': {'nodetype': 'font', 'params': {'text': '%CONTENT%'}},
+    '.txt': {'nodetype': 'font', 'params': {'text': '%CONTENT%', 'usefile': 1, 'file': '%FILEPATH%'}},
     '.abc': {'nodetype': 'alembic', 'params': {'fileName': '%FILEPATH%'}},
     '.usd': {'nodetype': 'usdimport', 'params': {'filepath1': '%FILEPATH%'}},
     '.usda': {'nodetype': 'usdimport', 'params': {'filepath1': '%FILEPATH%'}},
     '.usdc': {'nodetype': 'usdimport', 'params': {'filepath1': '%FILEPATH%'}},
+    '.obj': {'nodetype': 'obj_importer', 'params': {'sObjFile': '%FILEPATH%'}},
     '.fbx': {'nodetype': 'usdimport', 'params': {'input': 2, 'fbxfile': '%FILEPATH%'}},
     '.mdd': {'nodetype': 'mdd', 'params': {'file': '%FILEPATH%'}},
     '.ass': {'nodetype': 'arnold_asstoc', 'params': {'ass_file': '%FILEPATH%'}},
@@ -18,88 +29,108 @@ FILETYPES = {
 }
 
 
-def toNumber(s):
-    """Convert a string to an int or a float depending of their types"""
-    try:
-        return int(s)
-    except ValueError:
-        return float(s)
-
-
-def get_file_sequence(filepath):
-    """Detect if the filepath is a single file or a sequence"""
-    folder, filename = os.path.split(filepath)
-    mo = re.findall('\d+', filename)
-    mo = list(re.finditer('\d+', filename))
-    for i in mo[::-1]:
-        num = toNumber(i.group())
-        decremented = os.path.join(folder, filename[:i.start()] + str(num - 1) + filename[i.end():])
-        incremented = os.path.join(folder, filename[:i.start()] + str(num + 1) + filename[i.end():])
-        if os.path.exists(decremented) or os.path.exists(incremented):
-            return True, os.path.join(folder, filename[:i.start()] + '$F' + str(len(i.group())) + filename[i.end():])
-    return False, filepath
-
-
-def parse_strings(filepath, params):
-    result = {}
-    relpath = filepath.replace(hou.getenv('HIP'), '$HIP')  # Convert to relative path
-    for i in params:
-        result[i] = params[i].replace('%FILEPATH%', relpath)
-        if '%CONTENT%' in result[i]:
-            with open(filepath) as f:
-                result[i] = result[i].replace('%CONTENT%', f.read())
-    return result
-
-
-def create_node(parent, nodetype, params, filepath, name, position, get_sequence=False):
-    try:
-        if get_sequence:
-            _, filepath = get_file_sequence(filepath)
-        params = parse_strings(filepath, params)
-        logger.debug(parent, nodetype, params, filepath, name, position)
-        node = parent.createNode(nodetype, name, force_valid_node_name=True)
-        node.setPosition(position)
-        node.setParms(params)
-        return node
-    except hou.OperationFailed:
-        return False
+NODE_CATEGORIES = {
+    hou.chopNodeTypeCategory(): {'incontext': 'chopnet', 'root': '/ch', 'nodetype': 'file', 'params': {'file': '%FILEPATH%'}},
+    hou.cop2NodeTypeCategory(): {'incontext': 'cop2net', 'root': '/obj', 'nodetype': 'file', 'params': {'filename1': '%FILEPATH%'}, 'get_sequence': True},
+    hou.dopNodeTypeCategory(): {'incontext': 'dopnet', 'root': '/obj'},
+    hou.lopNodeTypeCategory(): {'incontext': 'lopnet', 'root': '/stage', 'nodetype': 'reference', 'params': {'filepath1': '%FILEPATH%'}},
+    hou.objNodeTypeCategory(): {'incontext': 'objnet', 'root': '/obj'},
+    hou.ropNodeTypeCategory(): {'incontext': 'ropnet', 'root': '/out'},
+    hou.shopNodeTypeCategory(): {'incontext': 'shopnet', 'root': '/shop', 'nodetype': 'texture', 'params': {'map': '%FILEPATH%'}},
+    hou.sopNodeTypeCategory(): {'incontext': 'geo', 'root': '/obj'},
+    hou.topNodeTypeCategory(): {'incontext': 'topnet', 'root': '/tasks'},
+    hou.vopNodeTypeCategory(): {'incontext': 'matnet', 'root': '/mat'}
+}
 
 
 def dropAccept(files):
+    merge = hou.getPreference('custom.regnareb.dragndrop.always_merge')
     pane = hou.ui.paneTabUnderCursor()
-    if pane.type() != hou.paneTabType.NetworkEditor:
+    if isinstance(pane, hou.NetworkEditor):
+        position = pane.cursorPosition()
+    elif isinstance(pane, hou.SceneViewer):
+        position = hou.Vector2(0, 0)
+    else:
         return False
-    parent = pane.pwd()
-    position = pane.cursorPosition()
 
-    # Create a geo only if some files can be imported
-    extensions = [os.path.splitext(os.path.basename(i))[-1] for i in files]
-    if parent.type().name() == 'obj' and any(x in extensions for x in FILETYPES.keys()):
-        parent = parent.createNode('geo', 'Geo')
-        parent.setPosition(position)
 
-    for i, filepath in enumerate(files):
-        name, ext = os.path.splitext(os.path.basename(filepath))
+    if pane.pwd().path() in ['/ch', '/img', '/tasks']:
+        # Some contexts do not allow the creation of other managers, change panel path to /obj
+        pane.cd('/obj')
 
-        if ext == '.hip':
-            hou.hipFile.load(filepath)
-        elif hou.node(filepath):
-            create_node(parent, 'object_merge', {'objpath1': '%FILEPATH%'}, filepath, name, position)
-        elif parent.type().name() == 'geo':
-            infos = FILETYPES.get(ext, {'nodetype': 'file', 'params': {'file': '%FILEPATH%'}})  # Create a file node if the extension is not in the list
-            nodetype, params = infos['nodetype'], infos['params']
-            create_node(parent, nodetype, params, filepath, name, position)
-        elif parent.type().name() in ['mat', 'vopmaterial', 'materialbuilder', 'materiallibrary']:
-            create_node(parent, 'texture', {'map': '%FILEPATH%'}, filepath, name, position, get_sequence=True)
-        elif parent.type().name() == 'chopnet':
-            create_node(parent, 'file', {'file': '%FILEPATH%'}, filepath, name, position)
-        elif parent.type().name() in ['img', 'cop2net']:
-            create_node(parent, 'file', {'filename1': '%FILEPATH%'}, filepath, name, position, get_sequence=True)
-        elif parent.type().name() in ['stage', 'lopnet']:
-            create_node(parent, 'reference', {'filepath1': '%FILEPATH%'}, filepath, name, position)
-        elif parent.type().name() == 'redshift_vopnet':
-            create_node(parent, 'redshift::TextureSampler', {'tex0': '%FILEPATH%'}, filepath, name, position)
-        elif parent.type().name() in ['arnold_materialbuilder', 'arnold_vopnet']:
-            create_node(parent, 'arnold::image', {'filename': '%FILEPATH%'}, filepath, name, position, get_sequence=True)
-        # position += hou.Vector2(0, i)
+    for filepath in files:
+        root = pane.pwd()
+        filename = os.path.basename(filepath)
+        name = filename.split('.')[0]
+        if hou.node(filepath):
+            common.hou_utils.create_node(root, 'object_merge', name, {'objpath1': '%FILEPATH%'}, position, filepath)
+        elif filename.endswith('.hip'):
+            if merge or hou.ui.displayMessage('Do you want to open the .hip file or merge into the current one?', buttons=('Open', 'Merge')):
+                hou.hipFile.merge(filepath)
+                merge = True  # Don't ask again for all consecutive files
+                continue
+            else:
+                hou.hipFile.load(filepath)
+                return True
+
+        extension = filter(filepath.lower().endswith, FILETYPES.keys() + IMAGES)
+        for ext in extension:
+            if ext in IMAGES:
+                categories = [hou.vopNodeTypeCategory()]
+                displace = re.search(REGEX, filename.lower())
+                if displace:
+                    nodetype = 'displacetexture'
+                    params = {'texture': '%FILEPATH%', 'type': displace.group(0)}
+                else:
+                    nodetype = 'texture'
+                    params = {'map': '%FILEPATH%'}
+            else:
+                categories = common.hou_utils.get_node_parent_categories(FILETYPES[ext]['nodetype'])
+                nodetype = FILETYPES[ext]['nodetype']
+                params = FILETYPES[ext]['params']
+
+
+            if root.childTypeCategory() in categories:
+                logger.debug('Compatible with current context')
+                parent = root
+            else:
+                # If the node can't be created in the current context, create a context manager compatible with it
+                logger.debug('Not compatible with current context {} {}'.format(ext, root.childTypeCategory()))
+                if hou.getPreference('tools.createincontext.val'):
+                    if len(categories) > 1:
+                        index = hou.ui.displayMessage('The current context is not compatible with the "{}" extension.\nMultiple context manager are compatible, which one do you want to create?'.format(ext), buttons=([i.name().upper() for i in categories]))
+                    else:
+                        index = 0
+                    parent_type = NODE_CATEGORIES[categories[index]]['incontext']
+                    logger.debug('Create node: {}'.format(parent_type))
+                    parent = root.createNode(parent_type)
+                    parent.setPosition(position)
+                else:
+                    parent = hou.node(NODE_CATEGORIES[root.childTypeCategory()]['root'])
+
+            common.hou_utils.create_node(parent, nodetype, name, params, position, filepath)
+            break
+        else:
+            # If it's not a supported extension, try to create generic nodes for each context
+            if root.childTypeCategory() == hou.objNodeTypeCategory():
+                parent = root.createNode('geo', 'Geo')
+                parent.setPosition(position)
+                common.hou_utils.create_node(parent, 'file', name, {'file': '%FILEPATH%'}, position, filepath, get_sequence=True)
+            # elif root.type().name() in ['mat', 'vopmaterial', 'materialbuilder', 'materiallibrary']:
+            #     common.hou_utils.create_node(root, 'texture', name, {'map': '%FILEPATH%'}, position, filepath, get_sequence=True)
+            # elif root.type().name() in ['chopnet']:
+            #     common.hou_utils.create_node(root, 'file', name, {'file': '%FILEPATH%'}, position, filepath)
+            # elif root.type().name() in ['img', 'cop2net']:
+            #     common.hou_utils.create_node(root, 'file', name, {'filename1': '%FILEPATH%'}, position, filepath, get_sequence=True)
+            # elif root.type().name() in ['stage', 'lopnet']:
+            #     common.hou_utils.create_node(root, 'reference', name, {'filepath1': '%FILEPATH%'}, position, filepath)
+            elif root.type().name() in ['redshift_vopnet']:
+                common.hou_utils.create_node(root, 'redshift::TextureSampler', name, {'tex0': '%FILEPATH%'}, position, filepath)
+            elif root.type().name() in ['arnold_materialbuilder', 'arnold_vopnet']:
+                common.hou_utils.create_node(root, 'arnold::image', name, {'filename': '%FILEPATH%'}, position, filepath, get_sequence=True)
+            elif NODE_CATEGORIES[root.childTypeCategory()].get('nodetype'):
+                common.hou_utils.create_node(root, NODE_CATEGORIES[root.childTypeCategory()]['nodetype'], name, NODE_CATEGORIES[root.childTypeCategory()]['params'], position, filepath, get_sequence=NODE_CATEGORIES[root.childTypeCategory()].get('get_sequence'))
+            else:
+                common.hou_utils.create_node(root, 'file', name, {'file': '%FILEPATH%'}, position, filepath, get_sequence=True)
+
     return True

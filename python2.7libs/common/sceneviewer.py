@@ -5,8 +5,8 @@ import shutil
 import hou
 import toolutils
 
-import utils
-# Test which file has priority if there is one in $HOME and one in $REGNAREB
+import common.utils
+# TODO: Test which file has priority if there is one in $HOME and one in $REGNAREB import utils
 
 
 COLORSCHEMES = {
@@ -14,16 +14,46 @@ COLORSCHEMES = {
     hou.viewportColorScheme.Dark: "config/3DSceneColors.dark",
     hou.viewportColorScheme.Grey: "config/3DSceneColors.bw"
     }
-colorscheme_enum = lib.utils.Enum(COLORSCHEMES.keys())
+colorscheme_enum = common.utils.Enum(COLORSCHEMES.keys())
+
+
+def get_viewports(current_viewport=False):
+    if current_viewport:
+        under_cursor = hou.ui.paneTabUnderCursor()
+        return [under_cursor.curViewport()]
+    else:
+        return toolutils.sceneViewer().viewports()
+
+
+def reset_viewport():
+    pass
+
+def toggle_wireframe():
+    pass
+
+def toggle_flatshaded():
+    pass
+
+def toggle_smoothshaded():
+    pass
+
+def change_particles(points=False, pixels=False, lines=False, discs=False, sprites=None):
+    pass
+
+def change_lighting(none=False, headlights=False, normal=False, highquality=False, shadows=False):
+    pass
+
+def toggle_element(points=False, point_normals=False, point_trails=False, point_numbers=False, prim_normals=False, prim_numbers=False, prim_hulls=False, vertex_markers=False, particles_origins=False, group_attr_list=False, object_names=False):
+    pass
+
+
+def change_visualizer_size():
+    # Increase point  trails and Normals size
+    pass
 
 
 def switch_viewports_colorscheme(current_viewport=False):
-    if current_viewport:
-        under_cursor = hou.ui.paneTabUnderCursor()
-        viewports = [under_cursor.curViewport()]
-    else:
-        viewports = toolutils.sceneViewer().viewports()
-
+    viewports = get_viewports(current_viewport)
     new_scheme = ''
     for viewport in viewports:
         scheme = viewport.settings().colorScheme()

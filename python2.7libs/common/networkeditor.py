@@ -75,6 +75,10 @@ def paste_objectmerge():
     return result
 
 
+def toggle_dependancy_links():
+    pass
+
+
 def remove_background_image(editor, image_path):
     images = editor.backgroundImages()
     images = [x for x in images if x.path() != image_path]

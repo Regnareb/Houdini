@@ -1,0 +1,19 @@
+﻿<menuDocument>
+	<menu>
+	
+		<scriptItem id="br_open_parm_folder">
+			<label>Open Folder</label>
+			<context>
+					<expression>
+						import common.hou_utils
+						return common.hou_utils.parm_is_folder(kwargs)
+					</expression>
+			</context>
+			<modifyItem><insertAfter>revert_to_prev_val</insertAfter></modifyItem>
+			<scriptCode><![CDATA[
+import common.utils; common.utils.open_folder(kwargs)
+]]></scriptCode>
+		</scriptItem>
+
+	</menu>
+</menuDocument>

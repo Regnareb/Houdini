@@ -43,3 +43,11 @@ def get_node_parent_categories(node_type):
         if hou.nodeType(cat, node_type):
             result.append(cat)
     return result
+
+
+def toggle_updatemode():
+    mode = hou.updateModeSetting()
+    if mode == hou.updateMode.AutoUpdate:
+        hou.setUpdateMode(hou.updateMode.Manual)
+    if mode == hou.updateMode.Manual:
+        hou.setUpdateMode(hou.updateMode.AutoUpdate)

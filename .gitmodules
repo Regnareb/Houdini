@@ -1,0 +1,3 @@
+[submodule "python2.7libs/lib/huilib"]
+	path = python2.7libs/lib/huilib
+	url = https://github.com/alexxbb/huilib.git

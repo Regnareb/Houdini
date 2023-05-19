@@ -15,8 +15,8 @@ if not hou.getPreference('custom.regnareb.firstlaunch'):
 
     common.hou_utils.set_preference('custom.regnareb.firstlaunch', '1')  # Set this custom preference so that we set those only once
 
-    common.hou_utils.set_preference('custom.regnareb.scrub_timeline.mode', 'relative')
-    common.hou_utils.set_preference('custom.regnareb.scrub_timeline.keep_pressed', '1')
+    common.hou_utils.set_preference('custom.regnareb.scrub_timeline_mode', 'relative')
+    common.hou_utils.set_preference('custom.regnareb.scrub_timeline_keep_pressed', '1')
 
     common.hou_utils.set_preference('networkeditor.showanimations', '0')  # Disable node shapes
 

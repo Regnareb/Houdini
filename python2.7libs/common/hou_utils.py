@@ -1,22 +1,15 @@
 import logging
 import hou
-import common.utils
+import lib.pythonlib.iopath as iopath
 
 logger = logging.getLogger(__name__)
-
-
-def set_preference(name, value):
-    if not hou.getPreference(name):
-        hou.addPreference(name, value)
-    else:
-        hou.setPreference(name, value)
 
 
 def create_node(parent, nodetype, name, params=[], position=None, filepath='', get_sequence=False):
     if filepath:
         if get_sequence:
-            _, filepath = common.utils.get_file_sequence(filepath, '$F')
-        common.utils.parse_strings(filepath, params)
+            _, filepath = iopath.get_file_sequence(filepath, '$F')
+        iopath.parse_strings(filepath, params)
     logger.debug(parent, nodetype, name, params, filepath, position)
     node = parent.createNode(nodetype, name, force_valid_node_name=True)
     for k, v in params.items():
@@ -51,3 +44,18 @@ def toggle_updatemode():
         hou.setUpdateMode(hou.updateMode.Manual)
     if mode == hou.updateMode.Manual:
         hou.setUpdateMode(hou.updateMode.AutoUpdate)
+
+
+def parse_strings(filepath, params):
+    """Convert all the data to the final one"""
+    path = iopath.get_envvar_path(filepath, 'HIP')
+    path = iopath.get_envvar_path(path, 'JOB')
+    for i in params:
+        try:
+            params[i] = params[i].replace('%FILEPATH%', path)
+            if '%CONTENT%' in params[i]:
+                with open(filepath) as f:
+                    params[i] = params[i].replace('%CONTENT%', f.read())
+        except AttributeError:
+            pass  # If the attribute is not a string
+    return params

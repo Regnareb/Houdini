@@ -1,3 +1,5 @@
+import os
+import re
 import logging
 import hou
 import lib.pythonlib.iopath as iopath
@@ -9,7 +11,7 @@ def create_node(parent, nodetype, name, params=[], position=None, filepath='', g
     if filepath:
         if get_sequence:
             _, filepath = iopath.get_file_sequence(filepath, '$F')
-        iopath.parse_strings(filepath, params)
+        parse_strings(filepath, params)
     logger.debug(parent, nodetype, name, params, filepath, position)
     node = parent.createNode(nodetype, name, force_valid_node_name=True)
     for k, v in params.items():
@@ -48,8 +50,7 @@ def toggle_updatemode():
 
 def parse_strings(filepath, params):
     """Convert all the data to the final one"""
-    path = iopath.get_envvar_path(filepath, 'HIP')
-    path = iopath.get_envvar_path(path, 'JOB')
+    path = iopath.get_absolute_path(filepath)
     for i in params:
         try:
             params[i] = params[i].replace('%FILEPATH%', path)

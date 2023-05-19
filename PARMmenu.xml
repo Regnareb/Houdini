@@ -1,17 +1,27 @@
 ﻿<menuDocument>
 	<menu>
 	
-		<scriptItem id="br_open_parm_folder">
-			<label>Open Folder</label>
+		<scriptItem id="br_open_parm_path">
+			<label>Open Path</label>
 			<context>
 					<expression>
-						import common.hou_utils
-						return common.hou_utils.parm_is_folder(kwargs)
+						import os
+						import lib.pythonlib.iopath
+						path = lib.pythonlib.iopath.get_absolute_path(kwargs['parms'][0].evalAsString())
+						return os.path.exists(path)
 					</expression>
 			</context>
 			<modifyItem><insertAfter>revert_to_prev_val</insertAfter></modifyItem>
 			<scriptCode><![CDATA[
-import common.utils; common.utils.open_folder(kwargs)
+import os
+import lib.pythonlib.iopath
+path = lib.pythonlib.iopath.get_absolute_path(kwargs['parms'][0].evalAsString())
+if kwargs['ctrlclick']:
+	path = os.path.dirname(path)
+if os.path.isdir(path):
+	lib.pythonlib.iopath.openfolder(path)
+else:
+	lib.pythonlib.iopath.openfile(path)
 ]]></scriptCode>
 		</scriptItem>
 

@@ -1,2 +1,3 @@
 [submodule "python2.7libs/lib/pythonlib"]
 	path = python2.7libs/lib/pythonlib
+	url = https://github.com/Regnareb/pythonlib.git

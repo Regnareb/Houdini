@@ -13,7 +13,13 @@ def create_null(parent, position):
 def createEventHandler(uievent, pending_actions):
     if isinstance(uievent, canvaseventtypes.MouseEvent) and \
        uievent.eventtype == 'mousedown' and \
-       uievent.modifierstate == canvaseventtypes.ModifierState(alt=0, ctrl=0, shift=1):
+       uievent.modifierstate == canvaseventtypes.ModifierState(alt=1, ctrl=0, shift=0):
+        if uievent.editor.pwd().path()=='/obj':
+            geo = uievent.editor.pwd().createNode('geo')
+            geo.setPosition(uievent.editor.cursorPosition() - hou.Vector2(0.5, 0.2))
+            uievent.editor.setPwd(geo)
+            return None, True
+
         mousepos = uievent.editor.posFromScreen(uievent.mousepos) - hou.Vector2(0.5, 0.2)
         selected = hou.selectedNodes()
         if len(selected) == 1:

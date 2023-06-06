@@ -12,7 +12,7 @@ class ScrubTimelineState(object):
         self.previous_viewer_state = args['viewer_state']
 
     def onExit(self, kwargs):
-        if hou.getPreference('custom.regnareb.scrub_timeline.keep_pressed'):
+        if hou.getPreference('custom.regnareb.scrub_timeline_keep_pressed'):
             self.scene_viewer.clearPromptMessage()
             scene_viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
             scene_viewer.setCurrentState(self.previous_viewer_state)
@@ -40,7 +40,6 @@ class ScrubTimelineState(object):
             self._base_frame = hou.intFrame()
 
     def onMouseEvent(self, kwargs):
-        print(kwargs["mode"])
         device = kwargs["ui_event"].device()
         if device.isLeftButton():
             x = device.mouseX()
@@ -81,7 +80,7 @@ template = hou.ViewerStateTemplate("br_scrub_timeline", "br_Scrub_timeline", hou
 template.bindFactory(ScrubTimelineState)
 
 menu = hou.ViewerStateMenu("br_scrub_timeline", "Scrub Timeline")
-menu.addRadioStrip("mode", "Mode", hou.getPreference('custom.regnareb.scrub_timeline.mode'))
+menu.addRadioStrip("mode", "Mode", hou.getPreference('custom.regnareb.scrub_timeline.mode') or 'relative')
 menu.addRadioStripItem("mode", "relative", "Relative")
 menu.addRadioStripItem("mode", "absolute", "Absolute")
 template.bindMenu(menu)

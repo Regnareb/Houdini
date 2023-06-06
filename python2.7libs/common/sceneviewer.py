@@ -5,7 +5,8 @@ import shutil
 import hou
 import toolutils
 
-import common.utils
+import lib.pythonlib.common as pythonlib
+import lib.pythonlib.iopath as iopath
 # TODO: Test which file has priority if there is one in $HOME and one in $REGNAREB import utils
 
 
@@ -14,7 +15,7 @@ COLORSCHEMES = {
     hou.viewportColorScheme.Dark: "config/3DSceneColors.dark",
     hou.viewportColorScheme.Grey: "config/3DSceneColors.bw"
     }
-colorscheme_enum = common.utils.Enum(COLORSCHEMES.keys())
+colorscheme_enum = pythonlib.Enum(COLORSCHEMES.keys())
 
 
 def get_viewports(current_viewport=False):
@@ -25,7 +26,7 @@ def get_viewports(current_viewport=False):
         return toolutils.sceneViewer().viewports()
 
 
-def reset_viewport():
+def reset_viewports():
     pass
 
 def toggle_wireframe():
@@ -52,45 +53,59 @@ def change_visualizer_size():
     pass
 
 
-def switch_viewports_colorscheme(current_viewport=False):
+def switch_viewports_colorscheme(current_viewport=False, scheme=None):
     viewports = get_viewports(current_viewport)
     new_scheme = ''
     for viewport in viewports:
-        scheme = viewport.settings().colorScheme()
-        new_scheme = new_scheme if new_scheme else colorscheme_enum.next(scheme)
-        viewport.settings().setColorScheme(new_scheme)
+        if scheme:
+            viewport.settings().setColorScheme(scheme)
+        else:
+            scheme = viewport.settings().colorScheme()
+            new_scheme = new_scheme if new_scheme else colorscheme_enum.next(scheme)
+            viewport.settings().setColorScheme(new_scheme)
 
 
 def get_current_colorscheme():
     scene_viewer = toolutils.sceneViewer()
     viewports = scene_viewer.viewports()
     for viewport in viewports:
-        return viewport.settings().colorScheme().name()
+        return viewport.settings().colorScheme()
     else:
         return hou.viewportColorScheme.Light
 
 
 class ViewportColor():
-    def __init__(self):
-        self.regex = re.compile(r'(BackgroundBottomColor|BackgroundColor):\s([\s|\d|\.]*)')
-        self.get_colors(get_current_colorscheme())
+    def __init__(self, scheme=None):
+        self.regex = re.compile(r'^(\w*):\s+([\d|\.| |@\w]+)', re.MULTILINE)
+        self.scheme = scheme or get_current_colorscheme()
+        self.get_colors()
+
+    def set_backgroundcolors(self, top=(), bot=()):
+        if top:
+            self.colors['BackgroundColor'] = top[0:3]
+        if bot:
+            self.colors['BackgroundBottomColor'] = bot[0:3]
 
     def replace_values(self, match_obj):
         """Replace values from a regex pattern to the custom color values"""
-        return '{}:\t{}\t'.format(match_obj.group(1), self.values[match_obj.group(1)])
+        rgb = {key: ' '.join([str(float(i)/255) for i in values]) if isinstance(values, list) else values for key, values in self.colors.items()}
+        return '{}:\t{}\t'.format(match_obj.group(1), rgb[match_obj.group(1)])
 
-    def get_colors(self, scheme):
+    def get_colors(self):
         """Retrieve viewport colors from the corresponding UI file"""
         try:
-            self.colorfilepath = os.path.join(hou.text.expandString("$REGNAREB"), COLORSCHEMES[scheme])
+            self.colorfilepath = os.path.join(hou.text.expandString("$REGNAREB"), COLORSCHEMES[self.scheme])
             with open(self.colorfilepath, "r") as f:
                 content = f.read()
                 values = re.findall(self.regex, content)
-                self.values = {i[0]: i[1].strip() for i in values}
+                values = {i[0]: i[1] for i in values}
+                # Convert rgb to a 255 values instead of the normalized Houdini one. Don't do it for reference colors and ALPHA
+                self.colors = {key: [int(round(float(i)*255)) for i in value.split()] if '@' not in value and 'ALPHA' not in value else value.strip() for key, value in values.items()}
         except IOError:  # Copy the original color scheme from Houdini install if it doesn't exists
-            originalpath = os.path.join(hou.text.expandString("$HFS"), 'houdini', COLORSCHEMES[scheme])
+            originalpath = os.path.join(hou.text.expandString("$HFS"), 'houdini', COLORSCHEMES[self.scheme])
+            iopath.create_dir(os.path.dirname(self.colorfilepath))
             shutil.copyfile(originalpath, self.colorfilepath)
-            self.get_colors(scheme)
+            self.get_colors()
 
     def save_colors(self):
         """Save viewport colors to the corresponding UI file"""
@@ -100,4 +115,5 @@ class ViewportColor():
             f.seek(0)
             f.write(content)
             f.truncate()
+        switch_viewports_colorscheme(scheme=self.scheme)
         hou.ui.reloadViewportColorSchemes()

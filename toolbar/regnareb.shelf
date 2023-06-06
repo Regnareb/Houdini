@@ -7,15 +7,15 @@
 
   <tool name="br_ui_viewports_colour" label="br Change Viewports Colour" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[
-import ui.viewport
-ui.viewport.switch_viewports_colorscheme()  
+import common.sceneviewer
+common.sceneviewer.switch_viewports_colorscheme()  
     ]]></script>
   </tool>
 
   <tool name="br_ui_viewport_colour" label="br Change Current Viewport Colour" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[
-import ui.viewport
-ui.viewport.switch_viewports_colorscheme(True)
+import common.sceneviewer
+common.sceneviewer.switch_viewports_colorscheme(True)
 ]]></script>
   </tool>
 

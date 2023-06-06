@@ -1,6 +1,10 @@
 import logging
+import functools
+import collections
 from PySide2 import QtCore, QtGui, QtWidgets
 import hou
+import lib.pythonlib.qt as qt
+import common.sceneviewer
 logger = logging.getLogger(__name__)
 
 
@@ -11,40 +15,262 @@ def set_preference(name, value):
         hou.setPreference(name, value)
 
 
+class FirstLaunch(QtWidgets.QDialog):
+    def __init__(self):
+        super(FirstLaunch, self).__init__(hou.ui.mainQtWindow())
+        self.setWindowTitle('First Launch Initialisation')
+        self.row_layout = QtWidgets.QVBoxLayout()
+        self.setLayout(self.row_layout)
+
+        self.interface = collections.defaultdict(qt.RowLayout)
+        self.interface['networkeditor.shownodeshapes'].addCheckbox('Disable Nodes Shapes', True)
+        self.interface['networkeditor.showsimpleshape'].addCheckbox('Use Simple Node Shapes', True)
+        self.interface['networkeditor.doautomovenodes'].addCheckbox('Disable Auto Move Nodes', True)  # Do not make room for new connected nodes
+        self.interface['networkeditor.showanimations'].addCheckbox('Disable Nodes Animations', True)
+        # self.interface[''].addCheckbox('Set Wire Style to Straight', True)
+        self.interface['networkeditor.maxflyoutscale'].addCheckbox('Set Low Size to Show Ring ', True)
+        self.interface['tools.createincontext.val'].addCheckbox('Create Tools In Context', True)
+        self.interface['tools.sopviewmode.val'].addCheckbox('Show Displayed Node instead of Selected node', True)
+        self.interface['compact_mode'].addCheckbox('Set UI to Compact Mode', True)
+        self.interface['general.ui.scale'].addCheckbox(state=True)
+        self.interface['general.ui.scale'].addLabel('General UI Scale')
+        self.interface['general.ui.scale'].addField(0.95, validator='float', minimum=0.75, maximum=3, decimals=2)
+        self.interface['general.ui.scale'].addSlider(0.95, mode='float', minimum=0.75, maximum=3)
+        self.interface['general.ui.scale'].field.valueChanged.connect(functools.partial(self.sync_uiscale, 'field'))
+        self.interface['general.ui.scale'].slider.valueChanged.connect(functools.partial(self.sync_uiscale, 'slider'))
+        for i in ['networkeditor.shownodeshapes', 'networkeditor.showsimpleshape', 'networkeditor.doautomovenodes', 'networkeditor.showanimations', 'networkeditor.maxflyoutscale', 'tools.sopviewmode.val', 'tools.createincontext.val', 'compact_mode']:  # , 'general.ui.scale'
+            self.row_layout.addLayout(self.interface[i])
+
+
+        self.shortcuts = collections.defaultdict(qt.RowLayout)
+        self.shortcuts_groupbox = QtWidgets.QGroupBox('Set Shortcuts')
+        self.shortcuts_groupbox.setCheckable(True)
+        self.shortcuts_vbox = QtWidgets.QVBoxLayout()
+        self.shortcuts_groupbox.setLayout(self.shortcuts_vbox)
+
+        shortcuts = {
+            'copy_parm': {'label': 'Copy Parameter', 'default_shortcut': 'Ctrl+Shift+C'},
+            'paste_refs': {'label': 'Paste Parameter Reference', 'default_shortcut': 'Ctrl+Shift+V'},
+            'paste_object_merge': {'label': 'Paste Object Merge', 'default_shortcut': 'Alt+V'},  # Remove existing shortcut
+            'cycle_display_flag': {'label': 'Cycle Display Flag', 'default_shortcut': 'R'},  # Remove existing shortcut
+            'display_next_output': {'label': 'Display Next Output', 'default_shortcut': 'Alt+X'},  # Remove existing shortcut
+            'show_dependancy_links': {'label': 'Show dependancy Links', 'default_shortcut': 'ctrl+D'},  # Remove existing shortcut
+            'connect_selected_nodes': {'label': 'Connect Selected Nodes', 'default_shortcut': 'Shift+Y'},
+            'scrub_timeline': {'label': 'Scrub Timeline', 'default_shortcut': 'K'},
+            'switch_viewport_background': {'label': 'Switch Viewports Background', 'default_shortcut': 'Alt+B'},
+            'switch_viewport_background_current': {'label': 'Switch Current Viewport Background', 'default_shortcut': 'Ctrl+Alt+B'},
+            'change_particles_display': {'label': 'Change Particles Display', 'default_shortcut': ''},
+            'toggle_cooking_mode': {'label': 'Toggle Cooking Mode', 'default_shortcut': ''},
+            'triggerupdate_viewport': {'label': 'Trigger update Viewport', 'default_shortcut': ''},
+            }
+        for shortcut, values in shortcuts.items():
+            self.shortcuts[shortcut].addLabel(values['label'])
+            self.shortcuts[shortcut].addSpacer()
+            self.shortcuts[shortcut].addWidget(qt.KeySequenceRecorder(values['default_shortcut']))
+            self.shortcuts_vbox.addLayout(self.shortcuts[shortcut])
+        self.row_layout.addWidget(self.shortcuts_groupbox)
+
+        spacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.row_layout.addItem(spacer)
+
+        self.buttons = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
+        self.buttons.accepted.connect(self.save_prefs)
+        self.buttons.rejected.connect(self.reject)
+        self.row_layout.addWidget(self.buttons)
+
+    def save_prefs(self):
+        # hou.hotkeys.addAssignment("h.pane.parms.copy_parm", "ctrl+C")  # Set shortcuts for copy/paste parameters
+        # hou.hotkeys.addAssignment("h.pane.parms.paste_refs", "ctrl+V")
+
+        settings = {'networkeditor.shownodeshapes': '0', 'networkeditor.showsimpleshape': '1', 'networkeditor.doautomovenodes': '0', 'networkeditor.showanimations': '0', 'networkeditor.maxflyoutscale': '5', 'tools.createincontext.val': '1', 'tools.sopviewmode.val': '0'}
+        for setting, val in settings.items():
+            if self.interface[setting].checkbox.checkState():
+                hou.setPreference(setting, val)
+
+        if self.interface['compact_mode'].checkbox.checkState():
+            print(234234234)
+            hou.setPreference('general.ui.icon_size', 'Compact')  # DOESNT WORK
+            hou.setPreference('general.uiplaybar.menu', '1')  # Set the playbar to compact mode
+
+        if self.interface['general.ui.scale'].checkbox.checkState():
+            hou.setPreference('ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
+
+        common.preferences.set_preference('custom.regnareb.scrub_timeline_mode', 'relative')
+        common.preferences.set_preference('custom.regnareb.scrub_timeline_keep_pressed', '1')
+        common.preferences.set_preference('custom.regnareb.firstlaunch', '1')  # Set this custom preference so that we set those only once
+        self.close()
+
+    def sync_uiscale(self, source, args):
+        self.interface['general.ui.scale'].field.blockSignals(True)
+        self.interface['general.ui.scale'].slider.blockSignals(True)
+        if source=='field':
+            self.interface['general.ui.scale'].slider.setValue(self.interface['general.ui.scale'].field.value())
+        else:
+            self.interface['general.ui.scale'].field.setValue(self.interface['general.ui.scale'].slider.value())
+        self.interface['general.ui.scale'].field.blockSignals(False)
+        self.interface['general.ui.scale'].slider.blockSignals(False)
+
+
+
 class Preferences(QtWidgets.QDialog):
     def __init__(self):
         super(Preferences, self).__init__(hou.ui.mainQtWindow())
         # self.setParent(hou.ui.mainQtWindow(), QtCore.Qt.Window)
-        self.setWindowTitle('Beranger Preferences')
+        self.setWindowTitle('BR Preferences')
 
-        self.transfer_display_node = QtWidgets.QCheckBox('Transfer Display Flag on connection')
-        self.create_null_shift_click = QtWidgets.QCheckBox('Create a NULL when shift clicking with a node selected')
-        self.scrub_timeline_mode = QtWidgets.QComboBox('Scrub Timeline tool relative mode')
-        self.scrub_timeline_keep_pressed = QtWidgets.QCheckBox('Scrub Timeline tool shortcut need to be kept pressed')
-        self.drag_and_drop_in_context = QtWidgets.QCheckBox('Always try to create drag and dropped files in the current context')
+        self.onnewscene = collections.defaultdict(qt.RowLayout)
+        self.onnewscene['on_open_go_manual'].addCheckbox('Set cooking to Manual')
+        self.onnewscene['on_open_sopviewmode'].addCheckbox('Set view to "Show Display Operator"')
+        self.onnewscene['on_open_hide_other_objects'].addCheckbox('Set view to "Hide other objects"')
+        self.onnewscene['on_open_use_color_scheme'].addCheckbox('Use Default Color Scheme"')
+        # self.onnewscene['on_open_disable_nodes_shapes'].addCheckbox('Disable nodes shapes')
+        self.onnewscene['on_open_use_desktop'].addLabel('Use desktop')
+        self.onnewscene['on_open_use_desktop'].addSpacer()
+        self.onnewscene['on_open_use_desktop'].addCombobox([i.name() for i in hou.ui.desktops()])
 
+        self.network = collections.defaultdict(qt.RowLayout)
+        self.network['transfer_display_node'].addCheckbox('Transfer Display Flag on child connection')
+        self.network['create_null_shift_click'].addCheckbox('Create a NULL when shift clicking with a node selected')
+        self.network['drag_and_drop_in_context'].addCheckbox('Always try to create drag and dropped files in the current context')
+
+        self.viewport = collections.defaultdict(qt.RowLayout)
+        self.viewport['scrub_timeline_keep_pressed'].addCheckbox('Scrub Timeline tool shortcut needs to be kept pressed')
+        self.viewport['scrub_timeline_mode'].addLabel('Scrub Timeline mode: ')  # 'Scrub Timeline tool relative mode'
+        self.viewport['scrub_timeline_mode'].addSpacer()
+        self.viewport['scrub_timeline_mode'].addCombobox(['Relative', 'Absolute'])  # 'Scrub Timeline tool relative mode'
+        self.viewport['viewport_colors'].addLabel('Viewport Colors')
+        # self.viewport['viewport_colors'].addSpacer()
+        scheme = self.viewport['viewport_colors'].addCombobox(['Light', 'Dark', 'Grey'])
+        topcolor = self.viewport['viewport_colors'].addButton('Top')
+        bottomcolor = self.viewport['viewport_colors'].addButton('Bot')
+        # previewcolor = self.viewport['viewport_colors'].addButton()
+        # previewcolor.setMaximumWidth(35)
+        scheme.currentIndexChanged.connect(self.get_scheme)
+        topcolor.clicked.connect(functools.partial(self.choose_color, topcolor))
+        bottomcolor.clicked.connect(functools.partial(self.choose_color, bottomcolor))
         self.row_layout = QtWidgets.QVBoxLayout()
-        self.row_layout.addWidget(self.transfer_display_node)
-        self.row_layout.addWidget(self.create_null_shift_click)
-        self.row_layout.addWidget(self.scrub_timeline_mode)
-        self.row_layout.addWidget(self.scrub_timeline_keep_pressed)
-        self.row_layout.addWidget(self.drag_and_drop_in_context)
+
+        self.onnewscene_groupbox = QtWidgets.QGroupBox('On Scene Open')
+        self.onnewscene_vbox = QtWidgets.QVBoxLayout()
+        self.onnewscene_groupbox.setLayout(self.onnewscene_vbox)
+        for i in self.onnewscene.values():
+            self.onnewscene_vbox.addLayout(i)
+
+        self.network_groupbox = QtWidgets.QGroupBox('Network View')
+        self.network_vbox = QtWidgets.QVBoxLayout()
+        self.network_groupbox.setLayout(self.network_vbox)
+        for i in self.network.values():
+            self.network_vbox.addLayout(i)
+
+        self.viewport_groupbox = QtWidgets.QGroupBox('Viewport View')
+        self.viewport_vbox = QtWidgets.QVBoxLayout()
+        self.viewport_groupbox.setLayout(self.viewport_vbox)
+        for i in self.viewport.values():
+            self.viewport_vbox.addLayout(i)
+
+        self.row_layout.addWidget(self.onnewscene_groupbox)
+        self.row_layout.addWidget(self.network_groupbox)
+        self.row_layout.addWidget(self.viewport_groupbox)
         self.row_layout.addStretch()
 
-        self.apply = QtWidgets.QPushButton('Apply')
-        self.accept = QtWidgets.QPushButton('Accept')
-        self.close = QtWidgets.QPushButton('Close')
-        self.buttons_layout = QtWidgets.QHBoxLayout()
-        self.buttons_layout.addStretch()
-        self.buttons_layout.addWidget(self.apply)
-        self.buttons_layout.addWidget(self.close)
-
+        self.buttons_layout = qt.RowLayout()
+        self.buttons_layout.addSpacer()
+        for i in ['apply', 'accept', 'close']:
+            btn = self.buttons_layout.addButton(i.capitalize())
+            btn.clicked.connect(functools.partial(self.buttons, i))
         self.row_layout.addLayout(self.buttons_layout)
+
         self.setLayout(self.row_layout)
-        # self.setContentsMargins(0,0,0,0)
+        self.setContentsMargins(0, 0, 0, 0)
+        self.set_tooltips()
+        self.load_prefs()
 
 
-def show():
+
+    def load_prefs(self):
+        # self.network['transfer_display_node'].checkbox.checkState()
+        # self.network['create_null_shift_click'].checkbox.checkState()
+        # self.network['drag_and_drop_in_context'].checkbox.checkState()
+        # self.viewport['scrub_timeline_keep_pressed'].checkbox.checkState()
+        # self.viewport['scrub_timeline_mode'].combobox.currentText()
+        self.load_prefs_viewportcolors()
+
+
+    def load_prefs_viewportcolors(self, scheme=None):
+        self.viewport_colors = common.sceneviewer.ViewportColor(scheme)
+        index = self.viewport['viewport_colors'].combobox.findText(self.viewport_colors.scheme.name())
+        self.viewport['viewport_colors'].combobox.setCurrentIndex(index)
+        top = self.viewport_colors.colors.get('BackgroundColor', None)
+        bottom = self.viewport_colors.colors.get('BackgroundBottomColor', None)
+        self.update_colors_ui(top, bottom)
+
+
+    def save_prefs(self):
+        self.network['inherit_display_node'].checkbox.checkState()
+        self.network['create_null_shift_click'].checkbox.checkState()
+        self.network['drag_and_drop_in_context'].checkbox.checkState()
+        self.viewport['scrub_timeline_keep_pressed'].checkbox.checkState()
+        self.viewport['scrub_timeline_mode'].combobox.currentText()
+        self.viewport['viewport_colors'].combobox.currentText()
+        self.viewport_colors.save_colors()
+
+    def buttons(self, action):
+        if action in ['accept', 'apply']:
+            self.save_prefs()
+            self.load_prefs()
+        if action in ['accept', 'close']:
+            self.close()
+
+    def get_scheme(self):
+        text = self.viewport['viewport_colors'].combobox.currentText()
+        scheme = getattr(hou.viewportColorScheme, text)
+        self.load_prefs_viewportcolors(scheme)
+
+    def update_colors_ui(self, top=None, bot=None):
+        if top and 'ALPHA' not in top:
+            if '@' in top:
+                top = self.viewport_colors.colors[top.replace('@', '')]
+            self.viewport['viewport_colors'].buttons[0].setStyleSheet('background-color: rgba({}); border: none;'.format(','.join(str(i) for i in top)))
+        if bot and '@' and 'ALPHA' not in bot:
+            if '@' in bot:
+                bot = self.viewport_colors.colors[bot.replace('@', '')]
+            self.viewport['viewport_colors'].buttons[1].setStyleSheet('background-color: rgba({}); border: none;'.format(','.join(str(i) for i in bot)))
+        # self.viewport['viewport_colors'].buttons[2].setStyleSheet('background: qlineargradient( x1:0 y1:0, x2:0 y2:1, stop:0 {}, stop:1 {});; border: none;'.format(top, bottom))
+
+    def choose_color(self, btn):
+        color = QtWidgets.QColorDialog.getColor()
+        if color.isValid():
+            btn.setStyleSheet('background-color: rgb({}); border: none;'.format(','.join(str(i) for i in color.toTuple())))
+            kwarg = {btn.text().lower(): list(color.toTuple())}
+
+            self.update_colors_ui(**kwarg)
+            self.viewport_colors.set_backgroundcolors(**kwarg)
+
+
+
+    def set_tooltips(self):
+        self.onnewscene['on_open_go_manual'].setToolTip('When opening a scene, the cooking will be set to Manual to prevent the loading of a heavy scene.')
+        self.onnewscene['on_open_hide_other_objects'].setToolTip('When opening a scene the viewports will be set to "Hide other obects" to prevent the loading of all objects.')
+        # self.onnewscene['on_open_disable_nodes_shapes'].setToolTip('When opening a scene, disable the display of all shapes nodes')
+        self.onnewscene['on_open_use_desktop'].setToolTip('When opening a scene, change the Desktop panel arrangement to the one selected.')
+        # self.onnewscene['on_open_switch_wire_to'].setToolTip()
+        self.network['inherit_display_node'].setToolTip("When connecting a child node to a Displayed one, the connected node will inherit the Display flag unless the child is on the ignore list (in case it's aheavy node)")
+        self.network['create_null_shift_click'].setToolTip('If you have a node selected in the network view and shift click on an empty area, it will create a NULL node connected to that selected node.')
+        self.network['drag_and_drop_in_context'].setToolTip('If this is checked, drag and dropping a file in Houdini will always create the nodes in the current context. Otherwise it follows the Houdini preference.')
+        self.viewport['scrub_timeline_keep_pressed'].setToolTip('You need to keep the shortcut pressed then click on the viewport to change the current time like in Maya.\nOtherwise it is used as a classic shortcut.')
+        self.viewport['scrub_timeline_mode'].setToolTip('Relative mode means the timeline moves with mouse movement.\nAbsolute mode means the horizontal axis of the viewport is the same as the timline,\nif you click on the left you are set to the beginning, on the right at the end.')
+        self.viewport['viewport_colors'].setToolTip('Set your viewport color sceme and background colors.')
+
+def show_prefs():
     ui = Preferences()
     ui.show()
     return ui
+
+def show_firstlaunch():
+    # The pref 'networkeditor.shownodeshapes' is checked in case it is the very first time Houdini
+    # is launched and basic prefs are not set yet. In that case lots of the settings can't be set
+    # thus no settings are set.
+    # if not hou.getPreference('custom.regnareb.firstlaunch') and hou.getPreference('networkeditor.shownodeshapes'):
+        ui = FirstLaunch()
+        ui.show()
+        return ui

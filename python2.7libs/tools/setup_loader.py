@@ -77,9 +77,7 @@ class SetupLoader(QtWidgets.QWidget):
         typ = combo.itemData(index)['type']
         if typ == 'files':
             self.button.setEnabled(True)
-            print('enabled')
         else:
-            print('disabled')
             self.button.setEnabled(False)
 
 

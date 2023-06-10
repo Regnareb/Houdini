@@ -1,5 +1,4 @@
 import os
-import tkinter
 import logging
 import hou
 import nodegraphutils
@@ -66,7 +65,7 @@ def paste_objectmerge():
     else:
         return None, False
     parent = pane.pwd()
-    clipboard = tkinter.Tk().clipboard_get().split(' ')
+    clipboard = hou.ui.getTextFromClipboard().split()
     for path in clipboard:
         if hou.node(path):
             name = os.path.basename(os.path.normpath(path))

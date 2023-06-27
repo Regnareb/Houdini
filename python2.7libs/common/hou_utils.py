@@ -1,6 +1,7 @@
 import os
 import re
 import logging
+import contextlib
 import hou
 import lib.pythonlib.iopath as iopath
 
@@ -40,12 +41,12 @@ def get_node_parent_categories(node_type):
     return result
 
 
-def toggle_updatemode():
+def toggle_updatemode(default=hou.updateMode.AutoUpdate):
     mode = hou.updateModeSetting()
-    if mode == hou.updateMode.AutoUpdate:
+    if mode in [hou.updateMode.AutoUpdate, hou.updateMode.OnMouseUp]:
         hou.setUpdateMode(hou.updateMode.Manual)
     if mode == hou.updateMode.Manual:
-        hou.setUpdateMode(hou.updateMode.AutoUpdate)
+        hou.setUpdateMode(default)
 
 
 def parse_strings(filepath, params):
@@ -60,3 +61,11 @@ def parse_strings(filepath, params):
         except AttributeError:
             pass  # If the attribute is not a string
     return params
+
+
+@contextlib.contextmanager
+def temporary_cooking_mode(mode):
+    current = hou.updateModeSetting()
+    hou.setUpdateMode(mode)
+    yield
+    hou.setUpdateMode(current)

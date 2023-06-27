@@ -57,7 +57,7 @@ class FirstLaunch(QtWidgets.QDialog):
             'paste_object_merge': {'label': 'Paste Object Merge', 'default_shortcut': 'Alt+V'},  # Remove existing shortcut
             'cycle_display_flag': {'label': 'Cycle Display Flag', 'default_shortcut': 'R'},  # Remove existing shortcut
             'display_next_output': {'label': 'Display Next Output', 'default_shortcut': 'Alt+X'},  # Remove existing shortcut
-            'show_dependancy_links': {'label': 'Show dependancy Links', 'default_shortcut': 'ctrl+D'},  # Remove existing shortcut
+            'show_dependancy_links': {'label': 'Show dependancy Links', 'default_shortcut': 'Ctrl+D'},  # Remove existing shortcut
             'connect_selected_nodes': {'label': 'Connect Selected Nodes', 'default_shortcut': 'Shift+Y'},
             'scrub_timeline': {'label': 'Scrub Timeline', 'default_shortcut': 'K'},
             'switch_viewport_background': {'label': 'Switch Viewports Background', 'default_shortcut': 'Alt+B'},
@@ -65,6 +65,7 @@ class FirstLaunch(QtWidgets.QDialog):
             'change_particles_display': {'label': 'Change Particles Display', 'default_shortcut': ''},
             'toggle_cooking_mode': {'label': 'Toggle Cooking Mode', 'default_shortcut': ''},
             'triggerupdate_viewport': {'label': 'Trigger update Viewport', 'default_shortcut': ''},
+            'create_node_preview': {'label': 'Create Node Preview', 'default_shortcut': ''},
             }
         for shortcut, values in shortcuts.items():
             self.shortcuts[shortcut].addLabel(values['label'])
@@ -121,22 +122,20 @@ class Preferences(QtWidgets.QDialog):
         self.setWindowTitle('BR Preferences')
 
         self.onnewscene = collections.defaultdict(qt.RowLayout)
-        self.onnewscene['on_open_go_manual'].addCheckbox('Set cooking to Manual')
-        self.onnewscene['on_open_sopviewmode'].addCheckbox('Set view to "Show Display Operator"')
-        self.onnewscene['on_open_hide_other_objects'].addCheckbox('Set view to "Hide other objects"')
-        self.onnewscene['on_open_use_color_scheme'].addCheckbox('Use Default Color Scheme"')
-        # self.onnewscene['on_open_disable_nodes_shapes'].addCheckbox('Disable nodes shapes')
-        self.onnewscene['on_open_use_desktop'].addLabel('Use desktop')
-        self.onnewscene['on_open_use_desktop'].addSpacer()
-        self.onnewscene['on_open_use_desktop'].addCombobox([i.name() for i in hou.ui.desktops()])
+        self.onnewscene['on_open_go_manual'].addCheckbox('Set cooking to Manual', True)
+        self.onnewscene['on_open_sopviewmode'].addCheckbox('Set view to "Show Display Operator"', True)
+        self.onnewscene['on_open_hide_other_objects'].addCheckbox('Set view to "Hide other objects"', True)
+        self.onnewscene['on_open_use_color_scheme'].addCheckbox('Use Default Color Scheme', True)
+        # self.onnewscene['on_open_disable_nodes_shapes'].addCheckbox('Disable nodes shapes', True)
 
         self.network = collections.defaultdict(qt.RowLayout)
-        self.network['transfer_display_node'].addCheckbox('Transfer Display Flag on child connection')
-        self.network['create_null_shift_click'].addCheckbox('Create a NULL when shift clicking with a node selected')
-        self.network['drag_and_drop_in_context'].addCheckbox('Always try to create drag and dropped files in the current context')
+        self.network['transfer_display_node'].addCheckbox('Transfer Display Flag on child connection', True)
+        self.network['create_null_shift_click'].addCheckbox('Create a NULL when Ctrl+Shift clicking with a node selected', True)
+        self.network['drag_and_drop'].addCheckbox('Enable Drag And Drop of files from File Explorer', True)
+        self.network['drag_and_drop_in_context'].addCheckbox('Always try to create drag and dropped files in the current context', True)
 
         self.viewport = collections.defaultdict(qt.RowLayout)
-        self.viewport['scrub_timeline_keep_pressed'].addCheckbox('Scrub Timeline tool shortcut needs to be kept pressed')
+        self.viewport['scrub_timeline_keep_pressed'].addCheckbox('Scrub Timeline tool shortcut needs to be kept pressed', True)
         self.viewport['scrub_timeline_mode'].addLabel('Scrub Timeline mode: ')  # 'Scrub Timeline tool relative mode'
         self.viewport['scrub_timeline_mode'].addSpacer()
         self.viewport['scrub_timeline_mode'].addCombobox(['Relative', 'Absolute'])  # 'Scrub Timeline tool relative mode'
@@ -187,8 +186,6 @@ class Preferences(QtWidgets.QDialog):
         self.set_tooltips()
         self.load_prefs()
 
-
-
     def load_prefs(self):
         # self.network['transfer_display_node'].checkbox.checkState()
         # self.network['create_null_shift_click'].checkbox.checkState()
@@ -197,7 +194,6 @@ class Preferences(QtWidgets.QDialog):
         # self.viewport['scrub_timeline_mode'].combobox.currentText()
         self.load_prefs_viewportcolors()
 
-
     def load_prefs_viewportcolors(self, scheme=None):
         self.viewport_colors = common.sceneviewer.ViewportColor(scheme)
         index = self.viewport['viewport_colors'].combobox.findText(self.viewport_colors.scheme.name())
@@ -205,7 +201,6 @@ class Preferences(QtWidgets.QDialog):
         top = self.viewport_colors.colors.get('BackgroundColor', None)
         bottom = self.viewport_colors.colors.get('BackgroundBottomColor', None)
         self.update_colors_ui(top, bottom)
-
 
     def save_prefs(self):
         self.network['inherit_display_node'].checkbox.checkState()
@@ -248,13 +243,10 @@ class Preferences(QtWidgets.QDialog):
             self.update_colors_ui(**kwarg)
             self.viewport_colors.set_backgroundcolors(**kwarg)
 
-
-
     def set_tooltips(self):
         self.onnewscene['on_open_go_manual'].setToolTip('When opening a scene, the cooking will be set to Manual to prevent the loading of a heavy scene.')
         self.onnewscene['on_open_hide_other_objects'].setToolTip('When opening a scene the viewports will be set to "Hide other obects" to prevent the loading of all objects.')
         # self.onnewscene['on_open_disable_nodes_shapes'].setToolTip('When opening a scene, disable the display of all shapes nodes')
-        self.onnewscene['on_open_use_desktop'].setToolTip('When opening a scene, change the Desktop panel arrangement to the one selected.')
         # self.onnewscene['on_open_switch_wire_to'].setToolTip()
         self.network['inherit_display_node'].setToolTip("When connecting a child node to a Displayed one, the connected node will inherit the Display flag unless the child is on the ignore list (in case it's aheavy node)")
         self.network['create_null_shift_click'].setToolTip('If you have a node selected in the network view and shift click on an empty area, it will create a NULL node connected to that selected node.')
@@ -272,7 +264,7 @@ def show_firstlaunch():
     # The pref 'networkeditor.shownodeshapes' is checked in case it is the very first time Houdini
     # is launched and basic prefs are not set yet. In that case lots of the settings can't be set
     # thus no settings are set.
-    # if not hou.getPreference('custom.regnareb.firstlaunch') and hou.getPreference('networkeditor.shownodeshapes'):
+    if not hou.getPreference('custom.regnareb.firstlaunch') and hou.getPreference('networkeditor.shownodeshapes'):
         ui = FirstLaunch()
         ui.show()
         return ui

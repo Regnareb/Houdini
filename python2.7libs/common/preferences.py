@@ -38,9 +38,12 @@ class FirstLaunch(QtWidgets.QDialog):
         self.interface['general.ui.scale'].addSlider(0.95, mode='float', minimum=0.75, maximum=3)
         self.interface['general.ui.scale'].field.valueChanged.connect(functools.partial(self.sync_uiscale, 'field'))
         self.interface['general.ui.scale'].slider.valueChanged.connect(functools.partial(self.sync_uiscale, 'slider'))
-        for i in ['networkeditor.shownodeshapes', 'networkeditor.showsimpleshape', 'networkeditor.doautomovenodes', 'networkeditor.showanimations', 'networkeditor.maxflyoutscale', 'tools.sopviewmode.val', 'tools.createincontext.val', 'compact_mode']:  # , 'general.ui.scale'
+        self.interface['general.desk.val'].addCheckbox('Startup In Desktop', True)
+        self.interface['general.desk.val'].addCombobox([i.name() for i in hou.ui.desktops()])
+        self.interface['general.desk.val'].combobox.setCurrentIndex(self.interface['general.desk.val'].combobox.findText('Compact'))
+        self.interface['general.desk.val'].checkbox.toggled.connect(self.interface['general.desk.val'].connectCheckboxState)
+        for i in ['networkeditor.shownodeshapes', 'networkeditor.showsimpleshape', 'networkeditor.doautomovenodes', 'networkeditor.showanimations', 'networkeditor.maxflyoutscale', 'tools.sopviewmode.val', 'tools.createincontext.val', 'compact_mode', 'general.desk.val']:  # , 'general.ui.scale'
             self.row_layout.addLayout(self.interface[i])
-
 
         self.shortcuts = collections.defaultdict(qt.RowLayout)
         self.shortcuts_groupbox = QtWidgets.QGroupBox('Set Shortcuts')
@@ -82,13 +85,12 @@ class FirstLaunch(QtWidgets.QDialog):
         # hou.hotkeys.addAssignment("h.pane.parms.copy_parm", "ctrl+C")  # Set shortcuts for copy/paste parameters
         # hou.hotkeys.addAssignment("h.pane.parms.paste_refs", "ctrl+V")
 
-        settings = {'networkeditor.shownodeshapes': '0', 'networkeditor.showsimpleshape': '1', 'networkeditor.doautomovenodes': '0', 'networkeditor.showanimations': '0', 'networkeditor.maxflyoutscale': '5', 'tools.createincontext.val': '1', 'tools.sopviewmode.val': '0'}
+        settings = {'networkeditor.shownodeshapes': '0', 'networkeditor.showsimpleshape': '1', 'networkeditor.doautomovenodes': '0', 'networkeditor.showanimations': '0', 'networkeditor.maxflyoutscale': '5', 'tools.createincontext.val': '1', 'tools.sopviewmode.val': '0', 'general.desk.val': self.interface['general.desk.val'].combobox.currentText()}
         for setting, val in settings.items():
             if self.interface[setting].checkbox.checkState():
                 hou.setPreference(setting, val)
 
         if self.interface['compact_mode'].checkbox.checkState():
-            print(234234234)
             hou.setPreference('general.ui.icon_size', 'Compact')  # DOESNT WORK
             hou.setPreference('general.uiplaybar.menu', '1')  # Set the playbar to compact mode
 

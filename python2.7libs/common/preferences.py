@@ -25,9 +25,8 @@ class FirstLaunch(QtWidgets.QDialog):
         self.interface = collections.defaultdict(qt.RowLayout)
         self.interface['networkeditor.shownodeshapes'].addCheckbox('Disable Nodes Shapes', True)
         self.interface['networkeditor.showsimpleshape'].addCheckbox('Use Simple Node Shapes', True)
-        self.interface['networkeditor.doautomovenodes'].addCheckbox('Disable Auto Move Nodes', True)  # Do not make room for new connected nodes
+        self.interface['networkeditor.doautomovenodes'].addCheckbox('Disable Auto Move Nodes', True)
         self.interface['networkeditor.showanimations'].addCheckbox('Disable Nodes Animations', True)
-        # self.interface[''].addCheckbox('Set Wire Style to Straight', True)
         self.interface['networkeditor.maxflyoutscale'].addCheckbox('Set Low Size to Show Ring ', True)
         self.interface['tools.createincontext.val'].addCheckbox('Create Tools In Context', True)
         self.interface['tools.sopviewmode.val'].addCheckbox('Show Displayed Node instead of Selected node', True)
@@ -36,8 +35,7 @@ class FirstLaunch(QtWidgets.QDialog):
         self.interface['general.ui.scale'].addLabel('General UI Scale')
         self.interface['general.ui.scale'].addField(0.95, validator='float', minimum=0.75, maximum=3, decimals=2)
         self.interface['general.ui.scale'].addSlider(0.95, mode='float', minimum=0.75, maximum=3)
-        self.interface['general.ui.scale'].field.valueChanged.connect(functools.partial(self.sync_uiscale, 'field'))
-        self.interface['general.ui.scale'].slider.valueChanged.connect(functools.partial(self.sync_uiscale, 'slider'))
+        self.interface['general.ui.scale'].connectFieldSlider()
         self.interface['general.desk.val'].addCheckbox('Startup In Desktop', True)
         self.interface['general.desk.val'].addCombobox([i.name() for i in hou.ui.desktops()])
         self.interface['general.desk.val'].combobox.setCurrentIndex(self.interface['general.desk.val'].combobox.findText('Compact'))
@@ -83,9 +81,6 @@ class FirstLaunch(QtWidgets.QDialog):
         self.row_layout.addWidget(self.buttons)
 
     def save_prefs(self):
-        # hou.hotkeys.addAssignment("h.pane.parms.copy_parm", "ctrl+C")  # Set shortcuts for copy/paste parameters
-        # hou.hotkeys.addAssignment("h.pane.parms.paste_refs", "ctrl+V")
-
         settings = {'networkeditor.shownodeshapes': '0', 'networkeditor.showsimpleshape': '1', 'networkeditor.doautomovenodes': '0', 'networkeditor.showanimations': '0', 'networkeditor.maxflyoutscale': '5', 'tools.createincontext.val': '1', 'tools.sopviewmode.val': '0', 'general.desk.val': self.interface['general.desk.val'].combobox.currentText()}
         for setting, val in settings.items():
             if self.interface[setting].checkbox.checkState():
@@ -97,21 +92,39 @@ class FirstLaunch(QtWidgets.QDialog):
 
         if self.interface['general.ui.scale'].checkbox.checkState():
             hou.setPreference('ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
+            hou.setPreference('general.ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
 
-        common.preferences.set_preference('custom.regnareb.scrub_timeline_mode', 'relative')
-        common.preferences.set_preference('custom.regnareb.scrub_timeline_keep_pressed', '1')
-        common.preferences.set_preference('custom.regnareb.firstlaunch', '1')  # Set this custom preference so that we set those only once
+        set_preference('custom.regnareb.scrub_timeline_mode', 'relative')
+        set_preference('custom.regnareb.scrub_timeline_keep_pressed', '1')
+        self.save_shortcuts()
+
+        set_preference('custom.regnareb.firstlaunch', '1')  # Set this custom preference so that the window is only displayed once
         self.close()
 
-    def sync_uiscale(self, source, args):
-        self.interface['general.ui.scale'].field.blockSignals(True)
-        self.interface['general.ui.scale'].slider.blockSignals(True)
-        if source=='field':
-            self.interface['general.ui.scale'].slider.setValue(self.interface['general.ui.scale'].field.value())
-        else:
-            self.interface['general.ui.scale'].field.setValue(self.interface['general.ui.scale'].slider.value())
-        self.interface['general.ui.scale'].field.blockSignals(False)
-        self.interface['general.ui.scale'].slider.blockSignals(False)
+    def save_shortcuts(self):
+        # hou.hotkeys.addAssignment("h.pane.parms.copy_parm", "ctrl+C")  # Set shortcuts for copy/paste parameters
+        # hou.hotkeys.addAssignment("h.pane.parms.paste_refs", "ctrl+V")
+        # for each shortcut :
+        # - check if it exists and is in the same scope as the current tool
+        # - unassign it if it already exists
+        # - assigne the new shortcut
+        pass
+
+    def check_shortcut(self):
+        # check if the shortcut exists and is in the same scope as the current tool
+        pass
+
+    def set_tooltips(self):
+        self.interface['networkeditor.shownodeshapes'].setToolTip('Use rectangular node shapes only')
+        self.interface['networkeditor.showsimpleshape'].setToolTip("In the network editor's View menu, you can turn off display of custom node shapes. If that option and this option are both on, Houdini uses an even simpler default node shape (a simple rectangle instead of a rounded rectangle). This may speed up the display of extremely complex networks.")
+        self.interface['networkeditor.doautomovenodes'].setToolTip("Won't auto move nodes when connecting a node in between closed ")
+        self.interface['networkeditor.showanimations'].setToolTip('Animates certain changes and transitions in the network editor for clarity (for example, moving nodes out the way when a new node is placed). Turn this off to disable animations.')
+        self.interface['networkeditor.maxflyoutscale'].setToolTip('When opening a scene, change the Desktop panel arrangement to the one selected.')
+        self.interface['tools.createincontext.val'].setToolTip('Geometry will be created within the current context (eg. another piece of geometry in the same object).')
+        self.interface['tools.sopviewmode.val'].setToolTip('Geometry is displayed from the node with the display flag enabled.')
+        self.interface['compact_mode'].setToolTip('Change the playbar and UI icon size to compact.')
+        self.interface['general.ui.scale'].setToolTip('Change the UI scale globally.')
+        self.interface['general.desk.val'].setToolTip('Always force this Desktop when launching Houdini or opening a new scene.')
 
 
 
@@ -119,7 +132,7 @@ class Preferences(QtWidgets.QDialog):
     def __init__(self):
         super(Preferences, self).__init__(hou.ui.mainQtWindow())
         # self.setParent(hou.ui.mainQtWindow(), QtCore.Qt.Window)
-        self.setWindowTitle('BR Preferences')
+        self.setWindowTitle('Regnareb Preferences')
 
         self.onnewscene = collections.defaultdict(qt.RowLayout)
         self.onnewscene['on_open_go_manual'].addCheckbox('Set cooking to Manual', True)
@@ -183,15 +196,19 @@ class Preferences(QtWidgets.QDialog):
 
         self.setLayout(self.row_layout)
         self.setContentsMargins(0, 0, 0, 0)
-        self.set_tooltips()
+        # self.set_tooltips()
         self.load_prefs()
 
     def load_prefs(self):
-        # self.network['transfer_display_node'].checkbox.checkState()
-        # self.network['create_null_shift_click'].checkbox.checkState()
-        # self.network['drag_and_drop_in_context'].checkbox.checkState()
-        # self.viewport['scrub_timeline_keep_pressed'].checkbox.checkState()
-        # self.viewport['scrub_timeline_mode'].combobox.currentText()
+        all_prefs_ui = dict(list(self.onnewscene.items()) + list(self.network.items()) + [('scrub_timeline_keep_pressed', self.viewport['scrub_timeline_keep_pressed'])])  # Merge all UI with checkboxes
+        # all_prefs_ui = {**self.onnewscene, **self.network, 'scrub_timeline_keep_pressed': self.viewport['scrub_timeline_keep_pressed']}  # python 3
+        for name, values in all_prefs_ui.items():
+            name = 'custom.regnareb.{}'.format(name)
+            value = hou.getPreference(name) or '1'  # set default state if the pref does not exists
+            value = QtCore.Qt.Checked if value=='1' else QtCore.Qt.Unchecked
+            values.checkbox.setCheckState(value)
+        index = self.viewport['scrub_timeline_mode'].combobox.findText(hou.getPreference('custom.regnareb.scrub_timeline_mode') or 'Relative')
+        self.viewport['scrub_timeline_mode'].combobox.setCurrentIndex(index)
         self.load_prefs_viewportcolors()
 
     def load_prefs_viewportcolors(self, scheme=None):
@@ -203,12 +220,14 @@ class Preferences(QtWidgets.QDialog):
         self.update_colors_ui(top, bottom)
 
     def save_prefs(self):
-        self.network['inherit_display_node'].checkbox.checkState()
-        self.network['create_null_shift_click'].checkbox.checkState()
-        self.network['drag_and_drop_in_context'].checkbox.checkState()
-        self.viewport['scrub_timeline_keep_pressed'].checkbox.checkState()
-        self.viewport['scrub_timeline_mode'].combobox.currentText()
-        self.viewport['viewport_colors'].combobox.currentText()
+        all_prefs_ui = dict(list(self.onnewscene.items()) + list(self.network.items()) + [('scrub_timeline_keep_pressed', self.viewport['scrub_timeline_keep_pressed'])])  # Merge all UI with checkboxes
+        # all_prefs_ui = {**self.onnewscene, **self.network, 'scrub_timeline_keep_pressed': self.viewport['scrub_timeline_keep_pressed']}  # python 3
+        for name, values in all_prefs_ui.items():
+            name = 'custom.regnareb.{}'.format(name)
+            state = values.checkbox.checkState()
+            value = '1' if state==QtCore.Qt.Checked else '0'
+            set_preference(name, value)
+        set_preference('custom.regnareb.scrub_timeline_mode', self.viewport['scrub_timeline_mode'].combobox.currentText())
         self.viewport_colors.save_colors()
 
     def buttons(self, action):
@@ -246,9 +265,7 @@ class Preferences(QtWidgets.QDialog):
     def set_tooltips(self):
         self.onnewscene['on_open_go_manual'].setToolTip('When opening a scene, the cooking will be set to Manual to prevent the loading of a heavy scene.')
         self.onnewscene['on_open_hide_other_objects'].setToolTip('When opening a scene the viewports will be set to "Hide other obects" to prevent the loading of all objects.')
-        # self.onnewscene['on_open_disable_nodes_shapes'].setToolTip('When opening a scene, disable the display of all shapes nodes')
-        # self.onnewscene['on_open_switch_wire_to'].setToolTip()
-        self.network['inherit_display_node'].setToolTip("When connecting a child node to a Displayed one, the connected node will inherit the Display flag unless the child is on the ignore list (in case it's aheavy node)")
+        self.network['transfer_display_node'].setToolTip("When connecting a child node to a Displayed one, the connected node will inherit the Display flag unless the child is on the ignore list (in case it's aheavy node)")
         self.network['create_null_shift_click'].setToolTip('If you have a node selected in the network view and shift click on an empty area, it will create a NULL node connected to that selected node.')
         self.network['drag_and_drop_in_context'].setToolTip('If this is checked, drag and dropping a file in Houdini will always create the nodes in the current context. Otherwise it follows the Houdini preference.')
         self.viewport['scrub_timeline_keep_pressed'].setToolTip('You need to keep the shortcut pressed then click on the viewport to change the current time like in Maya.\nOtherwise it is used as a classic shortcut.')
@@ -261,9 +278,9 @@ def show_prefs():
     return ui
 
 def show_firstlaunch():
-    # The pref 'networkeditor.shownodeshapes' is checked in case it is the very first time Houdini
-    # is launched and basic prefs are not set yet. In that case lots of the settings can't be set
-    # thus no settings are set.
+    """Houdini need several launches to get initialised correctly.
+    The pref 'networkeditor.shownodeshapes' is checked in case it is the very first time Houdini is launched and basic prefs are not set yet.
+    In that case lots of the settings can't be set, that's why we delay the display of the UI"""
     if not hou.getPreference('custom.regnareb.firstlaunch') and hou.getPreference('networkeditor.shownodeshapes'):
         ui = FirstLaunch()
         ui.show()

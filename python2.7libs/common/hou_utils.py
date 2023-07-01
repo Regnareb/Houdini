@@ -8,6 +8,9 @@ import lib.pythonlib.iopath as iopath
 logger = logging.getLogger(__name__)
 
 
+UPDATEMODE = hou.updateMode.AutoUpdate
+
+
 def create_node(parent, nodetype, name, params=[], position=None, filepath='', get_sequence=False):
     if filepath:
         if get_sequence:
@@ -41,12 +44,14 @@ def get_node_parent_categories(node_type):
     return result
 
 
-def toggle_updatemode(default=hou.updateMode.AutoUpdate):
+def toggle_updatemode():
     mode = hou.updateModeSetting()
     if mode in [hou.updateMode.AutoUpdate, hou.updateMode.OnMouseUp]:
         hou.setUpdateMode(hou.updateMode.Manual)
+        global UPDATEMODE
+        UPDATEMODE = mode
     if mode == hou.updateMode.Manual:
-        hou.setUpdateMode(default)
+        hou.setUpdateMode(UPDATEMODE)
 
 
 def parse_strings(filepath, params):

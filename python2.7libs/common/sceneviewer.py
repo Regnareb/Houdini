@@ -60,8 +60,8 @@ def switch_viewports_colorscheme(current_viewport=False, scheme=None):
         if scheme:
             viewport.settings().setColorScheme(scheme)
         else:
-            scheme = viewport.settings().colorScheme()
-            new_scheme = new_scheme if new_scheme else colorscheme_enum.next(scheme)
+            current = viewport.settings().colorScheme()
+            new_scheme = new_scheme if new_scheme else colorscheme_enum.next(current)
             viewport.settings().setColorScheme(new_scheme)
 
 

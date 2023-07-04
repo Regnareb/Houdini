@@ -21,9 +21,9 @@ colorscheme_enum = pythonlib.Enum(COLORSCHEMES.keys())
 def get_viewports(current_viewport=False):
     if current_viewport:
         under_cursor = hou.ui.paneTabUnderCursor()
-        return [under_cursor.curViewport()]
-    else:
-        return toolutils.sceneViewer().viewports()
+        if under_cursor.type()==hou.paneTabType.SceneViewer:
+            return [under_cursor.curViewport()]
+    return toolutils.sceneViewer().viewports()
 
 
 def reset_viewports():

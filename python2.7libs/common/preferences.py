@@ -11,9 +11,9 @@ VERSION = 1
 
 def set_preference(name, value):
     if not hou.getPreference(name):
-        hou.addPreference(name, value)
+        return hou.addPreference(name, value)
     else:
-        hou.setPreference(name, value)
+        return hou.setPreference(name, value)
 
 
 class FirstLaunch(QtWidgets.QDialog):
@@ -113,6 +113,10 @@ class FirstLaunch(QtWidgets.QDialog):
             # Custom Tools Default Preferences
             set_preference('custom.regnareb.scrub_timeline_mode', 'relative')
             set_preference('custom.regnareb.scrub_timeline_keep_pressed', '1')
+            set_preference('custom.regnareb.preview_resolutionX', '640')
+            set_preference('custom.regnareb.preview_resolutionY', '640')
+            set_preference('custom.regnareb.preview_widthratio', '1')
+
         self.save_shortcuts()
         # Set this custom preference so that the window is only displayed once or when new settings are implemented
         set_preference('custom.regnareb.firstlaunch', str(VERSION))
@@ -158,20 +162,25 @@ class Preferences(QtWidgets.QDialog):
         self.setWindowTitle('Regnareb Preferences')
 
         self.onnewscene = collections.defaultdict(qt.RowLayout)
-        self.onnewscene['on_open_go_manual'].addCheckbox('Set cooking to Manual', True)
-        self.onnewscene['on_open_sopviewmode'].addCheckbox('Set view to "Show Display Operator"', True)
-        self.onnewscene['on_open_hide_other_objects'].addCheckbox('Set view to "Hide other objects"', True)
-        self.onnewscene['on_open_use_color_scheme'].addCheckbox('Use Default Color Scheme', True)
+        self.onnewscene['on_open_go_manual'].addCheckbox('Set cooking to Manual')
+        self.onnewscene['on_open_sopviewmode'].addCheckbox('Set view to "Show Display Operator"')
+        self.onnewscene['on_open_hide_other_objects'].addCheckbox('Set view to "Hide other objects"')
+        self.onnewscene['on_open_use_color_scheme'].addCheckbox('Use Default Color Scheme')
         # self.onnewscene['on_open_disable_nodes_shapes'].addCheckbox('Disable nodes shapes', True)
 
         self.network = collections.defaultdict(qt.RowLayout)
-        self.network['transfer_display_node'].addCheckbox('Transfer Display Flag on child connection', True)
-        self.network['create_null_shift_click'].addCheckbox('Create a NULL when Ctrl+Shift clicking with a node selected', True)
-        self.network['drag_and_drop'].addCheckbox('Enable Drag And Drop of files from File Explorer', True)
-        self.network['drag_and_drop_in_context'].addCheckbox('Always try to create drag and dropped files in the current context', True)
+        self.network['transfer_display_node'].addCheckbox('Transfer Display Flag on child connection')
+        self.network['create_null_shift_click'].addCheckbox('Create a NULL when Ctrl+Shift clicking with a node selected')
+        self.network['drag_and_drop'].addCheckbox('Enable Drag And Drop of files from File Explorer')
+        self.network['drag_and_drop_in_context'].addCheckbox('Always try to create drag and dropped files in the current context')
+        self.network['nodepreview_resolution'].addLabel('Node Preview Resolution')
+        self.network['nodepreview_resolution'].addField(maximum=1000)
+        self.network['nodepreview_resolution'].addField(maximum=1000)
+        self.network['nodepreview_widthratio'].addLabel('Node Preview Width Ratio')
+        self.network['nodepreview_widthratio'].addField()
 
         self.viewport = collections.defaultdict(qt.RowLayout)
-        self.viewport['scrub_timeline_keep_pressed'].addCheckbox('Scrub Timeline tool shortcut needs to be kept pressed', True)
+        self.viewport['scrub_timeline_keep_pressed'].addCheckbox('Scrub Timeline tool shortcut needs to be kept pressed')
         self.viewport['scrub_timeline_mode'].addLabel('Scrub Timeline mode: ')  # 'Scrub Timeline tool relative mode'
         self.viewport['scrub_timeline_mode'].addSpacer()
         self.viewport['scrub_timeline_mode'].addCombobox(['Relative', 'Absolute'])  # 'Scrub Timeline tool relative mode'
@@ -221,17 +230,26 @@ class Preferences(QtWidgets.QDialog):
         self.setContentsMargins(0, 0, 0, 0)
         # self.set_tooltips()
         self.load_prefs()
+        self.show()
+
+    def get_allcheckoxes_ui(self):
+        all_checkboxes = {}
+        all_checkboxes.update(self.onnewscene)
+        all_checkboxes.update({k:v for k,v in self.network.items() if 'nodepreview' not in k})
+        all_checkboxes.update({'scrub_timeline_keep_pressed': self.viewport['scrub_timeline_keep_pressed']})
+        return all_checkboxes
 
     def load_prefs(self):
-        all_prefs_ui = dict(list(self.onnewscene.items()) + list(self.network.items()) + [('scrub_timeline_keep_pressed', self.viewport['scrub_timeline_keep_pressed'])])  # Merge all UI with checkboxes
-        # all_prefs_ui = {**self.onnewscene, **self.network, 'scrub_timeline_keep_pressed': self.viewport['scrub_timeline_keep_pressed']}  # python 3
-        for name, values in all_prefs_ui.items():
+        all_checkboxes = self.get_allcheckoxes_ui()
+        for name, values in all_checkboxes.items():
             name = 'custom.regnareb.{}'.format(name)
             value = hou.getPreference(name) or '1'  # set default state if the pref does not exists
             value = QtCore.Qt.Checked if value=='1' else QtCore.Qt.Unchecked
             values.checkbox.setCheckState(value)
         index = self.viewport['scrub_timeline_mode'].combobox.findText(hou.getPreference('custom.regnareb.scrub_timeline_mode') or 'Relative')
         self.viewport['scrub_timeline_mode'].combobox.setCurrentIndex(index)
+        self.network['nodepreview_resolution'].setValues([int(hou.getPreference('custom.regnareb.preview_resolutionX')), int(hou.getPreference('custom.regnareb.preview_resolutionY'))])
+        self.network['nodepreview_widthratio'].setValues([int(hou.getPreference('custom.regnareb.preview_widthratio'))])
         self.load_prefs_viewportcolors()
 
     def load_prefs_viewportcolors(self, scheme=None):
@@ -243,14 +261,16 @@ class Preferences(QtWidgets.QDialog):
         self.update_colors_ui(top, bottom)
 
     def save_prefs(self):
-        all_prefs_ui = dict(list(self.onnewscene.items()) + list(self.network.items()) + [('scrub_timeline_keep_pressed', self.viewport['scrub_timeline_keep_pressed'])])  # Merge all UI with checkboxes
-        # all_prefs_ui = {**self.onnewscene, **self.network, 'scrub_timeline_keep_pressed': self.viewport['scrub_timeline_keep_pressed']}  # python 3
-        for name, values in all_prefs_ui.items():
+        all_checkboxes = self.get_allcheckoxes_ui()
+        for name, values in all_checkboxes.items():
             name = 'custom.regnareb.{}'.format(name)
             state = values.checkbox.checkState()
             value = '1' if state==QtCore.Qt.Checked else '0'
             set_preference(name, value)
         set_preference('custom.regnareb.scrub_timeline_mode', self.viewport['scrub_timeline_mode'].combobox.currentText())
+        set_preference('custom.regnareb.preview_resolutionX', str(self.network['nodepreview_resolution'].fields[0].value()))
+        set_preference('custom.regnareb.preview_resolutionY', str(self.network['nodepreview_resolution'].fields[1].value()))
+        set_preference('custom.regnareb.preview_widthratio', str(self.network['nodepreview_widthratio'].field.value()))
         self.viewport_colors.save_colors()
 
     def buttons(self, action):
@@ -297,7 +317,6 @@ class Preferences(QtWidgets.QDialog):
 
 def show_prefs():
     ui = Preferences()
-    ui.show()
     return ui
 
 def show_firstlaunch(check=True):

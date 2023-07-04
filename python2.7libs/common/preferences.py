@@ -7,6 +7,7 @@ import lib.pythonlib.qt as qt
 import common.sceneviewer
 logger = logging.getLogger(__name__)
 
+VERSION = 1
 
 def set_preference(name, value):
     if not hou.getPreference(name):

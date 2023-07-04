@@ -16,60 +16,65 @@ def set_preference(name, value):
 
 
 class FirstLaunch(QtWidgets.QDialog):
-    def __init__(self):
+    def __init__(self, check):
         super(FirstLaunch, self).__init__(hou.ui.mainQtWindow())
         self.setWindowTitle('First Launch Initialisation')
         self.row_layout = QtWidgets.QVBoxLayout()
         self.setLayout(self.row_layout)
 
+        self.check = check
+        if not self.is_there_new_prefs(VERSION):
+            return
+
         self.interface = collections.defaultdict(qt.RowLayout)
-        self.interface['networkeditor.shownodeshapes'].addCheckbox('Disable Nodes Shapes', True)
-        self.interface['networkeditor.showsimpleshape'].addCheckbox('Use Simple Node Shapes', True)
-        self.interface['networkeditor.doautomovenodes'].addCheckbox('Disable Auto Move Nodes', True)
-        self.interface['networkeditor.showanimations'].addCheckbox('Disable Nodes Animations', True)
-        self.interface['networkeditor.maxflyoutscale'].addCheckbox('Set Low Size to Show Ring ', True)
-        self.interface['tools.createincontext.val'].addCheckbox('Create Tools In Context', True)
-        self.interface['tools.sopviewmode.val'].addCheckbox('Show Displayed Node instead of Selected node', True)
-        self.interface['compact_mode'].addCheckbox('Set UI to Compact Mode', True)
-        self.interface['general.ui.scale'].addCheckbox(state=True)
-        self.interface['general.ui.scale'].addLabel('General UI Scale')
-        self.interface['general.ui.scale'].addField(0.95, validator='float', minimum=0.75, maximum=3, decimals=2)
-        self.interface['general.ui.scale'].addSlider(0.95, mode='float', minimum=0.75, maximum=3)
-        self.interface['general.ui.scale'].connectFieldSlider()
-        self.interface['general.desk.val'].addCheckbox('Startup In Desktop', True)
-        self.interface['general.desk.val'].addCombobox([i.name() for i in hou.ui.desktops()])
-        self.interface['general.desk.val'].combobox.setCurrentIndex(self.interface['general.desk.val'].combobox.findText('Compact'))
-        self.interface['general.desk.val'].checkbox.toggled.connect(self.interface['general.desk.val'].connectCheckboxState)
-        for i in ['networkeditor.shownodeshapes', 'networkeditor.showsimpleshape', 'networkeditor.doautomovenodes', 'networkeditor.showanimations', 'networkeditor.maxflyoutscale', 'tools.sopviewmode.val', 'tools.createincontext.val', 'compact_mode', 'general.desk.val']:  # , 'general.ui.scale'
-            self.row_layout.addLayout(self.interface[i])
+        if self.is_there_new_prefs(1):
+            self.interface['networkeditor.shownodeshapes'].addCheckbox('Disable Nodes Shapes', True)
+            self.interface['networkeditor.showsimpleshape'].addCheckbox('Use Simple Node Shapes', True)
+            self.interface['networkeditor.doautomovenodes'].addCheckbox('Disable Auto Move Nodes', True)
+            self.interface['networkeditor.showanimations'].addCheckbox('Disable Nodes Animations', True)
+            self.interface['networkeditor.maxflyoutscale'].addCheckbox('Set Low Size to Show Ring ', True)
+            self.interface['tools.createincontext.val'].addCheckbox('Create Tools In Context', True)
+            self.interface['tools.sopviewmode.val'].addCheckbox('Show Displayed Node instead of Selected node', True)
+            self.interface['compact_mode'].addCheckbox('Set UI to Compact Mode', True)
+            self.interface['general.ui.scale'].addCheckbox(state=True)
+            self.interface['general.ui.scale'].addLabel('General UI Scale')
+            self.interface['general.ui.scale'].addField(0.95, validator='float', minimum=0.75, maximum=3, decimals=2)
+            self.interface['general.ui.scale'].addSlider(0.95, mode='float', minimum=0.75, maximum=3)
+            self.interface['general.ui.scale'].connectFieldSlider()
+            self.interface['general.desk.val'].addCheckbox('Startup In Desktop', True)
+            self.interface['general.desk.val'].addCombobox([i.name() for i in hou.ui.desktops()])
+            self.interface['general.desk.val'].combobox.setCurrentIndex(self.interface['general.desk.val'].combobox.findText('Compact'))
+            self.interface['general.desk.val'].checkbox.toggled.connect(self.interface['general.desk.val'].connectCheckboxState)
+            for i in ['networkeditor.shownodeshapes', 'networkeditor.showsimpleshape', 'networkeditor.doautomovenodes', 'networkeditor.showanimations', 'networkeditor.maxflyoutscale', 'tools.sopviewmode.val', 'tools.createincontext.val', 'compact_mode', 'general.desk.val']:  # , 'general.ui.scale'
+                self.row_layout.addLayout(self.interface[i])
 
         self.shortcuts = collections.defaultdict(qt.RowLayout)
         self.shortcuts_groupbox = QtWidgets.QGroupBox('Set Shortcuts')
         self.shortcuts_groupbox.setCheckable(True)
         self.shortcuts_vbox = QtWidgets.QVBoxLayout()
         self.shortcuts_groupbox.setLayout(self.shortcuts_vbox)
-
-        shortcuts = {
-            'copy_parm': {'label': 'Copy Parameter', 'default_shortcut': 'Ctrl+Shift+C'},
-            'paste_refs': {'label': 'Paste Parameter Reference', 'default_shortcut': 'Ctrl+Shift+V'},
-            'paste_object_merge': {'label': 'Paste Object Merge', 'default_shortcut': 'Alt+V'},  # Remove existing shortcut
-            'cycle_display_flag': {'label': 'Cycle Display Flag', 'default_shortcut': 'R'},  # Remove existing shortcut
-            'display_next_output': {'label': 'Display Next Output', 'default_shortcut': 'Alt+X'},  # Remove existing shortcut
-            'show_dependancy_links': {'label': 'Show dependancy Links', 'default_shortcut': 'Ctrl+D'},  # Remove existing shortcut
-            'connect_selected_nodes': {'label': 'Connect Selected Nodes', 'default_shortcut': 'Shift+Y'},
-            'scrub_timeline': {'label': 'Scrub Timeline', 'default_shortcut': 'K'},
-            'switch_viewport_background': {'label': 'Switch Viewports Background', 'default_shortcut': 'Alt+B'},
-            'switch_viewport_background_current': {'label': 'Switch Current Viewport Background', 'default_shortcut': 'Ctrl+Alt+B'},
-            'change_particles_display': {'label': 'Change Particles Display', 'default_shortcut': ''},
-            'toggle_cooking_mode': {'label': 'Toggle Cooking Mode', 'default_shortcut': ''},
-            'triggerupdate_viewport': {'label': 'Trigger update Viewport', 'default_shortcut': ''},
-            'create_node_preview': {'label': 'Create Node Preview', 'default_shortcut': ''},
-            }
-        for shortcut, values in shortcuts.items():
-            self.shortcuts[shortcut].addLabel(values['label'])
-            self.shortcuts[shortcut].addSpacer()
-            self.shortcuts[shortcut].addWidget(qt.KeySequenceRecorder(values['default_shortcut']))
-            self.shortcuts_vbox.addLayout(self.shortcuts[shortcut])
+        if self.is_there_new_prefs(1):
+            shortcuts = {
+                'copy_parm': {'label': 'Copy Parameter', 'default_shortcut': 'Ctrl+Shift+C', 'command': 'h.pane.parms.copy_parm'},
+                'paste_refs': {'label': 'Paste Parameter Reference', 'default_shortcut': 'Ctrl+Shift+V', 'command': 'h.pane.parms.paste_refs'},
+                'paste_object_merge': {'label': 'Paste Object Merge', 'default_shortcut': 'Alt+V', 'command': ''},  # Remove existing shortcut
+                'cycle_display_flag': {'label': 'Cycle Display Flag', 'default_shortcut': 'R', 'command': ''},  # Remove existing shortcut
+                'display_next_output': {'label': 'Display Next Output', 'default_shortcut': 'Alt+X', 'command': ''},  # Remove existing shortcut
+                'toggle_dependancy_links': {'label': 'Toggle dependancy Links', 'default_shortcut': 'Ctrl+D', 'command': ''},  # Remove existing shortcut
+                'connect_selected_nodes': {'label': 'Connect Selected Nodes', 'default_shortcut': 'Shift+Y', 'command': ''},
+                'scrub_timeline': {'label': 'Scrub Timeline', 'default_shortcut': 'K', 'command': ''},
+                'switch_viewport_background': {'label': 'Switch Viewports Background', 'default_shortcut': 'Alt+B', 'command': ''},
+                'switch_viewport_background_current': {'label': 'Switch Current Viewport Background', 'default_shortcut': 'Ctrl+Alt+B', 'command': ''},
+                'change_particles_display': {'label': 'Change Particles Display', 'default_shortcut': '', 'command': ''},
+                'toggle_cooking_mode': {'label': 'Toggle Cooking Mode', 'default_shortcut': '', 'command': ''},
+                'triggerupdate_viewport': {'label': 'Trigger update Viewport', 'default_shortcut': '', 'command': ''},
+                'create_node_preview': {'label': 'Create Node Preview', 'default_shortcut': '', 'command': ''},
+                }
+            for shortcut, values in shortcuts.items():
+                self.shortcuts[shortcut].addLabel(values['label'])
+                self.shortcuts[shortcut].addSpacer()
+                self.shortcuts[shortcut].addWidget(qt.KeySequenceRecorder(values['default_shortcut']))
+                self.shortcuts_vbox.addLayout(self.shortcuts[shortcut])
         self.row_layout.addWidget(self.shortcuts_groupbox)
 
         spacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
@@ -79,26 +84,37 @@ class FirstLaunch(QtWidgets.QDialog):
         self.buttons.accepted.connect(self.save_prefs)
         self.buttons.rejected.connect(self.reject)
         self.row_layout.addWidget(self.buttons)
+        self.set_tooltips()
+        self.show()
+
+
+    def is_there_new_prefs(self, version):
+        """Houdini need several launches to get initialised correctly.
+        The pref 'networkeditor.shownodeshapes' is checked in case it is the very first time Houdini is launched and basic prefs are not set yet.
+        In that case lots of the settings can't be set, that's why we delay the display of the UI"""
+        return not self.check or not hou.getPreference('networkeditor.shownodeshapes') or int(hou.getPreference('custom.regnareb.firstlaunch') or 0) < version
 
     def save_prefs(self):
-        settings = {'networkeditor.shownodeshapes': '0', 'networkeditor.showsimpleshape': '1', 'networkeditor.doautomovenodes': '0', 'networkeditor.showanimations': '0', 'networkeditor.maxflyoutscale': '5', 'tools.createincontext.val': '1', 'tools.sopviewmode.val': '0', 'general.desk.val': self.interface['general.desk.val'].combobox.currentText()}
-        for setting, val in settings.items():
-            if self.interface[setting].checkbox.checkState():
-                hou.setPreference(setting, val)
+        if self.is_there_new_prefs(1):
+            settings = {'networkeditor.shownodeshapes': '0', 'networkeditor.showsimpleshape': '1', 'networkeditor.doautomovenodes': '0', 'networkeditor.showanimations': '0', 'networkeditor.maxflyoutscale': '5', 'tools.createincontext.val': '1', 'tools.sopviewmode.val': '0', 'general.desk.val': self.interface['general.desk.val'].combobox.currentText()}
+            for setting, val in settings.items():
+                if self.interface[setting].checkbox.checkState():
+                    hou.setPreference(setting, val)
 
-        if self.interface['compact_mode'].checkbox.checkState():
-            hou.setPreference('general.ui.icon_size', 'Compact')  # DOESNT WORK
-            hou.setPreference('general.uiplaybar.menu', '1')  # Set the playbar to compact mode
+            if self.interface['compact_mode'].checkbox.checkState():
+                hou.setPreference('general.ui.icon_size', 'Compact')  # DOESNT WORK
+                hou.setPreference('general.uiplaybar.menu', '1')  # Set the playbar to compact mode
 
-        if self.interface['general.ui.scale'].checkbox.checkState():
-            hou.setPreference('ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
-            hou.setPreference('general.ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
+            if self.interface['general.ui.scale'].checkbox.checkState():
+                hou.setPreference('ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
+                hou.setPreference('general.ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
 
-        set_preference('custom.regnareb.scrub_timeline_mode', 'relative')
-        set_preference('custom.regnareb.scrub_timeline_keep_pressed', '1')
+            # Custom Tools Default Preferences
+            set_preference('custom.regnareb.scrub_timeline_mode', 'relative')
+            set_preference('custom.regnareb.scrub_timeline_keep_pressed', '1')
         self.save_shortcuts()
-
-        set_preference('custom.regnareb.firstlaunch', '1')  # Set this custom preference so that the window is only displayed once
+        # Set this custom preference so that the window is only displayed once or when new settings are implemented
+        set_preference('custom.regnareb.firstlaunch', str(VERSION))
         self.close()
 
     def save_shortcuts(self):
@@ -277,11 +293,6 @@ def show_prefs():
     ui.show()
     return ui
 
-def show_firstlaunch():
-    """Houdini need several launches to get initialised correctly.
-    The pref 'networkeditor.shownodeshapes' is checked in case it is the very first time Houdini is launched and basic prefs are not set yet.
-    In that case lots of the settings can't be set, that's why we delay the display of the UI"""
-    if not hou.getPreference('custom.regnareb.firstlaunch') and hou.getPreference('networkeditor.shownodeshapes'):
-        ui = FirstLaunch()
-        ui.show()
-        return ui
+def show_firstlaunch(check=True):
+    ui = FirstLaunch(check)
+    return ui

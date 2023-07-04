@@ -13,6 +13,13 @@ SELECTION = []
 INDEX = 0
 
 
+@contextlib.contextmanager
+def restore_display_flag():
+    display_node = get_display_node()
+    yield
+    display_node.setDisplayFlag(True)
+
+
 def get_display_node(pane=None):
     """Return the node with a display flag in the network editor under the mouse"""
     if not pane:
@@ -24,7 +31,7 @@ def get_display_node(pane=None):
 
 
 
-def set_display_flag():
+def cycle_display_flag():
     """Cycle between selected nodes to set the display flag
     If only one node is selected it will cycle between the current displayed node and the selected one"""
     try:
@@ -49,10 +56,10 @@ def set_display_flag():
     except hou.ObjectWasDeleted:
         SELECTION.pop(INDEX)
         INDEX = (INDEX - 1) % len(SELECTION)
-        return set_display_flag()
+        return cycle_display_flag()
     except IndexError:  # If the new list is smaller than the new one
         INDEX = 0
-        return set_display_flag()
+        return cycle_display_flag()
     except ZeroDivisionError:  # If no node is selected and no STATE is set
         return False
     return True
@@ -80,7 +87,7 @@ def toggle_dependancy_links():
     pass
 
 
-def remove_background_image(node, event_type):
+def remove_background_image(node):
     editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
     images = tuple(i for i in editor.backgroundImages() if i.relativeToPath() != node.path())
     editor.setBackgroundImages(images)
@@ -100,37 +107,25 @@ def modify_linked_networkimage(node):
 
 
 def event_update_background_image(node, event_type, **kwargs):
-    if not node.isBypassed():
-        display_node = get_display_node()
-        editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
-        images = editor.backgroundImages()
-        for i in images:
-            if i.relativeToPath() == node.path():
-                path = i.path()
-                i.setPath('')
-                node.setDisplayFlag(True)
-                take_screenshot(path)
-                editor.setBackgroundImages(images)
-                nodegraphutils.saveBackgroundImages(editor.pwd(), images)
-                i.setPath(path)
-                break
-        editor.setBackgroundImages(images)
-        nodegraphutils.saveBackgroundImages(editor.pwd(), images)
-        if display_node:
-             display_node.setDisplayFlag(True)
-
-
-
-
-
-
-
-
-
+    if not node.isBypassed():  #TODO replace as a decorator when python2 is far away
+        with restore_display_flag():
+            editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
+            images = editor.backgroundImages()
+            for i in images:
+                if i.relativeToPath() == node.path():
+                    path = i.path()
+                    i.setPath('')
+                    node.setDisplayFlag(True)
+                    take_screenshot(path)
+                    editor.setBackgroundImages(images)
+                    nodegraphutils.saveBackgroundImages(editor.pwd(), images)
+                    i.setPath(path)
+                    break
+            editor.setBackgroundImages(images)
+            nodegraphutils.saveBackgroundImages(editor.pwd(), images)
 
 
 def event_visibility_background_image(node, event_type):
-    print('hide')
     if event_type == hou.nodeEventType.FlagChanged:  # This is needed because it get also called with event InputDataChanged
         with modify_linked_networkimage(node) as i:
             i.setBrightness(int(not node.isBypassed()))
@@ -141,14 +136,14 @@ def event_remove_background_image(node, event_type):
     # node.removeEventCallback((hou.nodeEventType.BeingDeleted,), event_remove_background_image)
     # node.removeEventCallback((hou.nodeEventType.FlagChanged,), event_visibility_background_image)
     event_visibility_background_image(node, event_type)
-    print(2,node, event_type)
-    editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
-    images = tuple(i for i in editor.backgroundImages() if i.relativeToPath() != node.path())
-    editor.setBackgroundImages(images)
-    nodegraphutils.saveBackgroundImages(editor.pwd(), images)
+    remove_background_image(node)
 
 
-def take_screenshot(filepath, frame=None, viewername=''):
+def event_renamed_node(node, event_type):
+    pass
+
+
+def take_screenshot(filepath, frame=None, viewername='', resolution=[640, 640]):
     pane = toolutils.sceneViewer()
     if not viewername:
         desktop = hou.ui.curDesktop()
@@ -161,54 +156,54 @@ def take_screenshot(filepath, frame=None, viewername=''):
     refplane = pane.referencePlane()
     current = refplane.isVisible()
     refplane.setIsVisible(False)
-    hou.hscript("viewwrite -r 640 640 -R beauty -f {0} {0} {1} '{2}'".format(frame, viewername, filepath))
+    lib.pythonlib.iopath.create_dir(os.path.dirname(filepath))
+    hou.hscript("viewwrite -r {3} {4} -R beauty -f {0} {0} {1} '{2}'".format(frame, viewername, filepath, resolution[0], resolution[1]))
     refplane.setIsVisible(current)
 
 
-def create_screenshots(image_path=None):
+def toggle_node_preview(image_path=None):
     """Create a screenshot for all selected nodes."""
-    display_node = get_display_node()
-    selection = hou.selectedNodes()
-    if not image_path:
-        image_path = os.path.join(hou.text.expandString('$HIP'), 'screenshots', '%NODE%.png')
-    lib.pythonlib.iopath.create_dir(os.path.dirname(image_path))
+    with restore_display_flag():  #TODO replace as a decorator when python2 is far away
+        if not image_path:
+            image_path = os.path.join(hou.text.expandString('$HIP'), 'screenshots', '%NODE%.png')
+        image_path = lib.pythonlib.iopath.normpath(image_path)
+        editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
 
-    editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
-    for node in selection:
-        node.setDisplayFlag(True)
-        filepath = image_path.replace('%NODE%', node.name())
-        take_screenshot(filepath)
+        selection = hou.selectedNodes()
+        for node in selection:
+            node.setDisplayFlag(True)
+            filepath = image_path.replace('%NODE%', node.name())
+            image_exists = [i for i in editor.backgroundImages() if lib.pythonlib.iopath.normpath(i.path())==filepath]
+            if image_exists:
+                remove_background_image(node)
+            else:
+                resolutionX = int(hou.getPreference('custom.regnareb.preview_resolutionX'))
+                resolutionY = int(hou.getPreference('custom.regnareb.preview_resolutionY'))
+                resolution = [resolutionX, resolutionY]
+                widthratio = int(hou.getPreference('custom.regnareb.preview_widthratio'))
 
-        add_background_image(editor, filepath, node)
-        # rez = hou.imageResolution(filepath)
-        # ratio = 1.0*rez[1]/rez[0]
-        # rect = hou.BoundingRect(0, -node.size()[1]*1.1, widthRatio, -widthRatio*ratio-node.size()[1]*1.1)
-        # image.setRelativeToPath(node.path())
-        # image.setRect(rect)
-    display_node.setDisplayFlag(True)
+                take_screenshot(filepath, resolution=resolution)
+                add_background_image(editor, filepath, node=node, relative=True, widthratio=widthratio)
 
 
-def add_background_image(editor, image_path, node):
-    image = [i for i in editor.backgroundImages() if i.path()==image_path]
-    if image:
-        return image[0]
-    else:
-        image = hou.NetworkImage()
-        image.setPath(image_path)
+def add_background_image(editor, image_path, rect=None, node=None, relative=True, widthratio=1):
+    image = hou.NetworkImage()
+    image.setPath(image_path)
+    rez = hou.imageResolution(image_path)
+    ratio = 1.0 * rez[1] / rez[0]
 
-        rez = hou.imageResolution(image_path)
-        widthRatio = 1
-        ratio = 1.0 * rez[1] / rez[0]
-        rect = hou.BoundingRect(0, -node.size()[1], widthRatio, -widthRatio*ratio-node.size()[1]*1.2)
-        image.setRelativeToPath(node.path())
-        image.setRect(rect)
-
+    if node:
+        rect = hou.BoundingRect(0, -node.size()[1], widthratio, -widthratio*ratio-node.size()[1]*1.2)
+        if relative:
+            image.setRelativeToPath(node.path())
         node.addEventCallback((hou.nodeEventType.InputDataChanged, hou.nodeEventType.InputRewired, hou.nodeEventType.ParmTupleChanged), event_update_background_image)
         node.addEventCallback((hou.nodeEventType.BeingDeleted,), event_remove_background_image)
         node.addEventCallback((hou.nodeEventType.FlagChanged,), event_visibility_background_image)
+    if not rect:
+        rect = hou.BoundingRect(0, -2, widthratio*2, -widthratio*ratio)
+    image.setRect(rect)
+    images = editor.backgroundImages() + (image,)
+    editor.setBackgroundImages(images)
+    nodegraphutils.saveBackgroundImages(editor.pwd(), images)
 
-        images = editor.backgroundImages() + (image,)
-        editor.setBackgroundImages(images)
-        nodegraphutils.saveBackgroundImages(editor.pwd(), images)
-
-        return image
+    return image

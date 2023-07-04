@@ -131,16 +131,22 @@ class FirstLaunch(QtWidgets.QDialog):
         pass
 
     def set_tooltips(self):
-        self.interface['networkeditor.shownodeshapes'].setToolTip('Use rectangular node shapes only')
-        self.interface['networkeditor.showsimpleshape'].setToolTip("In the network editor's View menu, you can turn off display of custom node shapes. If that option and this option are both on, Houdini uses an even simpler default node shape (a simple rectangle instead of a rounded rectangle). This may speed up the display of extremely complex networks.")
-        self.interface['networkeditor.doautomovenodes'].setToolTip("Won't auto move nodes when connecting a node in between closed ")
-        self.interface['networkeditor.showanimations'].setToolTip('Animates certain changes and transitions in the network editor for clarity (for example, moving nodes out the way when a new node is placed). Turn this off to disable animations.')
-        self.interface['networkeditor.maxflyoutscale'].setToolTip('When opening a scene, change the Desktop panel arrangement to the one selected.')
-        self.interface['tools.createincontext.val'].setToolTip('Geometry will be created within the current context (eg. another piece of geometry in the same object).')
-        self.interface['tools.sopviewmode.val'].setToolTip('Geometry is displayed from the node with the display flag enabled.')
-        self.interface['compact_mode'].setToolTip('Change the playbar and UI icon size to compact.')
-        self.interface['general.ui.scale'].setToolTip('Change the UI scale globally.')
-        self.interface['general.desk.val'].setToolTip('Always force this Desktop when launching Houdini or opening a new scene.')
+        tooltips = {
+            'networkeditor.shownodeshapes': 'Use rectangular node shapes only',
+            'networkeditor.showsimpleshape': "In the network editor's View menu, you can turn off display of custom node shapes. If that option and this option are both on, Houdini uses an even simpler default node shape (a simple rectangle instead of a rounded rectangle). This may speed up the display of extremely complex networks.",
+            'networkeditor.doautomovenodes': "Won't auto move nodes when connecting a node in between closed ",
+            'networkeditor.showanimations': 'Animates certain changes and transitions in the network editor for clarity (for example, moving nodes out the way when a new node is placed). Turn this off to disable animations.',
+            'networkeditor.maxflyoutscale': 'When opening a scene, change the Desktop panel arrangement to the one selected.',
+            'tools.createincontext.val': 'Geometry will be created within the current context (eg. another piece of geometry in the same object).',
+            'tools.sopviewmode.val': 'Geometry is displayed from the node with the display flag enabled.',
+            'compact_mode': 'Change the playbar and UI icon size to compact.',
+            'general.ui.scale': 'Change the UI scale globally.',
+            'general.desk.val': 'Always force this Desktop when launching Houdini or opening a new scene.',
+        }
+        for key, tooltip in tooltips.items():
+            self.interface[key].setToolTip(tooltip)
+
+
 
 
 

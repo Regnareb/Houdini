@@ -15,7 +15,8 @@ COLORSCHEMES = {
     hou.viewportColorScheme.Dark: "config/3DSceneColors.dark",
     hou.viewportColorScheme.Grey: "config/3DSceneColors.bw"
     }
-colorscheme_enum = pythonlib.Enum(COLORSCHEMES.keys())
+DISPLAYPARTICLES = [hou.viewportParticleDisplay.Points, hou.viewportParticleDisplay.Pixels, hou.viewportParticleDisplay.Lines, hou.viewportParticleDisplay.Discs]
+displayparticles_enum = pythonlib.Enum(DISPLAYPARTICLES)
 
 
 def get_viewports(current_viewport=False):
@@ -38,8 +39,17 @@ def toggle_flatshaded():
 def toggle_smoothshaded():
     pass
 
-def change_particles(points=False, pixels=False, lines=False, discs=False, sprites=None):
-    pass
+def change_particles_display(displaytype=None, current_viewport=False):
+    viewports = get_viewports(current_viewport)
+    new_displaytype = None
+    for viewport in viewports:
+        if displaytype:
+            viewport.settings().particleDisplayType(displaytype)
+        else:
+            current = viewport.settings().particleDisplayType()
+            new_displaytype = new_displaytype if new_displaytype else displayparticles_enum.next(current)
+            viewport.settings().particleDisplayType(new_displaytype)
+
 
 def change_lighting(none=False, headlights=False, normal=False, highquality=False, shadows=False):
     pass

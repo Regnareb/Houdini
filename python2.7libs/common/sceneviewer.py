@@ -15,6 +15,8 @@ COLORSCHEMES = {
     hou.viewportColorScheme.Dark: "config/3DSceneColors.dark",
     hou.viewportColorScheme.Grey: "config/3DSceneColors.bw"
     }
+colorschemes_enum = pythonlib.Enum(COLORSCHEMES.keys())
+
 DISPLAYPARTICLES = [hou.viewportParticleDisplay.Points, hou.viewportParticleDisplay.Pixels, hou.viewportParticleDisplay.Lines, hou.viewportParticleDisplay.Discs]
 displayparticles_enum = pythonlib.Enum(DISPLAYPARTICLES)
 
@@ -63,15 +65,15 @@ def change_visualizer_size():
     pass
 
 
-def switch_viewports_colorscheme(current_viewport=False, scheme=None):
+def switch_viewports_colorscheme(scheme=None, current_viewport=False):
     viewports = get_viewports(current_viewport)
-    new_scheme = ''
+    new_scheme = None
     for viewport in viewports:
         if scheme:
             viewport.settings().setColorScheme(scheme)
         else:
             current = viewport.settings().colorScheme()
-            new_scheme = new_scheme if new_scheme else colorscheme_enum.next(current)
+            new_scheme = new_scheme if new_scheme else colorschemes_enum.next(current)
             viewport.settings().setColorScheme(new_scheme)
 
 

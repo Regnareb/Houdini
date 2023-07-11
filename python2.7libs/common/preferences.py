@@ -1,7 +1,7 @@
 import logging
 import functools
 import collections
-from PySide2 import QtCore, QtGui, QtWidgets
+from PySide2 import QtCore, QtWidgets
 import hou
 import lib.pythonlib.qt as qt
 import common.sceneviewer
@@ -17,14 +17,13 @@ def set_preference(name, value):
 
 
 class FirstLaunch(QtWidgets.QDialog):
-    def __init__(self, check):
+    def __init__(self):
         super(FirstLaunch, self).__init__(hou.ui.mainQtWindow())
         self.setWindowTitle('First Launch Initialisation')
         self.row_layout = QtWidgets.QVBoxLayout()
         self.setLayout(self.row_layout)
 
-        self.check = check
-        if not self.is_there_new_prefs(VERSION):
+        if self.is_there_new_prefs() in [0, -1]:
             return
 
         self.interface = collections.defaultdict(qt.RowLayout)
@@ -86,14 +85,19 @@ class FirstLaunch(QtWidgets.QDialog):
         self.buttons.rejected.connect(self.reject)
         self.row_layout.addWidget(self.buttons)
         self.set_tooltips()
-        self.show()
+        self.exec()  # Display as a modal window
 
-
-    def is_there_new_prefs(self, version):
+    @staticmethod
+    def is_there_new_prefs(version=VERSION):
         """Houdini need several launches to get initialised correctly.
         The pref 'networkeditor.shownodeshapes' is checked in case it is the very first time Houdini is launched and basic prefs are not set yet.
         In that case lots of the settings can't be set, that's why we delay the display of the UI"""
-        return not self.check or not hou.getPreference('networkeditor.shownodeshapes') or int(hou.getPreference('custom.regnareb.firstlaunch') or 0) < version
+        if hou.getPreference('networkeditor.shownodeshapes') == '':
+            return -1
+        elif int(hou.getPreference('custom.regnareb.firstlaunch') or 0) < version:
+            return 1
+        else:
+            return 0
 
     def save_prefs(self):
         if self.is_there_new_prefs(1):
@@ -315,10 +319,14 @@ class Preferences(QtWidgets.QDialog):
         self.viewport['scrub_timeline_mode'].setToolTip('Relative mode means the timeline moves with mouse movement.\nAbsolute mode means the horizontal axis of the viewport is the same as the timline,\nif you click on the left you are set to the beginning, on the right at the end.')
         self.viewport['viewport_colors'].setToolTip('Set your viewport color sceme and background colors.')
 
-def show_prefs():
-    ui = Preferences()
-    return ui
 
-def show_firstlaunch(check=True):
-    ui = FirstLaunch(check)
+def show_prefs():
+    firstlaunch = show_firstlaunch()
+    if not firstlaunch.is_there_new_prefs():
+        ui = Preferences()
+        return ui
+
+
+def show_firstlaunch():
+    ui = FirstLaunch()
     return ui

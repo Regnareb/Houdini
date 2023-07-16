@@ -31,13 +31,13 @@ common.sceneviewer.switch_viewports_colorscheme(current_viewport=True)
 import toolutils
 scene_viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
 current_state = scene_viewer.currentState()
-if current_state !='br_scrub_timeline':
+if current_state != 'br_scrub_timeline':
   scene_viewer.setCurrentState("br_scrub_timeline")
-  toolutils.sceneViewer().runStateCommand('', args={'viewer_state': current_state})
+  toolutils.sceneViewer().runStateCommand('enter_scrubtimeline', args={'viewer_state': current_state})
 ]]></script>
   </tool>
 
-  <tool name="br_add_preview" label="Add Preview" icon="PLASMA_App">
+  <tool name="br_create_node_preview" label="Add Preview" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[
 import common.networkeditor
 common.networkeditor.toggle_node_preview()
@@ -82,14 +82,7 @@ common.networkeditor.connect_selected_nodes()
   <tool name="br_toggle_update_mode" label="Toggle Update Mode" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[
 import common.networkeditor
-common.networkeditor.toggle_updatemode()
-]]></script>
-  </tool>
-
-  <tool name="br_reset_viewport" label="Reset Viewport" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[
-import common.networkeditor
-common.networkeditor.reset_viewports()
+common.hou_utils.toggle_update_mode()
 ]]></script>
   </tool>
 
@@ -100,14 +93,12 @@ common.sceneviewer.change_particles_display()
 ]]></script>
   </tool>
 
-
-
   <toolshelf name="Regnareb" label="Regnareb">
     <memberTool name="br_ui_show_preferences"/>
     <memberTool name="br_ui_viewports_colour"/>
     <memberTool name="br_ui_viewport_colour"/>
     <memberTool name="br_scrub_timeline"/>
-    <memberTool name="br_add_preview"/>
+    <memberTool name="br_create_node_preview"/>
     <memberTool name="br_change_particles_display"/>
   </toolshelf>
 </shelfDocument>

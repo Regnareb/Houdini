@@ -5,6 +5,7 @@ import hou
 import toolutils
 import nodegraphutils
 import lib.pythonlib.iopath
+import lib.pythonlib.common as pythonlib
 import common.hou_utils
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,15 @@ def get_display_node(pane=None):
     display = pane.pwd().displayNode()
     return display
 
+
+
+def display_next_output():
+    selection = hou.selectedNodes()
+    for node in selection:
+        total = len(node.subnetOutputs())
+        current = node.outputForViewFlag()
+        cycle = pythonlib.Enum(list(range(total)))
+        node.setOutputForViewFlag(cycle.next(current))
 
 
 def cycle_display_flag():
@@ -67,7 +77,6 @@ def cycle_display_flag():
 
 def paste_objectmerge():
     """Create an Object Merge node with the path to the nodes in the clipboard"""
-    result = []
     pane = hou.ui.paneTabUnderCursor()
     if isinstance(pane, hou.NetworkEditor):
         position = pane.cursorPosition()
@@ -88,8 +97,12 @@ def paste_objectmerge():
     return merge, True
 
 
-def toggle_dependancy_links():
-    pass
+def toggle_dependancy_links(mode=None):
+    editor = hou.ui.paneTabUnderCursor()
+    if isinstance(editor, hou.NetworkEditor):
+        modes = pythonlib.Enum(['0', '1', '2'])
+        mode = mode if mode is not None else modes.next(editor.getPref('showdep'))
+        editor.setPref('showdep', mode)
 
 
 def remove_background_image(node):
@@ -212,3 +225,12 @@ def add_background_image(editor, image_path, rect=None, node=None, relative=True
     nodegraphutils.saveBackgroundImages(editor.pwd(), images)
 
     return image
+
+
+def connect_selected_nodes():
+    # TODO: Create a merge if nodes have the same height
+    nodes = sorted(hou.selectedNodes(), key=lambda x: x.position()[1], reverse=True)
+    for index, node in enumerate(nodes):
+        if not index or index==len(nodes):
+            continue
+        node.setInput(0, nodes[index-1], 0)

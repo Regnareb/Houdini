@@ -36,6 +36,11 @@ def get_shelf(label='', name=''):
     return None
 
 
+def get_tabs_type(tab_type):
+    desktop = hou.ui.curDesktop()
+    return [t for t in desktop.paneTabs() if t.type() == tab_type]
+
+
 def get_node_parent_categories(node_type):
     result = []
     for cat in hou.nodeTypeCategories().values():

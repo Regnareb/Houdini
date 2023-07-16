@@ -1,0 +1,11 @@
+{
+    "path": "$REGNAREB",
+    "load_package_once": true,
+    "version": "18.5",
+    "enable": true,
+    "env": [
+        {
+            "REGNAREB": "path/to/this/folder"
+        }
+    ]
+}

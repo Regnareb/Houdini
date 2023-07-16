@@ -75,12 +75,17 @@ def paste_objectmerge():
         return None, False
     parent = pane.pwd()
     clipboard = hou.ui.getTextFromClipboard().split()
-    for path in clipboard:
+    merge = None
+    for index, path in enumerate(clipboard):
         if hou.node(path):
             name = os.path.basename(os.path.normpath(path))
-            new = common.hou_utils.create_node(parent, 'object_merge', name, {'objpath1': '%FILEPATH%'}, position, path)
-            result.append(new)
-    return result
+            if not merge:
+                merge = common.hou_utils.create_node(parent, 'object_merge', name, {'objpath1': '%FILEPATH%'}, position, path)
+            else:
+                parm = merge.parm('numobj')
+                parm.insertMultiParmInstance(index)
+                merge.setParms({'objpath{}'.format(str(index+1)): path})
+    return merge, True
 
 
 def toggle_dependancy_links():

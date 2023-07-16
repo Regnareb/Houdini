@@ -5,6 +5,7 @@ import shutil
 import hou
 import toolutils
 
+import common.hou_utils
 import lib.pythonlib.common as pythonlib
 import lib.pythonlib.iopath as iopath
 # TODO: Test which file has priority if there is one in $HOME and one in $REGNAREB import utils
@@ -24,13 +25,11 @@ displayparticles_enum = pythonlib.Enum(DISPLAYPARTICLES)
 def get_viewports(current_viewport=False):
     if current_viewport:
         under_cursor = hou.ui.paneTabUnderCursor()
-        if under_cursor.type()==hou.paneTabType.SceneViewer:
+        if isinstance(under_cursor.type(), hou.paneTabType.SceneViewer.__class__):
             return [under_cursor.curViewport()]
-    return toolutils.sceneViewer().viewports()
-
-
-def reset_viewports():
-    pass
+    sceneviewers = common.hou_utils.get_tabs_type(hou.paneTabType.SceneViewer)
+    viewports = [i.viewports() for i in sceneviewers]
+    return pythonlib.flatten(viewports)
 
 def toggle_wireframe():
     pass

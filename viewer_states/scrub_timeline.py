@@ -8,8 +8,10 @@ class ScrubTimelineState(object):
         self._base_x = self._base_frame = None
 
     def onCommand(self, kwargs):
+        name = kwargs['command']
         args = kwargs['command_args']
-        self.previous_viewer_state = args['viewer_state']
+        if name == 'enter_scrubtimeline':
+            self.previous_viewer_state = args['viewer_state']
 
     def onExit(self, kwargs):
         if hou.getPreference('custom.regnareb.scrub_timeline_keep_pressed'):

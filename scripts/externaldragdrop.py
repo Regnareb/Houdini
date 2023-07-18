@@ -53,7 +53,6 @@ def dropAccept(files):
     else:
         return False
 
-
     if pane.pwd().path() in ['/ch', '/img', '/tasks']:
         # Some contexts do not allow the creation of other managers, change panel path to /obj
         pane.cd('/obj')
@@ -73,7 +72,7 @@ def dropAccept(files):
                 hou.hipFile.load(filepath)
                 return True
 
-        extension = filter(filepath.lower().endswith, FILETYPES.keys() + IMAGES)
+        extension = filter(filepath.lower().endswith, list(FILETYPES.keys()) + IMAGES)  # TODO: Remove list() when python2 is far away
         for ext in extension:
             if ext in IMAGES:
                 categories = [hou.vopNodeTypeCategory()]

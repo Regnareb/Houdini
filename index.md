@@ -35,20 +35,20 @@ All this for making the loading of scenes faster and more stable
 * Alt+click to create Nulls (Video)  
 * Improved Cycle display flag (r) (Video)  
 * Connect nodes by height position (Video)  
-* Create Node Previews (Video)
+* Create Node Previews (Video) (may be slow) 
 
 
 
 
 ## Shortcuts 
 
-* Paste parameters with Ctrl+Shift+c / Ctrl+Shift+v  (Video)  
 * Changing viewport background color  (Video)  
+* Paste parameters with Ctrl+Shift+c / Ctrl+Shift+v  
 * Change particle types of display  
 * Show dependency links
 * Toggle cooking mode   
 
 
-Scrub Timeline
+Scrub Timeline (Video) 
 
 Network Clipboard 

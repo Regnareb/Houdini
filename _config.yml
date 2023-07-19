@@ -5,3 +5,8 @@ plugins:
 
 url: https://www.regnareb.com
 basurl: /houdini
+
+
+title: [Houdini Tools]
+description: [A collection of tools to set default preferences automatically and make Houdini more usable.]
+

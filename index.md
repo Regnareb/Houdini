@@ -1,6 +1,5 @@
 ---
 title: Houdini Tools
-description: A collection of tools to set default preferences automatically and make Houdini more usable.
 ---
 
 # Default Preferences
@@ -17,7 +16,7 @@ description: A collection of tools to set default preferences automatically and 
 
 
 
-## On Open Scene
+## On Scene Open 
 
 * Apply the default Desktop  
 * Set Cooking mode to Manual  

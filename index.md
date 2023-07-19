@@ -4,6 +4,8 @@ title: Houdini Tools
 
 ## Default Preferences
 
+
+
 * Disable Nodes Shapes  
 * Use Simple Node Shapes  
 * Disable Auto Move Nodes  
@@ -14,6 +16,8 @@ title: Houdini Tools
 * Set UI to Compact Mode  
 * Startup with a specific Desktop  
 
+![image alt >](/medias/first_launch.png.jpg)
+
 
 
 ## On Scene Open 
@@ -23,7 +27,7 @@ title: Houdini Tools
 * Set view to "Show Display Operator"  
 * Set view to "Hide other objects"
 
-All this for making the loading of scenes faster and more stable 
+For making the loading of scenes faster and more stable 
 
 
 

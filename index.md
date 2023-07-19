@@ -1,9 +1,9 @@
 ---
-title: Houdini
+title: Houdini Tools
 description: A collection of tools to set default preferences automatically and make Houdini more usable.
 ---
 
-## Default Preferences
+# Default Preferences
 
 * Disable Nodes Shapes  
 * Use Simple Node Shapes  

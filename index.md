@@ -2,7 +2,7 @@
 title: Houdini Tools
 ---
 
-# Default Preferences
+## Default Preferences
 
 * Disable Nodes Shapes  
 * Use Simple Node Shapes  
@@ -45,9 +45,8 @@ All this for making the loading of scenes faster and more stable
 * Paste parameters with Ctrl+Shift+c / Ctrl+Shift+v  (Video)  
 * Changing viewport background color  (Video)  
 * Change particle types of display  
-* Toggle cooking mode  
 * Show dependency links
-
+* Toggle cooking mode   
 
 
 Scrub Timeline

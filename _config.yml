@@ -6,6 +6,5 @@ plugins:
 url: https://www.regnareb.com
 basurl: /houdini
 
-show_downloads: [true]
-description: [A collection of tools to set default preferences automatically and make Houdini more usable.]
+description: A collection of tools to set default preferences automatically and make Houdini more usable.
 

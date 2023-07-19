@@ -16,7 +16,7 @@ title: Houdini Tools
 * Set UI to Compact Mode  
 * Startup with a specific Desktop  
 
-![image alt >](/medias/first_launch.png.jpg)
+![image alt >](medias/first_launch.png)
 
 
 

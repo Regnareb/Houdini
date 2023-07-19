@@ -1,7 +1,6 @@
 ---
 title: Houdini
 description: A collection of tools to set default preferences automatically and make Houdini more usable.
-layout: default
 ---
 
 ## Default Preferences

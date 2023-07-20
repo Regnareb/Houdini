@@ -31,29 +31,34 @@ For making the loading of scenes faster and more stable
 
 ## Network View Improvements
 
-* Drag and drop files from explorer (abc/usd/usd/usd/obj/fbx/txt/mdd/ass/rs/images)
-* Propagate display flag  
-<video width="400" height="400" controls>
+#### Drag and drop files from explorer (abc/usd/usd/usd/obj/fbx/txt/mdd/ass/rs/images)
+#### Propagate display flag  
+<video width="300" height="300" loop autoplay>
   <source src="{{site.baseurl}}/medias/propagate_display.mp4" type="video/mp4">
 </video>
-* Create object merge from clipboard  
-<video width="400" height="400" controls>
+
+#### Create object merge from clipboard  
+<video width="300" height="300" loop autoplay>
   <source src="{{site.baseurl}}/medias/paste_object_merge.mp4" type="video/mp4">
 </video>
-* Alt+click to create Nulls  
-<video width="400" height="400" controls>
+
+#### Alt+click to create Nulls  
+<video width="300" height="300" loop autoplay>
   <source src="{{site.baseurl}}/medias/create_nulls.mp4" type="video/mp4">
 </video>
-* Improved Cycle display flag (R)  
-<video width="400" height="400" controls>
+
+#### Improved Cycle display flag (R)  
+<video width="300" height="300" loop autoplay>
   <source src="{{site.baseurl}}/medias/cycle_display.mp4" type="video/mp4">
 </video>
-* Connect nodes by height position  
-<video width="400" height="400" controls>
+
+#### Connect nodes by height position  
+<video width="300" height="300" loop autoplay>
   <source src="{{site.baseurl}}/medias/connect_all_nodes.mp4" type="video/mp4">
 </video>
-* Create Node Previews (may be slow) 
-<video width="400" height="400" controls>
+
+#### Create Node Previews (may be slow) 
+<video width="300" height="300" loop autoplay>
   <source src="{{site.baseurl}}/medias/node_preview.mp4" type="video/mp4">
 </video>
 
@@ -61,14 +66,14 @@ For making the loading of scenes faster and more stable
 
 ## Shortcuts 
 
-* Changing viewport background color 
-<video width="400" height="400" controls>
-  <source src="{{site.baseurl}}/medias/change_viewport_color.mp4" type="video/mp4">
-</video>
 * Paste parameters with Ctrl+Shift+C / Ctrl+Shift+V 
 * Change particle types of display
 * Show dependency links
 * Toggle cooking mode   
+#### Changing viewport background color 
+<video width="300" height="300" loop autoplay>
+  <source src="{{site.baseurl}}/medias/change_viewport_color.mp4" type="video/mp4">
+</video>
 
 
 Scrub Timeline  (Video) 

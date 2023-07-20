@@ -53,12 +53,6 @@ For making the loading of scenes faster and more stable
 </video>
 <br>
 
-* **Improved Cycle display flag (R):**
-<video width="400" height="400" controls loop autoplay muted playsinline>
-  <source src="{{site.baseurl}}/medias/cycle_display.mp4" type="video/mp4">
-</video>
-<br>
-
 * **Connect nodes by height position:**
 <video width="400" height="400" controls loop autoplay muted playsinline>
   <source src="{{site.baseurl}}/medias/connect_all_nodes.mp4" type="video/mp4">
@@ -68,6 +62,12 @@ For making the loading of scenes faster and more stable
 * **Create Node Previews (experimental):**
 <video width="400" height="400" controls loop autoplay muted playsinline>
   <source src="{{site.baseurl}}/medias/node_preview.mp4" type="video/mp4">
+</video>
+<br>
+
+* **Improved Cycle display flag (R):**
+<video width="400" height="400" controls loop autoplay muted playsinline>
+  <source src="{{site.baseurl}}/medias/cycle_display.mp4" type="video/mp4">
 </video>
 
 ---

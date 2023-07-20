@@ -11,3 +11,8 @@ img[alt$="><"] {
   margin: auto;
   float: none !important;
 }
+
+video {
+  width: 100%; 
+  max-width: 400px;
+}

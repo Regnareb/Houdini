@@ -16,7 +16,6 @@ title: Houdini Tools
 * Startup with a specific Desktop  
 
 
----
 
 
 ## On Scene Open 
@@ -28,7 +27,7 @@ title: Houdini Tools
 
 For making the loading of scenes faster and more stable 
 
----
+
 
 ## Network View Improvements
 
@@ -40,7 +39,7 @@ For making the loading of scenes faster and more stable
 </video>
 <br>
 
-* **Create object merge from clipboard:**
+* **Create object merge from clipboard (Ctrl+C Alt+V):**
 <video width="400" height="400" playsinline autoplay muted loop>
   <source src="{{site.baseurl}}/medias/paste_object_merge.mp4" type="video/mp4">
 </video>
@@ -69,7 +68,6 @@ For making the loading of scenes faster and more stable
   <source src="{{site.baseurl}}/medias/cycle_display.mp4" type="video/mp4">
 </video>
 
----
 
 
 ## Shortcuts 

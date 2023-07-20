@@ -34,10 +34,6 @@ For making the loading of scenes faster and more stable
 ## Network View Improvements
 
 * **Drag and drop files from explorer (abc/usd/usd/usd/obj/fbx/txt/mdd/ass/rs/images):**
-<video width="400" height="400" controls loop autoplay muted playsinline>
-  <source src="{{site.baseurl}}/medias/dragndrop.mp4" type="video/mp4">
-</video>
-<br>
 
 * **Propagate display flag:**
 <video width="400" height="400" controls loop autoplay muted playsinline>
@@ -96,7 +92,7 @@ Network Clipboard
 
 ---
 
-### How to install
+# How to install
 
 Modify the file package.json to replace $REGNAREB to the path of the folder and copy the 'packages' folder in your Houdini preference folder
 The tool will launch automatically for some initialisation on the first start

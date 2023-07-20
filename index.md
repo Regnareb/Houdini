@@ -33,32 +33,32 @@ For making the loading of scenes faster and more stable
 
 #### Drag and drop files from explorer (abc/usd/usd/usd/obj/fbx/txt/mdd/ass/rs/images)
 #### Propagate display flag  
-<video width="300" height="300" loop autoplay>
+<video width="300" height="300" loop autoplay style="float:right">
   <source src="{{site.baseurl}}/medias/propagate_display.mp4" type="video/mp4">
 </video>
 
 #### Create object merge from clipboard  
-<video width="300" height="300" loop autoplay>
+<video width="300" height="300" loop autoplay style="float:right">
   <source src="{{site.baseurl}}/medias/paste_object_merge.mp4" type="video/mp4">
 </video>
 
 #### Alt+click to create Nulls  
-<video width="300" height="300" loop autoplay>
+<video width="300" height="300" loop autoplay style="float:right">
   <source src="{{site.baseurl}}/medias/create_nulls.mp4" type="video/mp4">
 </video>
 
 #### Improved Cycle display flag (R)  
-<video width="300" height="300" loop autoplay>
+<video width="300" height="300" loop autoplay style="float:right">
   <source src="{{site.baseurl}}/medias/cycle_display.mp4" type="video/mp4">
 </video>
 
 #### Connect nodes by height position  
-<video width="300" height="300" loop autoplay>
+<video width="300" height="300" loop autoplay style="float:right">
   <source src="{{site.baseurl}}/medias/connect_all_nodes.mp4" type="video/mp4">
 </video>
 
 #### Create Node Previews (may be slow) 
-<video width="300" height="300" loop autoplay>
+<video width="300" height="300" loop autoplay style="float:right">
   <source src="{{site.baseurl}}/medias/node_preview.mp4" type="video/mp4">
 </video>
 
@@ -71,7 +71,7 @@ For making the loading of scenes faster and more stable
 * Show dependency links
 * Toggle cooking mode   
 #### Changing viewport background color 
-<video width="300" height="300" loop autoplay>
+<video width="300" height="300" loop autoplay style="float:right">
   <source src="{{site.baseurl}}/medias/change_viewport_color.mp4" type="video/mp4">
 </video>
 

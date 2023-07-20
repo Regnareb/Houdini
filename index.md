@@ -95,13 +95,13 @@ Network Clipboard
 Modify the file package.json to replace $REGNAREB to the path of the folder and copy the 'packages' folder in your Houdini preference folder
 The tool will launch automatically for some initialisation on the first start
 
-![image alt <]({{site.baseurl}}/medias/first_launch.png)
+![]({{site.baseurl}}/medias/first_launch.png)
 
 
 
 Then you can change the Preferences with the Preference tool in the shelf
 
-![image alt >]({{site.baseurl}}/medias/preferences.png)
+![]({{site.baseurl}}/medias/preferences.png)
 
 
 

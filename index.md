@@ -90,8 +90,8 @@ Network Clipboard
 
 # How to install
 
-Modify the file REGNAREB.json, replace `path/to/this/folder` with the path of the folder where the .json file is located 
-Then copy the file in your Houdini preference folder, in a `packages"` folder
+Modify the file REGNAREB.json, replace `path/to/this/folder` with the path of the folder where the .json file is located  
+Then copy the file in your Houdini preference folder, in a `packages` folder  
 If everything is working fine, it should show that window on the next start of Houdini:
 
 ![]({{site.baseurl}}/medias/first_launch.png)

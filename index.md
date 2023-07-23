@@ -33,7 +33,7 @@ For making the loading of scenes faster and more stable
 
 * **Drag and drop files from explorer (abc/usd/usd/usd/obj/fbx/txt/mdd/ass/rs/images):**
 
-* **Propagate display flag:**
+* **Propagate display flag to children:**
 <video playsinline autoplay muted loop>
   <source src="{{site.baseurl}}/medias/propagate_display.mp4" type="video/mp4">
 </video>

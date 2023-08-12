@@ -80,3 +80,25 @@ def temporary_cooking_mode(mode):
     hou.setUpdateMode(mode)
     yield
     hou.setUpdateMode(current)
+
+
+def save_nodes_to_file(filepath, nodes=[]):
+    """Save the selected nodes to the corresponding filepath
+    Useful for sharing nodes over network. Use .cpio as file extension"""
+    if not nodes:
+        nodes = hou.selectedNodes()
+    nodes[0].parent().saveItemsToFile(nodes, filepath)
+
+
+def load_nodes_from_file(filepath):
+    """Load the nodes from filepath into the current context"""
+    pane = hou.ui.paneTabUnderCursor() or hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor) or hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
+    pane.pwd().loadItemsFromFile(filepath)
+
+
+def netclipboard(copy):
+    path = hou.getenv('HOU_NETCLIPBOARD')
+    if copy:
+        save_nodes_to_file(path)
+    else:
+        load_nodes_from_file(path)

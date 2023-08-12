@@ -49,13 +49,14 @@ def get_node_parent_categories(node_type):
     return result
 
 
-def toggle_update_mode():
-    mode = hou.updateModeSetting()
-    if mode in [hou.updateMode.AutoUpdate, hou.updateMode.OnMouseUp]:
+def toggle_update_mode(mode=None):
+    if not mode:
+        mode = hou.updateModeSetting()
+    if mode == hou.updateMode.Manual:
         hou.setUpdateMode(hou.updateMode.Manual)
         global UPDATEMODE
         UPDATEMODE = mode
-    if mode == hou.updateMode.Manual:
+    else:
         hou.setUpdateMode(UPDATEMODE)
 
 

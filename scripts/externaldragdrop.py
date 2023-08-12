@@ -22,7 +22,7 @@ FILETYPES = {
     '.usda': {'nodetype': 'usdimport', 'params': {'filepath1': '%FILEPATH%'}},
     '.usdc': {'nodetype': 'usdimport', 'params': {'filepath1': '%FILEPATH%'}},
     '.obj': {'nodetype': 'obj_importer', 'params': {'sObjFile': '%FILEPATH%'}},
-    '.fbx': {'nodetype': 'usdimport', 'params': {'input': 2, 'fbxfile': '%FILEPATH%'}},
+    '.fbx': {'nodetype': 'fbxcharacterimport', 'params': {'input': 2, 'fbxfile': '%FILEPATH%'}},
     '.mdd': {'nodetype': 'mdd', 'params': {'file': '%FILEPATH%'}},
     '.ass': {'nodetype': 'arnold_asstoc', 'params': {'ass_file': '%FILEPATH%'}},
     '.rs': {'nodetype': 'redshift_packedProxySOP', 'params': {'RS_proxy_file': '%FILEPATH%'}}

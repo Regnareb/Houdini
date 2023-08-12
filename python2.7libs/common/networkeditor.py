@@ -18,18 +18,18 @@ INDEX = 0
 def restore_display_flag():
     display_node = get_display_node()
     yield
-    display_node.setDisplayFlag(True)
+    if display_node:
+        display_node.setDisplayFlag(True)
 
 
 def get_display_node(pane=None):
     """Return the node with a display flag in the network editor under the mouse"""
     if not pane:
-        pane = hou.ui.paneTabUnderCursor() or hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
+        pane = hou.ui.paneTabUnderCursor()
     if not isinstance(pane, hou.NetworkEditor):
-        return False
+        pane = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
     display = pane.pwd().displayNode()
     return display
-
 
 
 def display_next_output():
@@ -106,6 +106,12 @@ def toggle_dependancy_links(mode=None):
 
 
 def remove_background_image(node):
+    try:
+        node.removeEventCallback((hou.nodeEventType.InputDataChanged, hou.nodeEventType.InputRewired, hou.nodeEventType.ParmTupleChanged), event_update_background_image)
+        node.removeEventCallback((hou.nodeEventType.BeingDeleted,), event_remove_background_image)
+        node.removeEventCallback((hou.nodeEventType.FlagChanged,), event_visibility_background_image)
+    except hou.OperationFailed:
+        return
     editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
     images = tuple(i for i in editor.backgroundImages() if i.relativeToPath() != node.path())
     editor.setBackgroundImages(images)
@@ -125,8 +131,8 @@ def modify_linked_networkimage(node):
 
 
 def event_update_background_image(node, event_type, **kwargs):
-    if not node.isBypassed():  #TODO replace as a decorator when python2 is far away
-        with restore_display_flag():
+    if not node.isBypassed():
+        with restore_display_flag():  #TODO replace as a decorator when python2 is far away
             editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
             images = editor.backgroundImages()
             for i in images:

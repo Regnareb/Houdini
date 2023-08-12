@@ -84,7 +84,7 @@ For making the loading of scenes faster and more stable
 
 Scrub Timeline  (Video) 
 
-Network Clipboard 
+Network Clipboard - Send selected nodes to another user on the same network
 
 ---
 

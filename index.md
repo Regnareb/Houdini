@@ -90,8 +90,9 @@ Network Clipboard
 
 # How to install
 
-Modify the file REGNAREB.json, replace `path/to/this/folder` with the path of the folder where the .json file is located  
-Then copy the file in your Houdini preference folder, in a `packages` folder  
+Download the [latest release](https://github.com/Regnareb/Houdini/releases) and extract its content.
+Modify the file `Houdini-tools/REGNAREB.json`, replace `path/to/this/folder` with the path to the folder of `Houdini-tools`  
+Then copy this .json file in your Houdini preference folder, in a `packages` folder   
 If everything is working fine, it should show that window on the next start of Houdini:
 
 ![]({{site.baseurl}}/medias/first_launch.png)
@@ -99,6 +100,9 @@ If everything is working fine, it should show that window on the next start of H
 For more tool preferences, activate the Regnareb shelf and press the Preferences button:
 
 ![]({{site.baseurl}}/medias/preferences.png)
+
+
+# How to uninstall
 
 If you want to uninstall the tools, just delete the file packages/regnareb.json in your Houdini preferences 
 

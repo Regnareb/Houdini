@@ -7,6 +7,8 @@ import lib.pythonlib.qt as qt
 import common.sceneviewer
 logger = logging.getLogger(__name__)
 
+# TODO: Make the creation of first launch prefs and shortcuts procedural by loading a JSON file
+
 VERSION = 1
 
 def set_preference(name, value):
@@ -18,6 +20,7 @@ def set_preference(name, value):
 
 class FirstLaunch(QtWidgets.QDialog):
     def __init__(self):
+        """Create all elements of UI and display it as a modal window"""
         super(FirstLaunch, self).__init__(hou.ui.mainQtWindow())
         self.setWindowTitle('First Launch Initialisation')
         self.row_layout = QtWidgets.QVBoxLayout()
@@ -56,24 +59,26 @@ class FirstLaunch(QtWidgets.QDialog):
         if self.is_there_new_prefs(1):
             shortcuts = {
                 'copy_parm': {'label': 'Copy Parameter', 'default_shortcut': 'Ctrl+Shift+C', 'command': 'h.pane.parms.copy_parm'},
-                'paste_refs': {'label': 'Paste Parameter Reference', 'default_shortcut': 'Ctrl+Shift+V', 'command': 'h.pane.parms.paste_refs'},
-                'paste_object_merge': {'label': 'Paste Object Merge', 'default_shortcut': 'Alt+V', 'command': ''},  # Remove existing shortcut
-                'cycle_display_flag': {'label': 'Cycle Display Flag', 'default_shortcut': 'R', 'command': ''},  # Remove existing shortcut
-                'display_next_output': {'label': 'Display Next Output', 'default_shortcut': 'Alt+X', 'command': ''},  # Remove existing shortcut
-                'toggle_dependancy_links': {'label': 'Toggle dependancy Links', 'default_shortcut': 'Ctrl+D', 'command': ''},  # Remove existing shortcut
-                'connect_selected_nodes': {'label': 'Connect Selected Nodes', 'default_shortcut': 'Shift+Y', 'command': ''},
-                'scrub_timeline': {'label': 'Scrub Timeline', 'default_shortcut': 'K', 'command': ''},
-                'switch_viewport_background': {'label': 'Switch Viewports Background', 'default_shortcut': 'Alt+B', 'command': ''},
-                'switch_viewport_background_current': {'label': 'Switch Current Viewport Background', 'default_shortcut': 'Ctrl+Alt+B', 'command': ''},
-                'change_particles_display': {'label': 'Change Particles Display', 'default_shortcut': '', 'command': ''},
-                'toggle_cooking_mode': {'label': 'Toggle Cooking Mode', 'default_shortcut': '', 'command': ''},
-                'triggerupdate_viewport': {'label': 'Trigger update Viewport', 'default_shortcut': '', 'command': ''},
-                'create_node_preview': {'label': 'Create Node Preview', 'default_shortcut': '', 'command': ''},
+                'paste_refs': {'label': 'Paste Parameter Reference', 'default_shortcut': 'Ctrl+Shift+V', 'command': 'h.pane.parms.paste_refs'},  # Remove existing shortcut
+                'paste_object_merge': {'label': 'Paste Object Merge', 'default_shortcut': 'Alt+V', 'command': 'h.pane.wsheet.tool:br_paste_object_merge', 'description': 'Create an Object Merge linked to the node in clipboard', 'remove_command': 'h.paste'},
+                'cycle_display_flag': {'label': 'Cycle Display Flag', 'default_shortcut': 'R', 'command': 'h.tool:br_cycle_display_flag', 'description': 'Cycle display flag between all selected nodes', 'remove_command': 'h.pane.wsheet.flag3_mode'},
+                'display_next_output': {'label': 'Display Next Output', 'default_shortcut': 'Alt+X', 'command': 'h.pane.wsheet.tool:br_display_next_output', 'description': 'Show the selected node next Output', 'remove_command': 'h.cut'},
+                'toggle_dependancy_links': {'label': 'Toggle dependancy Links', 'default_shortcut': 'Ctrl+D', 'command': 'h.pane.wsheet.tool:br_toggle_dependancy_links', 'description': 'Disable/enable dependancy links'},
+                'connect_selected_nodes': {'label': 'Connect Selected Nodes', 'default_shortcut': 'Shift+Y', 'command': 'h.pane.wsheet.tool:br_connect_selected_nodes', 'description': 'Connect all selected node in order of height'},
+                'scrub_timeline': {'label': 'Scrub Timeline', 'default_shortcut': 'K', 'command': 'h.pane.gview.tool:br_scrub_timeline', 'description': 'Move the current frame while clicking in the viewport'},
+                'switch_viewport_background': {'label': 'Switch Viewports Background', 'default_shortcut': 'Ctrl+Shift+B', 'command': 'h.pane.gview.tool:br_ui_viewports_colour', 'description': 'Change colors scheme of all viewports'},
+                'switch_viewports_background': {'label': 'Switch Current Viewport Background', 'default_shortcut': 'Shift+B', 'command': 'h.pane.gview.tool:br_ui_viewport_colour', 'description': 'Change colors scheme of the current viewport'},
+                'change_particles_display': {'label': 'Change Particles Display', 'default_shortcut': 'Shift+D', 'command': 'h.pane.gview.tool:br_change_particles_display', 'description': 'Cycle between particle types of display'},
+                'toggle_update_mode': {'label': 'Toggle Cooking Mode', 'default_shortcut': 'F10', 'command': 'h.tool:br_toggle_update_mode', 'description': 'Cycle between manual and cooking mode'},
+                'reset_viewport': {'label': 'Reset Viewport', 'default_shortcut': 'F12', 'command': 'h.reset_viewport', 'description': 'Reset and reload the viewport'},
+                'create_node_preview': {'label': 'Create Node Preview', 'default_shortcut': 'M', 'command': 'h.pane.wsheet.tool:br_create_node_preview', 'description': 'Create preview for selected nodes'},
                 }
             for shortcut, values in shortcuts.items():
                 self.shortcuts[shortcut].addLabel(values['label'])
                 self.shortcuts[shortcut].addSpacer()
-                self.shortcuts[shortcut].addWidget(qt.KeySequenceRecorder(values['default_shortcut']))
+                self.shortcuts[shortcut].shortcut = qt.KeySequenceRecorder(values['default_shortcut'])
+                self.shortcuts[shortcut].addWidget(self.shortcuts[shortcut].shortcut )
+                self.shortcuts[shortcut].data = values
                 self.shortcuts_vbox.addLayout(self.shortcuts[shortcut])
         self.row_layout.addWidget(self.shortcuts_groupbox)
 
@@ -85,7 +90,8 @@ class FirstLaunch(QtWidgets.QDialog):
         self.buttons.rejected.connect(self.reject)
         self.row_layout.addWidget(self.buttons)
         self.set_tooltips()
-        self.exec()  # Display as a modal window
+        self.setModal(True)
+        self.show()  # Display as a modal window
 
     @staticmethod
     def is_there_new_prefs(version=VERSION):
@@ -115,11 +121,15 @@ class FirstLaunch(QtWidgets.QDialog):
                 hou.setPreference('general.ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
 
             # Custom Tools Default Preferences
-            set_preference('custom.regnareb.scrub_timeline_mode', 'relative')
+            set_preference('custom.regnareb.scrub_timeline_mode', 'Relative')
             set_preference('custom.regnareb.scrub_timeline_keep_pressed', '1')
             set_preference('custom.regnareb.preview_resolutionX', '640')
             set_preference('custom.regnareb.preview_resolutionY', '640')
             set_preference('custom.regnareb.preview_widthratio', '1')
+            set_preference('custom.regnareb.on_open_change_desktop', '1')
+            set_preference('custom.regnareb.on_open_go_manual', '1')
+            set_preference('custom.regnareb.on_open_sopviewmode', '1')
+            set_preference('custom.regnareb.on_open_hide_other_objects', '1')
 
         self.save_shortcuts()
         # Set this custom preference so that the window is only displayed once or when new settings are implemented
@@ -127,27 +137,37 @@ class FirstLaunch(QtWidgets.QDialog):
         self.close()
 
     def save_shortcuts(self):
-        # hou.hotkeys.addAssignment("h.pane.parms.copy_parm", "ctrl+C")  # Set shortcuts for copy/paste parameters
-        # hou.hotkeys.addAssignment("h.pane.parms.paste_refs", "ctrl+V")
-        # for each shortcut :
-        # - check if it exists and is in the same scope as the current tool
-        # - unassign it if it already exists
-        # - assigne the new shortcut
+        if not self.shortcuts_groupbox.isChecked():
+            return
+        for interface in self.shortcuts.values():
+            if interface.data['command']:
+                if not interface.shortcut.displayText():
+                    continue
+                if interface.data.get('remove_command') and interface.shortcut.displayText().lower()==interface.data['default_shortcut'].lower():
+                    hou.hotkeys.removeAssignment(interface.data['remove_command'], interface.shortcut.displayText())
+                if ':' in interface.data['command']:
+                    hou.hotkeys.addCommand(interface.data['command'], interface.label.text() + ' - BR', interface.data['description'])
+                hou.hotkeys.addAssignment(interface.data['command'], interface.shortcut.displayText())
+        if not hou.hotkeys.saveOverrides():
+            logger.error("Couldn't save hotkey override file.")
         pass
 
     def check_shortcut(self):
-        # check if the shortcut exists and is in the same scope as the current tool
+        # for each shortcut :
+        # - check if it exists and is in the same scope as the current tool
+        # - unassign it if it already exists
+        # - assign the new shortcut
         pass
 
     def set_tooltips(self):
         tooltips = {
-            'networkeditor.shownodeshapes': 'Use rectangular node shapes only',
-            'networkeditor.showsimpleshape': "In the network editor's View menu, you can turn off display of custom node shapes. If that option and this option are both on, Houdini uses an even simpler default node shape (a simple rectangle instead of a rounded rectangle). This may speed up the display of extremely complex networks.",
-            'networkeditor.doautomovenodes': "Won't auto move nodes when connecting a node in between closed ",
-            'networkeditor.showanimations': 'Animates certain changes and transitions in the network editor for clarity (for example, moving nodes out the way when a new node is placed). Turn this off to disable animations.',
-            'networkeditor.maxflyoutscale': 'When opening a scene, change the Desktop panel arrangement to the one selected.',
+            'networkeditor.shownodeshapes': 'Use rectangular node shapes only in the network editor.\nThis may speed up the display of extremely complex networks.',
+            'networkeditor.showsimpleshape': 'You can turn off display of custom node shapes in the network editor\nThis may speed up the display of extremely complex networks.',
+            'networkeditor.doautomovenodes': "Won't auto move nodes when connecting a node in between other nodes that are too close",
+            'networkeditor.showanimations': 'Disable animations with certain changes and transitions in the network editor (for example, moving nodes out the way when a new node is placed).',
+            'networkeditor.maxflyoutscale': 'Change the node ring apparition to the lowest setting.',
             'tools.createincontext.val': 'Geometry will be created within the current context (eg. another piece of geometry in the same object).',
-            'tools.sopviewmode.val': 'Geometry is displayed from the node with the display flag enabled.',
+            'tools.sopviewmode.val': 'The node displayed in the viewport will be the one with the display flag enabled instead of the selected node.',
             'compact_mode': 'Change the playbar and UI icon size to compact.',
             'general.ui.scale': 'Change the UI scale globally.',
             'general.desk.val': 'Always force this Desktop when launching Houdini or opening a new scene.',
@@ -166,15 +186,16 @@ class Preferences(QtWidgets.QDialog):
         self.setWindowTitle('Regnareb Preferences')
 
         self.onnewscene = collections.defaultdict(qt.RowLayout)
+        self.onnewscene['on_open_change_desktop'].addCheckbox('Apply Default Desktop')
         self.onnewscene['on_open_go_manual'].addCheckbox('Set cooking to Manual')
         self.onnewscene['on_open_sopviewmode'].addCheckbox('Set view to "Show Display Operator"')
         self.onnewscene['on_open_hide_other_objects'].addCheckbox('Set view to "Hide other objects"')
-        self.onnewscene['on_open_use_color_scheme'].addCheckbox('Use Default Color Scheme')
+        self.onnewscene['on_open_hide_other_objects'].setEnabledChildren(False)
         # self.onnewscene['on_open_disable_nodes_shapes'].addCheckbox('Disable nodes shapes', True)
 
         self.network = collections.defaultdict(qt.RowLayout)
         self.network['transfer_display_node'].addCheckbox('Transfer Display Flag on child connection')
-        self.network['create_null_shift_click'].addCheckbox('Create a NULL when Ctrl+Shift clicking with a node selected')
+        self.network['create_null_shift_click'].addCheckbox('Create a NULL when Alt+click with a node selected')
         self.network['drag_and_drop'].addCheckbox('Enable Drag And Drop of files from File Explorer')
         self.network['drag_and_drop_in_context'].addCheckbox('Always try to create drag and dropped files in the current context')
         self.network['nodepreview_resolution'].addLabel('Node Preview Resolution')
@@ -193,8 +214,6 @@ class Preferences(QtWidgets.QDialog):
         scheme = self.viewport['viewport_colors'].addCombobox(['Light', 'Dark', 'Grey'])
         topcolor = self.viewport['viewport_colors'].addButton('Top')
         bottomcolor = self.viewport['viewport_colors'].addButton('Bot')
-        # previewcolor = self.viewport['viewport_colors'].addButton()
-        # previewcolor.setMaximumWidth(35)
         scheme.currentIndexChanged.connect(self.get_scheme)
         topcolor.clicked.connect(functools.partial(self.choose_color, topcolor))
         bottomcolor.clicked.connect(functools.partial(self.choose_color, bottomcolor))
@@ -232,11 +251,12 @@ class Preferences(QtWidgets.QDialog):
 
         self.setLayout(self.row_layout)
         self.setContentsMargins(0, 0, 0, 0)
-        # self.set_tooltips()
+        self.set_tooltips()
         self.load_prefs()
         self.show()
 
     def get_allcheckoxes_ui(self):
+        """Return all rowlayouts that have a checkbox"""
         all_checkboxes = {}
         all_checkboxes.update(self.onnewscene)
         all_checkboxes.update({k:v for k,v in self.network.items() if 'nodepreview' not in k})
@@ -312,7 +332,8 @@ class Preferences(QtWidgets.QDialog):
     def set_tooltips(self):
         self.onnewscene['on_open_go_manual'].setToolTip('When opening a scene, the cooking will be set to Manual to prevent the loading of a heavy scene.')
         self.onnewscene['on_open_hide_other_objects'].setToolTip('When opening a scene the viewports will be set to "Hide other obects" to prevent the loading of all objects.')
-        self.network['transfer_display_node'].setToolTip("When connecting a child node to a Displayed one, the connected node will inherit the Display flag unless the child is on the ignore list (in case it's aheavy node)")
+        self.onnewscene['on_open_sopviewmode'].setToolTip('Only show the displayed flag and not the selected nodes too.\nOtherwise it can lead to a lot of slowness and crashes because it cooks and change the viewport each time you select a node.')
+        self.network['transfer_display_node'].setToolTip("When connecting a child node to a Displayed one, the connected node will inherit the Display flag unless the child is on the ignore list (in case it's a heavy node)")
         self.network['create_null_shift_click'].setToolTip('If you have a node selected in the network view and shift click on an empty area, it will create a NULL node connected to that selected node.')
         self.network['drag_and_drop_in_context'].setToolTip('If this is checked, drag and dropping a file in Houdini will always create the nodes in the current context. Otherwise it follows the Houdini preference.')
         self.viewport['scrub_timeline_keep_pressed'].setToolTip('You need to keep the shortcut pressed then click on the viewport to change the current time like in Maya.\nOtherwise it is used as a classic shortcut.')

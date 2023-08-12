@@ -6,6 +6,7 @@ class ScrubTimelineState(object):
         self.state_name = state_name
         self.scene_viewer = scene_viewer
         self._base_x = self._base_frame = None
+        self.mode = hou.getPreference('custom.regnareb.scrub_timeline_mode')
 
     def onCommand(self, kwargs):
         name = kwargs['command']
@@ -45,9 +46,9 @@ class ScrubTimelineState(object):
         device = kwargs["ui_event"].device()
         if device.isLeftButton():
             x = device.mouseX()
-            if kwargs["mode"] == "relative":
+            if self.mode == "Relative":
                 self._scrub_rel(x)
-            elif kwargs["mode"] == "absolute":
+            elif self.mode == "Absolute":
                 self._scrub_abs(x)
         elif device.isMiddleButton():
             x = device.mouseX()
@@ -75,6 +76,15 @@ class ScrubTimelineState(object):
     def onParmChangeEvent(self, kwargs):
         print(kwargs)
 
+    def onMenuAction(self, kwargs):
+        hou.setPreference('custom.regnareb.scrub_timeline_mode', kwargs["mode"])
+        self.mode = kwargs["mode"]
+
+    def onMenuPreOpen(self, kwargs):
+        try:
+            kwargs['menu_item_states'][hou.getPreference('custom.regnareb.scrub_timeline_mode')]['enable']
+        except KeyError:
+            pass
 
 
 nodecategories = [hou.chopNodeTypeCategory(), hou.cop2NodeTypeCategory(), hou.dopNodeTypeCategory(), hou.sopNodeTypeCategory(), hou.topNodeTypeCategory()]
@@ -82,9 +92,9 @@ template = hou.ViewerStateTemplate("br_scrub_timeline", "br_Scrub_timeline", hou
 template.bindFactory(ScrubTimelineState)
 
 menu = hou.ViewerStateMenu("br_scrub_timeline", "Scrub Timeline")
-menu.addRadioStrip("mode", "Mode", hou.getPreference('custom.regnareb.scrub_timeline.mode') or 'relative')
-menu.addRadioStripItem("mode", "relative", "Relative")
-menu.addRadioStripItem("mode", "absolute", "Absolute")
+menu.addRadioStrip("mode", "Mode", hou.getPreference('custom.regnareb.scrub_timeline_mode') or 'Relative')
+menu.addRadioStripItem("mode", "Relative", "Relative")
+menu.addRadioStripItem("mode", "Absolute", "Absolute")
 template.bindMenu(menu)
 
 hou.ui.registerViewerState(template)

@@ -90,7 +90,7 @@ Network Clipboard - Send selected nodes to another user on the same network
 
 # How to install
 
-Download the [latest release](https://github.com/Regnareb/Houdini/releases) and extract its content.
+Download the [latest release](https://github.com/Regnareb/Houdini/releases/latest/download/Houdini-tools.zip) and extract its content.
 Modify the file `Houdini-tools/REGNAREB.json`, replace `path/to/this/folder` with the path to the folder of `Houdini-tools`  
 Then copy this .json file in your Houdini preference folder, in a `packages` folder   
 If everything is working fine, it should show that window on the next start of Houdini:

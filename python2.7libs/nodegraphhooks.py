@@ -13,6 +13,7 @@ def create_null(parent, position):
 def createEventHandler(uievent, pending_actions):
     if isinstance(uievent, canvaseventtypes.MouseEvent) and \
        uievent.eventtype == 'mousedown' and \
+       uievent.mousestate.lmb and \
        uievent.modifierstate == canvaseventtypes.ModifierState(alt=1, ctrl=0, shift=0):
         if uievent.selected.item:
             return None, False  # Let the user duplicate nodes with alt+click

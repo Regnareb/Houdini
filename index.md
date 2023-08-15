@@ -51,7 +51,7 @@ For making the loading of scenes faster and more stable
 </video>
 <br>
 
-* **Connect nodes by height position:**
+* **Connect nodes by height position (Shift+Y):**
 <video playsinline autoplay muted loop>
   <source src="{{site.baseurl}}/medias/connect_all_nodes.mp4" type="video/mp4">
 </video>
@@ -72,17 +72,17 @@ For making the loading of scenes faster and more stable
 
 ## Shortcuts 
 
-* Paste parameters with Ctrl+Shift+C / Ctrl+Shift+V 
-* Change particle types of display
-* Show dependency links
-* Toggle cooking mode   
-* **Changing viewport background color:**
+* Paste parameters (Ctrl+Shift+C / Ctrl+Shift+V) 
+* Change particle types of display (Shift+D)
+* Show dependency links (Ctrl+D)
+* Toggle cooking mode (F10)
+* **Changing viewport background color (Shift+B):**
 <video playsinline autoplay muted loop>
   <source src="{{site.baseurl}}/medias/change_viewport_color.mp4" type="video/mp4">
 </video>
 <br>
 
-Scrub Timeline  (Video) 
+Scrub Timeline (K) (Video) 
 
 Network Clipboard - Send selected nodes to another user on the same network
 

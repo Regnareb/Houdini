@@ -101,6 +101,12 @@ For more tool preferences, activate the Regnareb shelf and press the Preferences
 
 ![]({{site.baseurl}}/medias/preferences.png)
 
+### For Developers
+You can download the code by doing
+```
+git clone --recurse-submodules -c core.symlinks=true --remote-submodules https://github.com/Regnareb/Houdini.git
+```
+
 
 # How to uninstall
 

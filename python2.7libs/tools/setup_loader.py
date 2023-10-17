@@ -1,36 +1,41 @@
-# list all files and folders and sort files in reverse natural order with folders first in alphabetical order
-# create a menu with all those entries and select the first file if any, otherwise the first folder
-# if its a folder add a new menu and recall that function with the new path, deactivate the import button
-# if its a file remove the name of the folder from the menu entry, activate the import button
+"""This tool create a window to be able to import scene setup easily.
+It's an alternative way to HDAs which are not the solution for all cases.
+
+It lists all files and folders in the directory and show a combobox, files are prioritized over folders in
+a reverse order. This allow the last setup (eg: setup_name_v12) to appear first.
+If a folder is selected, it parse all files and folders in that folder and add a new combobox with the new entries.
+
+You can hide the text area for the path directory to hide it from users and only let the TDs change it.
+You can use the environment variable "HOUDINI_SETUPLOADER_PATH" instead of a path hardcoded in your script.
+
+This tool can be used in any software just by changing the import_file() function.
+"""
 
 
-# Create a window to import scene files in a folder. A bit like HDA but with scene files
-
-
-
-import re
 import os
 import functools
+import logging
 from PySide2 import QtCore, QtGui, QtWidgets
-import hou
-import common.utils
+import lib.pythonlib.common
+logger = logging.getLogger(__name__)
 
-
-MAINPATH = r'E:\Houdini\smoke'
+# import tools.setup_loader as t
 
 
 def get_entries(path):
+    """Return all files and folders in the specified path, separated by type in a dictionary"""
     elements = os.listdir(path)
     files = [i for i in elements if os.path.isfile(os.path.join(path, i))]
     folders = [i for i in elements if os.path.isdir(os.path.join(path, i))]
-    files = list(reversed(sorted(files, key=common.utils.natural_sort_key)))
-    folders = list(reversed(sorted(folders, key=common.utils.natural_sort_key)))
+    files = list(reversed(sorted(files, key=lib.pythonlib.common.natural_sort_key)))
+    folders = list(reversed(sorted(folders, key=lib.pythonlib.common.natural_sort_key)))
     return {'folders': folders, 'files': files}
 
 
 class SetupLoader(QtWidgets.QWidget):
-    def __init__(self, path, parent=None):
-        super(SetupLoader, self).__init__(parent)
+    def __init__(self, path, hide_path=True, parent=None):
+        super(SetupLoader, self).__init__()
+        self.setParent(hou.qt.mainWindow(), QtCore.Qt.Window)
         self.menus = []
         self.verticalLayout = QtWidgets.QVBoxLayout(self)
         self.path = QtWidgets.QLineEdit()
@@ -41,14 +46,18 @@ class SetupLoader(QtWidgets.QWidget):
         self.verticalLayout.addWidget(self.path)
         self.verticalLayout.addLayout(self.combosLayout)
         self.button = QtWidgets.QPushButton('Import')
-        self.button.clicked.connect(self.import2)
+        self.button.clicked.connect(self.import_file)
         self.verticalLayout.addWidget(self.button)
-
+        if not path:
+            path = os.environ.get('HOUDINI_SETUPLOADER_PATH')
         self.path.setText(path)
+        if hide_path:
+            self.path.setVisible(False)
         self.show()
 
-
     def add_menu(self, data):
+        """When the path or a combobox change, add a new combobox with the elements in data."""
+        logger.debug('add_menu', data)
         combo = QtWidgets.QComboBox()
         self.menus += [combo]
         comboModel = combo.model()
@@ -71,6 +80,7 @@ class SetupLoader(QtWidgets.QWidget):
         return combo
 
     def set_button_state(self):
+        """Set the import button state depending if the last combobox is a folder or a file."""
         combo = self.menus[-1]
         text = combo.currentText()
         index = combo.findText(text, QtCore.Qt.MatchFixedString)
@@ -80,9 +90,8 @@ class SetupLoader(QtWidgets.QWidget):
         else:
             self.button.setEnabled(False)
 
-
-
     def remove_menu(self):
+        """Remove the last combobox on the right."""
         try:
             self.combosLayout.removeWidget(self.menus[-1])
             self.menus[-1].deleteLater()
@@ -90,35 +99,31 @@ class SetupLoader(QtWidgets.QWidget):
         except IndexError:
             pass
 
-
     def change_path(self):
+        """Called when a new path is set in the LineEdit"""
         for i in self.menus:
             self.remove_menu()
         data = get_entries(self.path.text())
+        logger.debug('Change Path:', self.path.text())
         self.add_menu(data)
 
-
     def changed_entry(self, combo, index):
-        # remove all menus after the index of the current combo
-        # if it's a folder list the content and create a menu accordingly
-        # if it's a file do nothing
+        """Remove all comboboxes on the right of the combobox that changed.
+        If the entry of the combobox is a file do nothing.
+        If the entry of the combobox is a folder, list the data in the folder and create a combobox.
+        """
         combo_nb = self.menus.index(combo) + 1
         for i in range(len(self.menus) - combo_nb):
-            pass
             self.remove_menu()
         typ = combo.itemData(index)['type']
         if typ == 'folders':
-            path = []
-            for count, _ in enumerate(self.menus):
-                prev_index = self.menus[count].currentIndex()
-                path += [self.menus[count].itemData(prev_index)['name']]
-            path = os.path.join(self.path.text(), *path)
+            path = self.current_path()
             data = get_entries(path)
             combo = self.add_menu(data)
         self.set_button_state()
 
-
     def current_path(self):
+        """Rebuild the path from all combobox values."""
         path = []
         for count, _ in enumerate(self.menus):
             prev_index = self.menus[count].currentIndex()
@@ -126,10 +131,7 @@ class SetupLoader(QtWidgets.QWidget):
         path = os.path.join(self.path.text(), *path)
         return path
 
-
-    def import2(self):
+    def import_file(self):
         path = self.current_path()
+        import hou
         hou.hipFile.merge(path)
-
-
-dialog = SetupLoader()

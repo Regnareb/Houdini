@@ -8,7 +8,7 @@ If a folder is selected, it parse all files and folders in that folder and add a
 You can hide the text area for the path directory to hide it from users and only let the TDs change it.
 You can use the environment variable "HOUDINI_SETUPLOADER_PATH" instead of a path hardcoded in your script.
 
-This tool can be used in any software just by changing the import_file() function.
+This tool can be used in any software just by inheriting SetupLoader() and implementing the import_file() function.
 """
 
 
@@ -18,8 +18,6 @@ import logging
 from PySide2 import QtCore, QtGui, QtWidgets
 import lib.pythonlib.common
 logger = logging.getLogger(__name__)
-
-# import tools.setup_loader as t
 
 
 def get_entries(path):
@@ -34,8 +32,7 @@ def get_entries(path):
 
 class SetupLoader(QtWidgets.QWidget):
     def __init__(self, path, hide_path=True, parent=None):
-        super(SetupLoader, self).__init__()
-        self.setParent(hou.qt.mainWindow(), QtCore.Qt.Window)
+        super(SetupLoader, self).__init__(parent)
         self.menus = []
         self.verticalLayout = QtWidgets.QVBoxLayout(self)
         self.path = QtWidgets.QLineEdit()
@@ -48,12 +45,9 @@ class SetupLoader(QtWidgets.QWidget):
         self.button = QtWidgets.QPushButton('Import')
         self.button.clicked.connect(self.import_file)
         self.verticalLayout.addWidget(self.button)
-        if not path:
-            path = os.environ.get('HOUDINI_SETUPLOADER_PATH')
         self.path.setText(path)
         if hide_path:
             self.path.setVisible(False)
-        self.show()
 
     def add_menu(self, data):
         """When the path or a combobox change, add a new combobox with the elements in data."""
@@ -67,6 +61,8 @@ class SetupLoader(QtWidgets.QWidget):
                 item = QtGui.QStandardItem(name)
                 comboModel.appendRow(item)
                 combo.setItemData(index, {'type': typ, 'name': name})
+                if typ == 'folders':
+                    combo.model().item(index).setForeground(QtGui.QColor("#FFC733"))
                 index += 1
 
         self.combosLayout.addWidget(combo)
@@ -75,7 +71,10 @@ class SetupLoader(QtWidgets.QWidget):
         combo.activated.connect(functools.partial(self.changed_entry, combo))
         if text:
             index = combo.findText(text, QtCore.Qt.MatchFixedString)
-            combo.setCurrentIndex(index)
+            if index == combo.currentIndex():
+                self.changed_entry(combo, index)  # If there are only folders force the refresh of sucessive directories
+            else:
+                combo.setCurrentIndex(index)
         self.set_button_state()
         return combo
 
@@ -117,9 +116,12 @@ class SetupLoader(QtWidgets.QWidget):
             self.remove_menu()
         typ = combo.itemData(index)['type']
         if typ == 'folders':
+            combo.setStyleSheet("QComboBox:editable { color: #FFC733}")
             path = self.current_path()
             data = get_entries(path)
             combo = self.add_menu(data)
+        else:
+            combo.setStyleSheet("QComboBox:editable { color: #FFF}")
         self.set_button_state()
 
     def current_path(self):
@@ -132,6 +134,24 @@ class SetupLoader(QtWidgets.QWidget):
         return path
 
     def import_file(self):
-        path = self.current_path()
+        pass
+
+
+class HoudiniSetupLoader(SetupLoader):
+    def __init__(self, path, hide_path=True, parent=None):
+        super(HoudiniSetupLoader, self).__init__(path, hide_path, parent)
         import hou
+        self.setParent(hou.qt.mainWindow(), QtCore.Qt.Window)
+
+    def import_file(self):
+        import hou
+        path = self.current_path()
         hou.hipFile.merge(path)
+
+
+def open_houdini_setuploader(path, hide_path=True):
+    if not path:
+        path = os.environ.get('HOUDINI_SETUPLOADER_PATH')
+    ui = HoudiniSetupLoader(path, hide_path)
+    ui.show()
+    return ui

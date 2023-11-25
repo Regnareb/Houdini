@@ -1,6 +1,6 @@
 
 """Directly open image sequences with mplay by double clicking on any image
-Python path needs to be in your environment variables
+Python path needs to be in your environment variables, otherwise set the full path to python in the open_with_mplay.bat file
 
 Window: Right click on a file > Open With and find the open_with_mplay.bat
 """
@@ -8,7 +8,7 @@ Window: Right click on a file > Open With and find the open_with_mplay.bat
 import os
 import re
 import sys
-sys.path.append(os.path.join(os.path.abspath(__file__), 'python3.9libs'))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'python3.10libs'))
 import lib.pythonlib.iopath
 
 
@@ -29,6 +29,8 @@ if __name__ == "__main__":
     elif sys.platform.startswith('win32'):
         folder_binary = get_binary_path('C:/Program Files/Side Effects Software/', 'Houdini \\d')
 
-    assert os.path.isdir(folder_binary)
-    os.chdir(folder_binary)
-    os.system('mplay -p -P loop ' + filepath)
+    if os.path.isdir(folder_binary):
+        os.chdir(folder_binary)
+        os.system('mplay -p -P loop "{}"'.format(filepath))
+    else:
+        print('The binary folder is not a good folder: {}'.format(folder_binary))

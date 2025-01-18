@@ -85,7 +85,7 @@ class Installer():
         self.clean_temp()
 
         if update:
-            hou.ui.displayMessage(f'The tool has been updated to version "{self.version}"')
+            hou.ui.displayMessage(f'The tool has been updated to version "{self.version}"\n\nChangelog:', details_expanded=True, details=response.json()['body'])
 
 
     def clean_temp(self):

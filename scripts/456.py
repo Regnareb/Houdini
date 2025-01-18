@@ -12,7 +12,4 @@ if hou.getPreference('custom.regnareb.on_open_sopviewmode'):
     hou.setPreference('tools.sopviewmode.val', '0')
 
 if hou.getPreference('custom.regnareb.on_open_change_desktop'):
-    for i in hou.ui.desktops():
-        if i.name() == hou.getPreference('general.desk.val'):
-            i.setAsCurrent()
-            break
+    hou.ui.desktop(hou.getPreference('general.desk.val')).setAsCurrent()

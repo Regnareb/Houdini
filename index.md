@@ -88,7 +88,7 @@ Network Clipboard - Send selected nodes to another user on the same network
 
 ---
 
-# [How to install](#how-to-install)
+# How to install
 
 Paste [this script](https://raw.githubusercontent.com/Regnareb/Houdini/refs/tags/v0.3.1/python2.7libs/tools/installer.py) to **Houdini > Window > Python Source Editor > Accept**  
 

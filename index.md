@@ -88,7 +88,7 @@ Network Clipboard - Send selected nodes to another user on the same network
 
 ---
 
-# How to install
+# [How to install]
 
 Paste [this script](https://raw.githubusercontent.com/Regnareb/Houdini/refs/tags/v0.3.1/python2.7libs/tools/installer.py) to **Houdini > Window > Python Source Editor > Accept**  
 
@@ -116,6 +116,6 @@ git clone --recurse-submodules -c core.symlinks=true --remote-submodules https:/
 
 # How to uninstall
 
-If you want to uninstall the tools, just delete the file packages/regnareb.json in your Houdini preferences 
+If you want to uninstall the tools, just delete the file `packages/regnareb.json` in your Houdini preferences 
 
 

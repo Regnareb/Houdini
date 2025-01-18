@@ -8,7 +8,14 @@
   <tool name="br_ui_show_preferences" label="Preferences" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[
 import common.preferences
-common.preferences.show_prefs()  
+common.preferences.show_prefs()
+    ]]></script>
+  </tool>
+
+  <tool name="br_ui_update_tools" label="Update" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[
+import tools.installer
+tools.installer.Installer().install(update=True)
     ]]></script>
   </tool>
 
@@ -139,6 +146,7 @@ common.sceneviewer.change_particles_display()
 
   <toolshelf name="Regnareb" label="Regnareb">
     <memberTool name="br_ui_show_preferences"/>
+    <memberTool name="br_ui_update_tools"/>
     <memberTool name="br_ui_viewports_colour"/>
     <memberTool name="br_ui_viewport_colour"/>
     <memberTool name="br_scrub_timeline"/>

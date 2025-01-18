@@ -20,9 +20,9 @@ title: Houdini Tools
 
 ## On Scene Open 
 
-* Apply the default Desktop  
-* Set Cooking mode to Manual  
-* Set view to "Show Display Operator"  
+* Apply the default Desktop
+* Set Cooking mode to Manual
+* Set view to "Show Display Operator"
 * Set view to "Hide other objects"
 
 For making the loading of scenes faster and more stable 
@@ -72,7 +72,7 @@ For making the loading of scenes faster and more stable
 
 ## Shortcuts 
 
-* Paste parameters (Ctrl+Shift+C / Ctrl+Shift+V) 
+* Paste parameters (Ctrl+Shift+C / Ctrl+Shift+V)
 * Change particle types of display (Shift+D)
 * Show dependency links (Ctrl+D)
 * Toggle cooking mode (F10)
@@ -90,14 +90,20 @@ Network Clipboard - Send selected nodes to another user on the same network
 
 # How to install
 
-Download the [latest release](https://github.com/Regnareb/Houdini/releases/latest/download/Houdini-tools.zip) and extract its content.
-Modify the file `Houdini-tools/REGNAREB.json`, replace `path/to/this/folder` with the path to the folder of `Houdini-tools`  
-Then copy this .json file in your Houdini preference folder, in a `packages` folder   
-If everything is working fine, it should show that window on the next start of Houdini:
+Paste [this script](https://raw.githubusercontent.com/Regnareb/Houdini/refs/tags/v0.3.1/python2.7libs/tools/installer.py) to **Houdini > Window > Python Source Editor > Accept**  
 
+Here is what the script does:
+ * Download the [latest release](https://github.com/Regnareb/Houdini/releases/latest/download/Houdini-tools.zip) 
+ * Extract its content to the Houdini prefs folder 
+ * Modify the file `Houdini-tools/REGNAREB.json`, replace `$REGNAREB` with the path to the folder of the folder `Houdini-tools`  
+ * Move the `REGNAREB.json` file in a `packages` folder of your Houdini preferences folder
+
+
+If everything is working fine, it should show that window on the next start of Houdini:
 ![]({{site.baseurl}}/medias/first_launch.png)
 
-For more tool preferences, activate the Regnareb shelf and press the Preferences button:
+For more tool preferences, activate the Regnareb shelf and press the Preferences button.  
+You can also auto-update the tools by clicking the Update button.
 
 ![]({{site.baseurl}}/medias/preferences.png)
 

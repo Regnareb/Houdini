@@ -5,8 +5,8 @@ import common.sceneviewer
 if hou.getPreference('custom.regnareb.on_open_go_manual'):
     common.hou_utils.toggle_update_mode(hou.updateMode.Manual)
 
-if hou.getPreference('custom.regnareb.on_open_hide_other_objects'):
-    common.sceneviewer.hide_other_objects()
+# if hou.getPreference('custom.regnareb.on_open_hide_other_objects'):
+#     common.sceneviewer.hide_other_objects()
 
 if hou.getPreference('custom.regnareb.on_open_sopviewmode'):
     hou.setPreference('tools.sopviewmode.val', '0')

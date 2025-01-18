@@ -331,7 +331,7 @@ class Preferences(QtWidgets.QDialog):
 
     def set_tooltips(self):
         self.onnewscene['on_open_go_manual'].setToolTip('When opening a scene, the cooking will be set to Manual to prevent the loading of a heavy scene.')
-        self.onnewscene['on_open_hide_other_objects'].setToolTip('When opening a scene the viewports will be set to "Hide other obects" to prevent the loading of all objects.')
+        self.onnewscene['on_open_hide_other_objects'].setToolTip('[NOT IMPLEMENTED]\nWhen opening a scene the viewports will be set to "Hide other obects" to prevent the loading of all objects.')
         self.onnewscene['on_open_sopviewmode'].setToolTip('Only show the displayed flag and not the selected nodes too.\nOtherwise it can lead to a lot of slowness and crashes because it cooks and change the viewport each time you select a node.')
         self.network['transfer_display_node'].setToolTip("When connecting a child node to a Displayed one, the connected node will inherit the Display flag unless the child is on the ignore list (in case it's a heavy node)")
         self.network['create_null_shift_click'].setToolTip('If you have a node selected in the network view and shift click on an empty area, it will create a NULL node connected to that selected node.')

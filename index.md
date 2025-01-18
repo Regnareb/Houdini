@@ -22,8 +22,8 @@ title: Houdini Tools
 
 * Apply the default Desktop
 * Set Cooking mode to Manual
-* Set view to "Show Display Operator"
-* Set view to "Hide other objects"
+* ~~Set view to "Show Display Operator"~~ Not possible yet
+* ~~Set view to "Hide other objects"~~ Not possible yet
 
 For making the loading of scenes faster and more stable 
 

@@ -1,4 +1,4 @@
-remote_theme: pages-themes/slate@v0.2.0
+remote_theme: mmistakes/minimal-mistakes
 plugins:
 - jekyll-remote-theme # add this line to the plugins list if you already have one
 
@@ -7,4 +7,3 @@ url: https://www.regnareb.com
 basurl: /houdini
 
 description: A collection of tools to set default preferences automatically and make Houdini more usable.
-

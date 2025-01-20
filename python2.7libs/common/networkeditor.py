@@ -106,12 +106,12 @@ def toggle_dependancy_links(mode=None):
 
 
 def remove_background_image(node):
+    """Remove Callbacks of the node and all linked images"""
     try:
-        node.removeEventCallback((hou.nodeEventType.InputDataChanged, hou.nodeEventType.InputRewired, hou.nodeEventType.ParmTupleChanged), event_update_background_image)
         node.removeEventCallback((hou.nodeEventType.BeingDeleted,), event_remove_background_image)
         node.removeEventCallback((hou.nodeEventType.FlagChanged,), event_visibility_background_image)
     except hou.OperationFailed:
-        return
+        pass
     editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
     images = tuple(i for i in editor.backgroundImages() if i.relativeToPath() != node.path())
     editor.setBackgroundImages(images)
@@ -131,6 +131,8 @@ def modify_linked_networkimage(node):
 
 
 def event_update_background_image(node, event_type, **kwargs):
+    """Update all linked images of the node
+    Only update the image when the node is activated"""
     if not node.isBypassed():
         with restore_display_flag():  #TODO replace as a decorator when python2 is far away
             editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
@@ -151,20 +153,15 @@ def event_update_background_image(node, event_type, **kwargs):
 
 def event_visibility_background_image(node, event_type):
     if event_type == hou.nodeEventType.FlagChanged:  # This is needed because it get also called with event InputDataChanged
-        with modify_linked_networkimage(node) as i:
-            i.setBrightness(int(not node.isBypassed()))
+        try:
+            with modify_linked_networkimage(node) as i:
+                i.setBrightness(int(not node.isBypassed()))
+        except RuntimeError:
+            pass  # When duplicating a node with alt+click, its name is 'original0_of_' and modify_linked_networkimage() raise an exception
 
 
 def event_remove_background_image(node, event_type):
-    # node.removeEventCallback((hou.nodeEventType.InputDataChanged, hou.nodeEventType.InputRewired, hou.nodeEventType.ParmTupleChanged), event_update_background_image)
-    # node.removeEventCallback((hou.nodeEventType.BeingDeleted,), event_remove_background_image)
-    # node.removeEventCallback((hou.nodeEventType.FlagChanged,), event_visibility_background_image)
-    event_visibility_background_image(node, event_type)
     remove_background_image(node)
-
-
-def event_renamed_node(node, event_type):
-    pass
 
 
 def take_screenshot(filepath, frame=None, viewername='', resolution=[640, 640]):

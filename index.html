@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Landing Page - Start Bootstrap Theme</title>
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <script language="javascript" src="js/qwebchannel.js"></script>
+    </head>
+    <body>
+        <!-- Navigation-->
+        <nav class="navbar navbar-light bg-light static-top">
+            <div class="container">
+                <a class="navbar-brand" href="/">Houdini Tools</a>
+                <a class="btn link-dark btn-outline-light" href="how-to-install.html">How to Install</a>
+            </div>
+        </nav>
+        <!-- Masthead-->
+        <header class="masthead">
+            <div class="container position-relative">
+                <div class="row justify-content-center">
+                    <div class="col-xl-6">
+                        <div class="text-white">
+                            <h1 class="mb-3">Better Houdini Tools</h1>
+                            <div class="row">
+                                <p class="lead mb-2">A collection of tools to set default preferences automatically and make Houdini more usable and stable.</p>
+                                
+                                <p class="lead mb-4"><small><a class="text-muted text-decoration-none" href="https://github.com/Regnareb/Houdini/releases/latest">Latest release v0.3.1</a></small></p>
+                                <p class="mt-4">
+                                    <a href="https://raw.githubusercontent.com/Regnareb/Houdini/refs/heads/main/python2.7libs/tools/installer.py" title="Click to copy the code and then execute it in Python Source Editor" class="me-3 btn btn-outline-light btn-lg glow-on-hover" id="copy" onclick="get_install_script('https://raw.githubusercontent.com/Regnareb/Houdini/refs/heads/main/python2.7libs/tools/installer.py')")><i class="far bi bi-clipboard me-2"></i>Copy Code</a>
+                                    <a href="how-to-install.html" class="btn btn-outline-light btn-lg border-0" id="manual"><i class="fas fa-download"></i> Install Manually</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Icons Grid-->
+        <section class="features-icons bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <div class="features-icons-item mb-0">
+                            <!-- <div class="features-icons-icon d-flex"><i class="bi-window m-auto text-primary"></i></div> -->
+                            <h3>Default Preferences</h3>
+                            <ul class="lead mb-3">
+                                <li class="lead">Disable Nodes Shapes</li>
+                                <li class="lead">Use Simple Node Shapes</li>
+                                <li class="lead">Disable Auto Move Nodes</li>
+                                <li class="lead">Disable Nodes Animations</li>
+                                <li class="lead">Set Low Size to Show Ring</li>
+                                <li class="lead">Show Displayed Node instead of Selected Node</li>
+                                <li class="lead">Create Tools In Context</li>
+                                <li class="lead">Set UI to Compact Mode</li>
+                                <li class="lead">Startup with a specific Desktop</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="features-icons-item mb-0">
+                            <!-- <div class="features-icons-icon d-flex"><i class="bi-layers m-auto text-primary"></i></div> -->
+                            <h3>On Scene Open</h3>
+                            <ul class="lead mb-3">
+                              <li>Apply the default Desktop</li>
+                              <li>Set Cooking mode to Manual</li>
+                              <li><del>Set view to “Hide other objects”</del> <span class="text-muted">Not possible yet</span></li>
+                              <li><del>Set view to “Show Display Operator”</del> <span class="text-muted">Not possible yet</span></li>
+                            </ul>
+                            <p class="lead mb-0">This will make loading the scenes faster and more stable.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Image Showcases-->
+        <section class="showcase">
+            <div class="container-fluid p-0">
+                <div class="row g-0">
+                    <div class="col-lg-6 order-lg-2 text-white showcase-img">
+                        <video playsinline="" autoplay="" muted="" loop="">
+                            <source src="assets\videos\propagate_display.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                    <div class="col-lg-6 order-lg-1 my-auto showcase-text">
+                        <h2>Propagate display flag to children</h2>
+                        <p class="lead mb-0">Each time you connect a node to one with a display flag, the flag is transferred to the new one</p>
+                    </div>
+                </div>
+                <div class="row g-0">
+                    <div class="col-lg-6 text-white showcase-img">
+                        <video playsinline="" autoplay="" muted="" loop="">
+                            <source src="assets\videos\paste_object_merge.mp4" type="video/mp4">
+                        </video>                        
+                    </div>
+                    <div class="col-lg-6 my-auto showcase-text">
+                        <h2>Create object merge from clipboard</h2>
+                        <p class="lead mb-0">Create an Object merge with references to all copied nodes (Alt+V)</p>
+                    </div>
+                </div>
+                <div class="row g-0">
+                    <div class="col-lg-6 order-lg-2 text-white showcase-img">
+                        <video playsinline="" autoplay="" muted="" loop="">
+                            <source src="assets\videos\create_nulls.mp4" type="video/mp4">
+                        </video>                                                
+                    </div>
+                    <div class="col-lg-6 order-lg-1 my-auto showcase-text">
+                        <h2>Alt+click to create Nulls</h2>
+                        <p class="lead mb-0">automatically create Nulls with correct names for all selected nodes</p>
+                    </div>
+                </div>
+                <div class="row g-0">
+                    <div class="col-lg-6 text-white showcase-img">
+                        <video playsinline="" autoplay="" muted="" loop="">
+                            <source src="assets\videos\connect_all_nodes.mp4" type="video/mp4">
+                        </video>                        
+                    </div>
+                    <div class="col-lg-6 my-auto showcase-text">
+                        <h2>Connect nodes by height position</h2>
+                        <p class="lead mb-0">press Shift+Y amd all selected nodes will be connected in the order of their height</p>
+                    </div>
+                </div>
+                <div class="row g-0">
+                    <div class="col-lg-6 order-lg-2 text-white showcase-img">
+                        <video playsinline="" autoplay="" muted="" loop="">
+                            <source src="assets\videos\cycle_display.mp4" type="video/mp4">
+                        </video>                        
+                    </div>
+                    <div class="col-lg-6 order-lg-1 my-auto showcase-text">
+                        <h2>Improved Cycle Display</h2>
+                        <p class="lead mb-0">Cycle display flag between all selected nodes. Continue working after deselecting them</p>
+                    </div>
+                </div>
+                <div class="row g-0">
+                    <div class="col-lg-6 text-white showcase-img">
+                        <video playsinline="" autoplay="" muted="" loop="">
+                            <source src="assets\videos\node_preview.mp4" type="video/mp4">
+                        </video>                        
+                    </div>
+                    <div class="col-lg-6 my-auto showcase-text">
+                        <h2>Create Node Previews</h2>
+                        <p class="lead mb-0">Put a preview of the node like TouchDesigner. Very slow and experimental</p>
+                    </div>
+                </div>
+                <div class="row g-0">
+                    <div class="col-lg-6 order-lg-2 text-white showcase-img">
+                        <video playsinline="" autoplay="" muted="" loop="">
+                            <source src="assets\videos\change_viewport_color.mp4" type="video/mp4">
+                        </video>                        
+                    </div>
+                    <div class="col-lg-6 order-lg-1 my-auto showcase-text">
+                        <h2>Change Viewport Color</h2>
+                        <p class="lead mb-0">Add a shortcut to switch the background color of viewports</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Testimonials-->
+        <section class="testimonials bg-light">
+            <div class="container">
+                <h2 class="mb-5 text-center">Changelogs</h2>
+                <div id="changelogs" class="row">
+                    <div class="col-lg-4">
+                        <div class="mx-auto mb-5 mb-lg-0">
+                            <h5>v0.3.1</h5>
+                            <ul class="font-weight-light mb-0">
+                                <li>Add Houdini 20.5/python 3.11 support</li>
+                                <li>Add an auto-installer of the tool and auto-updater in the shelf</li>
+                                <li>Improve startup of Houdini with a better management of default desktops</li>
+                                <li>Disable "on open hide other objects" at scene open because it's not yet implemented</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="mx-auto mb-5 mb-lg-0">
+                            <h5>v0.3</h5>
+                            <ul class="font-weight-light mb-0">
+                                <li>Add Houdini 20/python 3.10 support</li>
+                                <li>Fix the tool to open images sequences with mplay from the file explorer.</li>
+                                <li>Fix bug preventing opening image sequences with spaces in their names</li>
+                                <li>Polish some UI in the SetupLoader() tool for an alternate method of loading setups that are not HDA</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="mx-auto mb-5 mb-lg-0">
+                            <h5>v0.2</h5>
+                            <ul class="font-weight-light mb-0">
+                                <li>Added python 3.7 support</li>
+                                <li>Add a tool to open image sequence with mplay directly from the file explorer</li>
+                                <li>Fix a bug with namespaces in submodule of pythonlib.</li>
+                                <li>It prevented the drag and drop of some files/nodes in the network view</li>
+                                <li>Removed the keymap file that overrides 2 keyboard shortcuts</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Call to Action-->
+        <section class="call-to-action text-white text-center">            
+            <div class="container position-relative">
+                <div class="row justify-content-center">
+                    <div class="col">
+                        <a href="https://github.com/Regnareb/Houdini/issues/new?template=bug_report.md" class="link-light text-decoration-none"><i class="bi bi-bug fs-1"></i>
+                        <p class="display-6">Found a bug?</p></a>
+                    </div>
+                    <div class="col">
+                        <a href="https://github.com/Regnareb/Houdini/issues/new?template=feature_request.md" class="link-light text-decoration-none"><i class="bi bi-window-plus fs-1"></i>
+                        <p class="display-6">Have a suggestion?</p></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Footer-->
+        <footer class="footer bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 h-100 text-center text-lg-start my-auto">
+                        <ul class="list-inline mb-2">
+                            <li class="list-inline-item align-items-center"><a href="https://regnareb.com/pro"><i class="bi-book fs-3"></i> <span class="xalign-baseline">Blog</span></a></li>
+                            <li class="list-inline-item">⋅</li>
+                            <li class="list-inline-item"><a href="https://regnareb.com/"><i class="bi-envelope fs-3"></i> Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-6 h-100 text-center text-lg-end my-auto">
+                        <ul class="list-inline mb-0">
+                            <li class="list-inline-item me-4">
+                                <a href="https://github.com/Regnareb/Houdini"><i class="bi-github fs-2"></i></a>
+                            </li>
+                            <li class="list-inline-item">
+                                <a href="https://github.com/Regnareb/Houdini/releases.atom"><i class="bi-rss-fill fs-2"></i></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="js/scripts.js"></script>
+    </body>
+</html>

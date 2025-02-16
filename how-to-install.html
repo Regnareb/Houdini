@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Landing Page - Start Bootstrap Theme</title>
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <script language="javascript" src="js/qwebchannel.js"></script>
+    </head>
+    <body>
+        <!-- Navigation-->
+        <nav class="navbar navbar-light bg-light static-top">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">Houdini Tools</a>
+                <a class="btn link-dark btn-outline-light" href="how-to-install.html">How to Install</a>
+            </div>
+        </nav>
+        <!-- Masthead-->
+        <header class="masthead">
+            <div class="container position-relative">
+                <div class="row justify-content-center">
+                    <div class="xcol-xl-6 text-white">
+                        <h1 class="mb-4">How To Install</h1>
+                        <h2 class="mb-4">Automatic Install</h2>
+
+                        <div class="mb-5">
+                            <ul>
+                                <li>Open this website directly in Houdini in a <code>Help Browser</code> view and clicking the rainbow button will automatically install it.</li>
+                                <li>Or click the button now and paste it to <code>Houdini > Window > Python Source Editor > Accept</code></li>
+                            </ul>
+                            <p>It will download and put the files in the right places, all you have to do is restart Houdini.</p>
+                        </div>
+                        
+                        <div class="flex xtext-center">
+                        <a href="https://raw.githubusercontent.com/Regnareb/Houdini/refs/heads/main/python2.7libs/tools/installer.py" title="Click to copy the code and then execute it in Python Source Editor" class="btn btn-outline-light btn-lg glow-on-hover mb-5" id="copy" onclick="get_install_script('https://raw.githubusercontent.com/Regnareb/Houdini/refs/heads/main/python2.7libs/tools/installer.py')")><i class="far bi bi-clipboard me-2"></i>Copy Code</a>
+                        </div>
+
+                        <div class="alert alert-success mb-4">
+                            <p>Here is what the script does exactly:</p>
+                            <ul>
+                                <li>Download the latest release from <a href="https://github.com/Regnareb/Houdini/releases/latest" class="link-danger">Github</a> </li>
+                                <li>Extract its content to the Houdini prefs folder</li>
+                                <li>Modify the file <code>REGNAREB.json</code> to add the path to the tool folder</li>
+                                <li>Move the json file in the <code>packages</code> folder of your Houdini preferences folder</li>
+                            </ul>
+                        </div>
+
+
+
+                        <p>If everything works fine, it should show that window on the next start of Houdini:</p>
+
+                        <img src="assets/img/first_launch.png" class="mb-5">
+
+                        <p>For more tool preferences, activate the <code>Regnareb</code> shelf and press the <code>Preferences</code> button.<br>
+                        You can also auto-update the tools by clicking the <code>Update</code> button in the shelf.</p>
+
+                        <img src="assets/img/preferences.png" class="mb-4 mt-3">
+
+
+                        <h2 class="mb-4 mt-5">How to Uninstall</h2>
+                        <div class="xlead">
+                            <p>Just remove the <code>REGNAREB.json</code> in the <code>packages</code> folder in your houdini preferences folder.</p>
+                            <p>You can also remove the <code>REGNAREB-TOOLS</code> folder but if the <code>json</code> is not in the packages folder this folder does nothing.</p>
+                        </div>
+
+                        <h2 class="mb-4 mt-5">For Developpers</h2>
+                        <div class="xlead">
+                            <p>You can download the code by doing:</p>
+                            <code>git clone --recurse-submodules -c core.symlinks=true --remote-submodules https://github.com/Regnareb/Houdini.git</code>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Footer-->
+        <footer class="footer bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 h-100 text-center text-lg-start my-auto">
+                        <ul class="list-inline mb-2">
+                            <li class="list-inline-item align-items-center"><a href="https://regnareb.com/pro"><i class="bi-book fs-3"></i> <span class="xalign-baseline">Blog</span></a></li>
+                            <li class="list-inline-item">⋅</li>
+                            <li class="list-inline-item"><a href="https://regnareb.com/"><i class="bi-envelope fs-3"></i> Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-6 h-100 text-center text-lg-end my-auto">
+                        <ul class="list-inline mb-0">
+                            <li class="list-inline-item me-4">
+                                <a href="https://github.com/Regnareb/Houdini"><i class="bi-github fs-2"></i></a>
+                            </li>
+                            <li class="list-inline-item">
+                                <a href="https://github.com/Regnareb/Houdini/releases.atom"><i class="bi-rss-fill fs-2"></i></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="js/scripts.js"></script>
+    </body>
+</html>

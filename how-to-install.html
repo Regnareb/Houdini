@@ -17,7 +17,7 @@
         <!-- Navigation-->
         <nav class="navbar navbar-light bg-light static-top">
             <div class="container">
-                <a class="navbar-brand" href="index.html">Houdini Tools</a>
+                <a class="navbar-brand" href="">Houdini Tools</a>
                 <a class="btn link-dark btn-outline-light" href="how-to-install.html">How to Install</a>
             </div>
         </nav>
@@ -25,7 +25,7 @@
         <header class="masthead">
             <div class="container position-relative">
                 <div class="row justify-content-center">
-                    <div class="xcol-xl-6 text-white">
+                    <div class="text-white">
                         <h1 class="mb-4">How To Install</h1>
                         <h2 class="mb-4">Automatic Install</h2>
 
@@ -37,7 +37,7 @@
                             <p>It will download and put the files in the right places, all you have to do is restart Houdini.</p>
                         </div>
                         
-                        <div class="flex xtext-center">
+                        <div class="flex">
                         <a href="https://raw.githubusercontent.com/Regnareb/Houdini/refs/heads/main/python2.7libs/tools/installer.py" title="Click to copy the code and then execute it in Python Source Editor" class="btn btn-outline-light btn-lg glow-on-hover mb-5" id="copy" onclick="get_install_script('https://raw.githubusercontent.com/Regnareb/Houdini/refs/heads/main/python2.7libs/tools/installer.py')")><i class="far bi bi-clipboard me-2"></i>Copy Code</a>
                         </div>
 
@@ -51,8 +51,6 @@
                             </ul>
                         </div>
 
-
-
                         <p>If everything works fine, it should show that window on the next start of Houdini:</p>
 
                         <img src="assets/img/first_launch.png" class="mb-5">
@@ -62,20 +60,17 @@
 
                         <img src="assets/img/preferences.png" class="mb-4 mt-3">
 
-
                         <h2 class="mb-4 mt-5">How to Uninstall</h2>
-                        <div class="xlead">
+                        <div>
                             <p>Just remove the <code>REGNAREB.json</code> in the <code>packages</code> folder in your houdini preferences folder.</p>
                             <p>You can also remove the <code>REGNAREB-TOOLS</code> folder but if the <code>json</code> is not in the packages folder this folder does nothing.</p>
                         </div>
 
                         <h2 class="mb-4 mt-5">For Developpers</h2>
-                        <div class="xlead">
-                            <p>You can download the code by doing:</p>
+                        <div>
+                            <p>You can download the code by doing (as admin for symlinks):</p>
                             <code>git clone --recurse-submodules -c core.symlinks=true --remote-submodules https://github.com/Regnareb/Houdini.git</code>
                         </div>
-
-
                     </div>
                 </div>
             </div>
@@ -86,9 +81,8 @@
                 <div class="row">
                     <div class="col-lg-6 h-100 text-center text-lg-start my-auto">
                         <ul class="list-inline mb-2">
-                            <li class="list-inline-item align-items-center"><a href="https://regnareb.com/pro"><i class="bi-book fs-3"></i> <span class="xalign-baseline">Blog</span></a></li>
-                            <li class="list-inline-item">⋅</li>
-                            <li class="list-inline-item"><a href="https://regnareb.com/"><i class="bi-envelope fs-3"></i> Contact</a></li>
+                            <li class="list-inline-item align-items-center"><a href="https://regnareb.com/pro" class="text-decoration-none"><i class="bi-book align-middle fs-3 me-1"></i> Blog</a></li>
+                            <li class="list-inline-item"><a href="https://regnareb.com/" class="text-decoration-none"><i class="bi-envelope align-middle fs-3 me-1"></i> Contact</a></li>
                         </ul>
                     </div>
                     <div class="col-lg-6 h-100 text-center text-lg-end my-auto">

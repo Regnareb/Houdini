@@ -11084,6 +11084,7 @@ footer.footer {
   padding:20px;
   content: attr(data-tooltip);
   width: 450px;
+  max-width: 99vw;
   background-color: #3d8a11;
   font-size: 1rem;
   border-radius: 0.25em;
@@ -11116,4 +11117,11 @@ footer.footer {
 }
 .tooltips:hover::before {
   top: 80px;
+}
+
+@media (max-width: 575.98px) {
+  .tooltips::before {
+    width: 99vw;
+    left: calc(var(--bs-gutter-x) * -0.5);
+  }
 }

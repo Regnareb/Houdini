@@ -1,5 +1,5 @@
 
-document.getElementById('copy').setAttribute('href','#');
+document.getElementById('copy').removeAttribute('href');
 // get_changelogs();
 
 

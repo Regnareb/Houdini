@@ -54,14 +54,14 @@ def get_node_parent_categories(node_type):
 
 def toggle_update_mode(mode=None):
     """Use a global variable to be able to set the setting back to the users one instead of choosing arbitrarily between Auto Update or On Mouse Up"""
+    global UPDATEMODE
     if not mode:
         mode = hou.updateModeSetting()
     if mode == hou.updateMode.Manual:
-        hou.setUpdateMode(hou.updateMode.Manual)
-        global UPDATEMODE
-        UPDATEMODE = mode
-    else:
         hou.setUpdateMode(UPDATEMODE)
+    else:
+        UPDATEMODE = mode
+        hou.setUpdateMode(hou.updateMode.Manual)
 
 
 def parse_strings(filepath, params):

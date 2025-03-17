@@ -13,12 +13,15 @@ class ScrubTimelineState(object):
         args = kwargs['command_args']
         if name == 'enter_scrubtimeline':
             self.previous_viewer_state = args['viewer_state']
+            cursor = hou.qt.getCursor("arrowLeftRight")
+            QtWidgets.QApplication.setOverrideCursor(cursor)
 
     def onExit(self, kwargs):
         if hou.getPreference('custom.regnareb.scrub_timeline_keep_pressed'):
             self.scene_viewer.clearPromptMessage()
             scene_viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
             scene_viewer.setCurrentState(self.previous_viewer_state)
+        QtWidgets.QApplication.restoreOverrideCursor()
 
     def _scrub_abs(self, x):
         # Take the absolute position of the mouse pointer (as a percentage

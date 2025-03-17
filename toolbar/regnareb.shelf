@@ -5,21 +5,21 @@
  Note, that two definitions of the same element are not allowed in
  a single file. -->
 
-  <tool name="br_ui_show_preferences" label="Preferences" icon="PLASMA_App">
+  <tool name="br_ui_show_preferences" label="Preferences" icon="MISC_generic">
     <script scriptType="python"><![CDATA[
 import common.preferences
 common.preferences.show_prefs()
     ]]></script>
   </tool>
 
-  <tool name="br_ui_update_tools" label="Update" icon="PLASMA_App">
+  <tool name="br_ui_update_tools" label="Update" icon="TOP_downloadfile">
     <script scriptType="python"><![CDATA[
 import tools.installer
 tools.installer.Installer().install(update=True)
     ]]></script>
   </tool>
 
-  <tool name="br_ui_viewports_colour" label="Change Viewports Colour" icon="PLASMA_App">
+  <tool name="br_ui_viewports_colour" label="Change Viewports Colour" icon="VIEW_layout_4">
     <toolMenuContext name="viewer">
       <contextNetType>OBJ</contextNetType>
       <contextNetType>SOP</contextNetType>
@@ -35,7 +35,7 @@ common.sceneviewer.switch_viewports_colorscheme()
     ]]></script>
   </tool>
 
-  <tool name="br_ui_viewport_colour" label="Change Current Viewport Colour" icon="PLASMA_App">
+  <tool name="br_ui_viewport_colour" label="Change Current Viewport Colour" icon="BUTTONS_aovs">
     <toolMenuContext name="viewer">
       <contextOpType>*</contextOpType>
       <contextNetType>OBJ</contextNetType>
@@ -52,7 +52,7 @@ common.sceneviewer.switch_viewports_colorscheme(current_viewport=True)
 ]]></script>
   </tool>
 
-  <tool name="br_scrub_timeline" label="Scrub Timeline" icon="PLASMA_App">
+  <tool name="br_scrub_timeline" label="Scrub Timeline" icon="COP2_timefilter">
     <toolMenuContext name="viewer">
       <contextNetType>OBJ</contextNetType>
       <contextNetType>SOP</contextNetType>
@@ -72,7 +72,7 @@ if current_state != 'br_scrub_timeline':
 ]]></script>
   </tool>
 
-  <tool name="br_create_node_preview" label="Add Preview" icon="PLASMA_App">
+  <tool name="br_create_node_preview" label="Add Preview" icon="VIEW_visualization_slice">
     <script scriptType="python"><![CDATA[
 import common.networkeditor
 common.networkeditor.toggle_node_preview()
@@ -109,12 +109,12 @@ common.networkeditor.connect_selected_nodes()
 
   <tool name="br_toggle_update_mode" label="Toggle Update Mode" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[
-import common.networkeditor
+import common.hou_utils
 common.hou_utils.toggle_update_mode()
 ]]></script>
   </tool>
 
-  <tool name="br_change_particles_display" label="Cycle Particles Display" icon="PLASMA_App">
+  <tool name="br_change_particles_display" label="Cycle Particles Display" icon="TOOLS_select_groups_point">
     <toolMenuContext name="viewer">
       <contextNetType>OBJ</contextNetType>
       <contextNetType>SOP</contextNetType>

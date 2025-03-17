@@ -1,4 +1,9 @@
 {
+    "env": [
+        {
+            "REGNAREB": "%TOOLSPATH%"
+        }
+    ],
     "hpath": "$REGNAREB",
     "load_package_once": true,
     "version": "18.5",

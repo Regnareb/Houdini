@@ -1,5 +1,8 @@
 import hou
-
+try:
+    from PySide6 import QtWidgets
+except:
+    from PySide2 import QtWidgets
 
 class ScrubTimelineState(object):
     def __init__(self, scene_viewer, state_name):

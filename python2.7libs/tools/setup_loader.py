@@ -15,7 +15,10 @@ This tool can be used in any software just by inheriting SetupLoader() and imple
 import os
 import functools
 import logging
-from PySide2 import QtCore, QtGui, QtWidgets
+try:
+    from PySide6 import QtCore, QtGui, QtWidgets
+except:
+    from PySide2 import QtCore, QtGui, QtWidgets
 import lib.pythonlib.common
 logger = logging.getLogger(__name__)
 

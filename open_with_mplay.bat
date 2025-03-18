@@ -1,2 +1,3 @@
-@ECHO OFF
-"python" %~dp0/open_with_mplay.py %1 
+start /min "OpenMPLAY" "python" %~dp0open_with_mplay.py %1 
+
+if NOT ["%errorlevel%"]==["0"] pause 

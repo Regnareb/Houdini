@@ -1,7 +1,7 @@
 import hou
 try:
     from PySide6 import QtWidgets
-except:
+except ImportError:
     from PySide2 import QtWidgets
 
 class ScrubTimelineState(object):

@@ -17,7 +17,7 @@ import functools
 import logging
 try:
     from PySide6 import QtCore, QtGui, QtWidgets
-except:
+except ImportError:
     from PySide2 import QtCore, QtGui, QtWidgets
 import lib.pythonlib.common
 logger = logging.getLogger(__name__)

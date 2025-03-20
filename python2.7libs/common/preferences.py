@@ -3,7 +3,7 @@ import functools
 import collections
 try:
     from PySide6 import QtCore, QtWidgets
-except:
+except ImportError:
     from PySide2 import QtCore, QtWidgets
 import hou
 import lib.pythonlib.qt as qt

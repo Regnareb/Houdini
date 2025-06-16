@@ -65,7 +65,7 @@ function get_install_script(url) {
     styleElem.innerHTML = ".glow-on-hover:after {background-color: rgba(0, 128, 0, 0.85) !important;} .bi-clipboard::before {content: \"\\f272\" !important;}";
     if (in_houdini()) {
         // download file and execute it in python
-        window.Python.runStatements('import os;import urllib.request;import tempfile;url = "' + url + '";filename = os.path.basename(url);tmp_path = os.path.join(tempfile.gettempdir(), filename);urllib.request.urlretrieve(url, tmp_path);exec(open(tmp_path).read());print(__name__);');
+        window.Python.runStatements('import os;import urllib.request;import tempfile;url = "' + url + '";filename = os.path.basename(url);tmp_path = os.path.join(tempfile.gettempdir(), filename);urllib.request.urlretrieve(url, tmp_path);exec(open(tmp_path).read())');
     }
     else {
         // copy to clipboard

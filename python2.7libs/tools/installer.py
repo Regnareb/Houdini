@@ -93,5 +93,5 @@ class Installer():
         delete_dir(self.tmp_unzipped)
 
 
-if __name__ == 'hou.session':
+if __name__ in ['__main__', 'hou.session']:
     Installer().install()

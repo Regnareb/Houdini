@@ -10993,19 +10993,54 @@ img {
   .features-icons .features-icons-item {
     margin-left: 4rem;
   }
+
+  .andmore .showcase-text {
+    min-height: 500px;
+    padding: 3rem;
+  }
+
+  #changelogs > div {
+    margin-top: 1rem;
+  }
+
+  #changelogs > div:not(:nth-child(-n+3)) {
+    display:none
+  }
 }
 
+.nav {
+  display: block;
+}
 
+.nav-link {
+  width:100%;
+  display: inline-block;
+  text-align: left;
+  border: none;
+  background: none;
+  border-radius: 4px ;
+}
+
+.nav-link.active {
+  background-color: #f7f7f7;
+}
+
+#v-pills-tab span {
+  float: right
+}
 
 small .text-white {
   color: #bcbfc0;
   text-decoration: none;
 }
+ 
+.font-weight-bold {
+  font-weight: bold;
+}
 
 .glow-on-hover:hover {
   color: #d4d6e0;
 }
-
 
 .glow-on-hover {
   position: relative;

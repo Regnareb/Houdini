@@ -48,7 +48,10 @@ common.sceneviewer.switch_viewports_colorscheme()
     </toolMenuContext>
     <script scriptType="python"><![CDATA[
 import common.sceneviewer
-common.sceneviewer.switch_viewports_colorscheme(current_viewport=True)
+try:
+  common.sceneviewer.switch_viewports_colorscheme(current_viewport=True)
+except AttributeError:
+  hou.ui.displayMessage('This tool can only be called through the keyboard shortcut when the mouse is over a viewport.')
 ]]></script>
   </tool>
 

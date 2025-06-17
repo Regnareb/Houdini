@@ -148,7 +148,8 @@ def event_update_background_image(node, event_type, **kwargs):
                     i.setPath(path)
                     break
             editor.setBackgroundImages(images)
-            nodegraphutils.saveBackgroundImages(editor.pwd(), images)
+            if images:
+                nodegraphutils.saveBackgroundImages(editor.pwd(), images)
 
 
 def event_visibility_background_image(node, event_type):

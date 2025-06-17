@@ -6,7 +6,7 @@ try:
 except ImportError:
     from PySide2 import QtCore, QtWidgets
 import hou
-import lib.pythonlib.qt as qt
+import lib.houqt as qt
 import common.sceneviewer
 logger = logging.getLogger(__name__)
 
@@ -25,12 +25,15 @@ class FirstLaunch(QtWidgets.QDialog):
     def __init__(self):
         """Create all elements of UI and display it as a modal window"""
         super(FirstLaunch, self).__init__(hou.ui.mainQtWindow())
-        self.setWindowTitle('First Launch Initialisation')
-        self.row_layout = QtWidgets.QVBoxLayout()
-        self.setLayout(self.row_layout)
-
         if self.is_there_new_prefs() in [0, -1]:
             return
+
+        self.row_layout = QtWidgets.QVBoxLayout()
+        self.setLayout(self.row_layout)
+        if max(hou.getPreference('custom.regnareb.firstlaunch'), hou.getPreference('custom.regnareb.installedversion')) != VERSION:  # TODO: Delete "custom.regnareb.firstlaunch" in 2026
+            self.setWindowTitle('New Preferences')
+        else:
+            self.setWindowTitle('First Launch Initialisation')
 
         self.interface = collections.defaultdict(qt.RowLayout)
         if self.is_there_new_prefs(1):
@@ -42,25 +45,23 @@ class FirstLaunch(QtWidgets.QDialog):
             self.interface['tools.createincontext.val'].addCheckbox('Create Tools In Context', True)
             self.interface['tools.sopviewmode.val'].addCheckbox('Show Displayed Node instead of Selected node', True)
             self.interface['compact_mode'].addCheckbox('Set UI to Compact Mode', True)
-            self.interface['general.ui.scale'].addCheckbox(state=True)
-            self.interface['general.ui.scale'].addLabel('General UI Scale')
-            self.interface['general.ui.scale'].addField(0.95, validator='float', minimum=0.75, maximum=3, decimals=2)
-            self.interface['general.ui.scale'].addSlider(0.95, mode='float', minimum=0.75, maximum=3)
-            self.interface['general.ui.scale'].connectFieldSlider()
+            # self.interface['general.ui.scale'].addCheckbox(state=True)
+            # self.interface['general.ui.scale'].addLabel('General UI Scale')
+            # self.interface['general.ui.scale'].addField(0.95, validator='float', minimum=0.75, maximum=3, decimals=2)
+            # self.interface['general.ui.scale'].addSlider(0.95, mode='float', minimum=0.75, maximum=3)
+            # self.interface['general.ui.scale'].connectFieldSlider()
             self.interface['general.desk.val'].addCheckbox('Startup In Desktop', True)
             self.interface['general.desk.val'].addCombobox([i.name() for i in hou.ui.desktops()])
             self.interface['general.desk.val'].combobox.setCurrentIndex(self.interface['general.desk.val'].combobox.findText('Compact'))
             self.interface['general.desk.val'].checkbox.toggled.connect(self.interface['general.desk.val'].connectCheckboxState)
-            for i in ['networkeditor.shownodeshapes', 'networkeditor.showsimpleshape', 'networkeditor.doautomovenodes', 'networkeditor.showanimations', 'networkeditor.maxflyoutscale', 'tools.sopviewmode.val', 'tools.createincontext.val', 'compact_mode', 'general.desk.val']:  # , 'general.ui.scale'
-                self.row_layout.addLayout(self.interface[i])
+        [self.row_layout.addLayout(self.interface[i]) for i in self.interface if i != 'general.ui.scale']
 
         self.shortcuts = collections.defaultdict(qt.RowLayout)
         self.shortcuts_groupbox = QtWidgets.QGroupBox('Set Shortcuts')
-        self.shortcuts_groupbox.setCheckable(True)
-        self.shortcuts_vbox = QtWidgets.QVBoxLayout()
-        self.shortcuts_groupbox.setLayout(self.shortcuts_vbox)
+        self.shortcuts_groupbox.setCheckable(False)
+        shortcuts = {}
         if self.is_there_new_prefs(1):
-            shortcuts = {
+            shortcuts.update({
                 'copy_parm': {'label': 'Copy Parameter', 'default_shortcut': 'Ctrl+Shift+C', 'command': 'h.pane.parms.copy_parm'},
                 'paste_refs': {'label': 'Paste Parameter Reference', 'default_shortcut': 'Ctrl+Shift+V', 'command': 'h.pane.parms.paste_refs'},  # Remove existing shortcut
                 'paste_object_merge': {'label': 'Paste Object Merge', 'default_shortcut': 'Alt+V', 'command': 'h.pane.wsheet.tool:br_paste_object_merge', 'description': 'Create an Object Merge linked to the node in clipboard', 'remove_command': 'h.paste'},
@@ -74,8 +75,12 @@ class FirstLaunch(QtWidgets.QDialog):
                 'change_particles_display': {'label': 'Change Particles Display', 'default_shortcut': 'Shift+D', 'command': 'h.pane.gview.tool:br_change_particles_display', 'description': 'Cycle between particle types of display'},
                 'toggle_update_mode': {'label': 'Toggle Cooking Mode', 'default_shortcut': 'F10', 'command': 'h.tool:br_toggle_update_mode', 'description': 'Cycle between manual and cooking mode'},
                 'reset_viewport': {'label': 'Reset Viewport', 'default_shortcut': 'F12', 'command': 'h.reset_viewport', 'description': 'Reset and reload the viewport'},
-                'create_node_preview': {'label': 'Create Node Preview', 'default_shortcut': 'M', 'command': 'h.pane.wsheet.tool:br_create_node_preview', 'description': 'Create preview for selected nodes'},
-                }
+                'create_node_preview': {'label': 'Create Node Preview', 'default_shortcut': 'M', 'command': 'h.pane.wsheet.tool:br_create_node_preview', 'description': 'Create preview for selected nodes'}
+                })
+        if shortcuts:
+            self.shortcuts_groupbox.setCheckable(True)
+            self.shortcuts_vbox = QtWidgets.QVBoxLayout()
+            self.shortcuts_groupbox.setLayout(self.shortcuts_vbox)
             for shortcut, values in shortcuts.items():
                 self.shortcuts[shortcut].addLabel(values['label'])
                 self.shortcuts[shortcut].addSpacer()
@@ -83,7 +88,7 @@ class FirstLaunch(QtWidgets.QDialog):
                 self.shortcuts[shortcut].addWidget(self.shortcuts[shortcut].shortcut )
                 self.shortcuts[shortcut].data = values
                 self.shortcuts_vbox.addLayout(self.shortcuts[shortcut])
-        self.row_layout.addWidget(self.shortcuts_groupbox)
+            self.row_layout.addWidget(self.shortcuts_groupbox)
 
         spacer = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.row_layout.addItem(spacer)
@@ -103,7 +108,7 @@ class FirstLaunch(QtWidgets.QDialog):
         In that case lots of the settings can't be set, that's why we delay the display of the UI"""
         if hou.getPreference('networkeditor.shownodeshapes') == '':
             return -1
-        elif int(hou.getPreference('custom.regnareb.firstlaunch') or 0) < version:
+        elif int(max(hou.getPreference('custom.regnareb.firstlaunch'), hou.getPreference('custom.regnareb.installedversion')) or 0) < version:
             return 1
         else:
             return 0
@@ -119,9 +124,9 @@ class FirstLaunch(QtWidgets.QDialog):
                 hou.setPreference('general.ui.icon_size', 'Compact')  # DOESNT WORK
                 hou.setPreference('general.uiplaybar.menu', '1')  # Set the playbar to compact mode
 
-            if self.interface['general.ui.scale'].checkbox.checkState():
-                hou.setPreference('ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
-                hou.setPreference('general.ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
+            # if self.interface['general.ui.scale'].checkbox.checkState():
+            #     hou.setPreference('ui.scale', str(self.interface['general.ui.scale'].field.text()))  # DOESNT WORK
+            #     hou.setPreference('general.ui.scale', str(self.interface['general.ui.scale'].field.text()))  # DOESNT WORK
 
             # Custom Tools Default Preferences
             set_preference('custom.regnareb.scrub_timeline_mode', 'Relative')
@@ -136,7 +141,7 @@ class FirstLaunch(QtWidgets.QDialog):
 
         self.save_shortcuts()
         # Set this custom preference so that the window is only displayed once or when new settings are implemented
-        set_preference('custom.regnareb.firstlaunch', str(VERSION))
+        set_preference('custom.regnareb.installedversion', str(VERSION))
         self.close()
 
     def save_shortcuts(self):
@@ -192,6 +197,7 @@ class Preferences(QtWidgets.QDialog):
         self.onnewscene['on_open_change_desktop'].addCheckbox('Apply Default Desktop')
         self.onnewscene['on_open_go_manual'].addCheckbox('Set cooking to Manual')
         self.onnewscene['on_open_sopviewmode'].addCheckbox('Set view to "Show Display Operator"')
+        self.onnewscene['on_open_sopviewmode'].setEnabledChildren(False)
         self.onnewscene['on_open_hide_other_objects'].addCheckbox('Set view to "Hide other objects"')
         self.onnewscene['on_open_hide_other_objects'].setEnabledChildren(False)
         # self.onnewscene['on_open_disable_nodes_shapes'].addCheckbox('Disable nodes shapes', True)
@@ -275,8 +281,8 @@ class Preferences(QtWidgets.QDialog):
             values.checkbox.setCheckState(value)
         index = self.viewport['scrub_timeline_mode'].combobox.findText(hou.getPreference('custom.regnareb.scrub_timeline_mode') or 'Relative')
         self.viewport['scrub_timeline_mode'].combobox.setCurrentIndex(index)
-        self.network['nodepreview_resolution'].setValues([int(hou.getPreference('custom.regnareb.preview_resolutionX')), int(hou.getPreference('custom.regnareb.preview_resolutionY'))])
-        self.network['nodepreview_widthratio'].setValues([int(hou.getPreference('custom.regnareb.preview_widthratio'))])
+        self.network['nodepreview_resolution'].setFields([hou.getPreference('custom.regnareb.preview_resolutionX'), hou.getPreference('custom.regnareb.preview_resolutionY')])
+        self.network['nodepreview_widthratio'].setFields([hou.getPreference('custom.regnareb.preview_widthratio')])
         self.load_prefs_viewportcolors()
 
     def load_prefs_viewportcolors(self, scheme=None):

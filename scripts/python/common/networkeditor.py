@@ -114,7 +114,7 @@ def modify_linked_networkimage(node):
             yield i
             break
     editor.setBackgroundImages(images)
-    nodegraphutils.saveBackgroundImages(editor.pwd(), images)
+    nodegraphutils.saveBackgroundImages(editor.pwd(), images, editor=editor)
 
 
 def take_screenshot(filepath, frame=None, viewername='', resolution=[640, 640]):
@@ -134,27 +134,40 @@ def take_screenshot(filepath, frame=None, viewername='', resolution=[640, 640]):
     hou.hscript("viewwrite -r {3} {4} -R beauty -f {0} {0} {1} '{2}'".format(frame, viewername, filepath, resolution[0], resolution[1]))
     refplane.setIsVisible(current)
 
-def add_background_image(editor, image_path, rect=None, node=None, relative=True, widthratio=1):
+def add_background_image(editor, image_path, rect=None, node=None, relative=True, width_ratio=1, stick_to_side='bottom', offset=hou.Vector2(0, 0)):
     image = hou.NetworkImage()
     image.setPath(image_path)
     rez = hou.imageResolution(image_path)
     ratio = 1.0 * rez[1] / rez[0]
-
     if node:
-        rect = hou.BoundingRect(0, -node.size()[1], widthratio, -widthratio*ratio-node.size()[1]*1.2)
         if relative:
             image.setRelativeToPath(node.path())
-        node.addEventCallback((hou.nodeEventType.InputDataChanged, hou.nodeEventType.InputRewired, hou.nodeEventType.ParmTupleChanged), event_update_background_image)
-        node.addEventCallback((hou.nodeEventType.BeingDeleted,), event_remove_background_image)
-        node.addEventCallback((hou.nodeEventType.FlagChanged,), event_visibility_background_image)
+        if stick_to_side and not rect:
+            if stick_to_side=='bottom':
+                rect = hou.BoundingRect(0, -node.size()[1], width_ratio, -node.size()[1] - ratio * width_ratio)
+            if stick_to_side=='left':
+                rect = hou.BoundingRect(0, 0, -node.size()[1] / ratio, -node.size()[1] * 1.08)
+            if stick_to_side=='top':
+                rect = hou.BoundingRect(0, 0, width_ratio, width_ratio * ratio)
+            if stick_to_side=='right':
+                rect = hou.BoundingRect(1, 0, 1 + node.size()[1] / ratio * width_ratio, -node.size()[1] * width_ratio * 1.08)
+            rect.translate(offset)
     if not rect:
-        rect = hou.BoundingRect(0, -2, widthratio*2, -widthratio*ratio)
+        rect = editor.visibleBounds()
+
     image.setRect(rect)
     images = editor.backgroundImages() + (image,)
     editor.setBackgroundImages(images)
-    nodegraphutils.saveBackgroundImages(editor.pwd(), images)
-
+    nodegraphutils.saveBackgroundImages(editor.pwd(), images, editor=editor)
     return image
+
+
+def remove_background_image(node):
+    """Remove all linked images"""
+    editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
+    images = tuple(i for i in editor.backgroundImages() if i.relativeToPath() != node.path())
+    editor.setBackgroundImages(images)
+    nodegraphutils.saveBackgroundImages(editor.pwd(), images, editor=editor)
 
 
 def connect_selected_nodes():

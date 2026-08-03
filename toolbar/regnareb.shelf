@@ -77,8 +77,8 @@ if current_state != 'br_scrub_timeline':
 
   <tool name="br_create_node_preview" label="Add Preview" icon="VIEW_visualization_slice">
     <script scriptType="python"><![CDATA[
-import common.networkeditor
-common.networkeditor.toggle_node_preview()
+import tools.node_preview
+tools.node_preview.toggle_node_preview()
 ]]></script>
   </tool>
 

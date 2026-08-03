@@ -105,19 +105,6 @@ def toggle_dependancy_links(mode=None):
         editor.setPref('showdep', mode)
 
 
-def remove_background_image(node):
-    """Remove Callbacks of the node and all linked images"""
-    try:
-        node.removeEventCallback((hou.nodeEventType.BeingDeleted,), event_remove_background_image)
-        node.removeEventCallback((hou.nodeEventType.FlagChanged,), event_visibility_background_image)
-    except hou.OperationFailed:
-        pass
-    editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
-    images = tuple(i for i in editor.backgroundImages() if i.relativeToPath() != node.path())
-    editor.setBackgroundImages(images)
-    nodegraphutils.saveBackgroundImages(editor.pwd(), images)
-
-
 @contextlib.contextmanager
 def modify_linked_networkimage(node):
     editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
@@ -128,41 +115,6 @@ def modify_linked_networkimage(node):
             break
     editor.setBackgroundImages(images)
     nodegraphutils.saveBackgroundImages(editor.pwd(), images)
-
-
-def event_update_background_image(node, event_type, **kwargs):
-    """Update all linked images of the node
-    Only update the image when the node is activated"""
-    if not node.isBypassed():
-        with restore_display_flag():  #TODO replace as a decorator when python2 is far away
-            editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
-            images = editor.backgroundImages()
-            for i in images:
-                if i.relativeToPath() == node.path():
-                    path = i.path()
-                    i.setPath('')
-                    node.setDisplayFlag(True)
-                    take_screenshot(path)
-                    editor.setBackgroundImages(images)
-                    nodegraphutils.saveBackgroundImages(editor.pwd(), images)
-                    i.setPath(path)
-                    break
-            editor.setBackgroundImages(images)
-            if images:
-                nodegraphutils.saveBackgroundImages(editor.pwd(), images)
-
-
-def event_visibility_background_image(node, event_type):
-    if event_type == hou.nodeEventType.FlagChanged:  # This is needed because it get also called with event InputDataChanged
-        try:
-            with modify_linked_networkimage(node) as i:
-                i.setBrightness(int(not node.isBypassed()))
-        except RuntimeError:
-            pass  # When duplicating a node with alt+click, its name is 'original0_of_' and modify_linked_networkimage() raise an exception
-
-
-def event_remove_background_image(node, event_type):
-    remove_background_image(node)
 
 
 def take_screenshot(filepath, frame=None, viewername='', resolution=[640, 640]):
@@ -181,32 +133,6 @@ def take_screenshot(filepath, frame=None, viewername='', resolution=[640, 640]):
     lib.pythonlib.iopath.create_dir(os.path.dirname(filepath))
     hou.hscript("viewwrite -r {3} {4} -R beauty -f {0} {0} {1} '{2}'".format(frame, viewername, filepath, resolution[0], resolution[1]))
     refplane.setIsVisible(current)
-
-
-def toggle_node_preview(image_path=None):
-    """Create a screenshot for all selected nodes."""
-    with restore_display_flag():  #TODO replace as a decorator when python2 is far away
-        if not image_path:
-            image_path = os.path.join(hou.text.expandString('$HIP'), 'screenshots', '%NODE%.png')
-        image_path = lib.pythonlib.iopath.normpath(image_path)
-        editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
-
-        selection = hou.selectedNodes()
-        for node in selection:
-            node.setDisplayFlag(True)
-            filepath = image_path.replace('%NODE%', node.name())
-            image_exists = [i for i in editor.backgroundImages() if lib.pythonlib.iopath.normpath(i.path())==filepath]
-            if image_exists:
-                remove_background_image(node)
-            else:
-                resolutionX = int(hou.getPreference('custom.regnareb.preview_resolutionX'))
-                resolutionY = int(hou.getPreference('custom.regnareb.preview_resolutionY'))
-                resolution = [resolutionX, resolutionY]
-                widthratio = int(hou.getPreference('custom.regnareb.preview_widthratio'))
-
-                take_screenshot(filepath, resolution=resolution)
-                add_background_image(editor, filepath, node=node, relative=True, widthratio=widthratio)
-
 
 def add_background_image(editor, image_path, rect=None, node=None, relative=True, widthratio=1):
     image = hou.NetworkImage()

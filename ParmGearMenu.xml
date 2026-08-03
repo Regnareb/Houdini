@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<menuDocument>
+    <menu>
+        <scriptItem id="detach_parameter_window">
+            <label>Detach Parameter Window</label>
+            <scriptCode><![CDATA[
+node = kwargs['node']
+window = hou.ui.curDesktop().createFloatingPaneTab(hou.paneTabType.Parm)
+window.setCurrentNode(node)
+window.setPin(True)
+]]>
+			</scriptCode>
+        </scriptItem>
+    </menu>
+</menuDocument>

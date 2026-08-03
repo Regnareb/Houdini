@@ -1,4 +1,5 @@
-﻿<menuDocument>
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<menuDocument>
 	<menu>
 	
 		<scriptItem id="br_open_parm_path">

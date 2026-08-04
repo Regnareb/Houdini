@@ -109,7 +109,7 @@ class FirstLaunch(QtWidgets.QDialog):
         In that case lots of the settings can't be set, that's why we delay the display of the UI"""
         if hou.getPreference('networkeditor.shownodeshapes') == '':
             return -1
-        elif (int(hou.getPreference('custom.regnareb.installedversion')) or 0) < version:
+        elif (int(hou.getPreference('custom.regnareb.installedversion') or 0)) < version:
             return 1
         else:
             return 0

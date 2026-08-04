@@ -22,21 +22,20 @@ def set_preference(name, value):
 
 
 class FirstLaunch(QtWidgets.QDialog):
-    def __init__(self):
+    def __init__(self, forceui=False):
         """Create all elements of UI and display it as a modal window"""
         super(FirstLaunch, self).__init__(hou.ui.mainQtWindow())
-        if self.is_there_new_prefs() in [0, -1]:
+        self.forceui = forceui
+        if self.forceui:
+            self.setWindowTitle('Re set Preferences?')
+        elif self.is_there_new_prefs() in [0, -1]:
             return
-
+        else:
+            self.setWindowTitle('New Preferences')
         self.row_layout = QtWidgets.QVBoxLayout()
         self.setLayout(self.row_layout)
-        if max(hou.getPreference('custom.regnareb.firstlaunch'), hou.getPreference('custom.regnareb.installedversion')) != VERSION:  # TODO: Delete "custom.regnareb.firstlaunch" in 2026
-            self.setWindowTitle('New Preferences')
-        else:
-            self.setWindowTitle('First Launch Initialisation')
-
         self.interface = collections.defaultdict(qt.RowLayout)
-        if self.is_there_new_prefs(1):
+        if self.forceui or self.is_there_new_prefs(1):
             self.interface['networkeditor.shownodeshapes'].addCheckbox('Disable Nodes Shapes', True)
             self.interface['networkeditor.showsimpleshape'].addCheckbox('Use Simple Node Shapes', True)
             self.interface['networkeditor.doautomovenodes'].addCheckbox('Disable Auto Move Nodes', True)
@@ -54,13 +53,15 @@ class FirstLaunch(QtWidgets.QDialog):
             self.interface['general.desk.val'].addCombobox([i.name() for i in hou.ui.desktops()])
             self.interface['general.desk.val'].combobox.setCurrentIndex(self.interface['general.desk.val'].combobox.findText('Compact'))
             self.interface['general.desk.val'].checkbox.toggled.connect(self.interface['general.desk.val'].connectCheckboxState)
-        [self.row_layout.addLayout(self.interface[i]) for i in self.interface if i != 'general.ui.scale']
+        # if self.is_there_new_prefs(2):
+        #     self.interface['check_for_updates'].addCheckbox('Check for updates', False)
+        [self.row_layout.addLayout(self.interface[i]) for i in self.interface]
 
         self.shortcuts = collections.defaultdict(qt.RowLayout)
         self.shortcuts_groupbox = QtWidgets.QGroupBox('Set Shortcuts')
         self.shortcuts_groupbox.setCheckable(False)
         shortcuts = {}
-        if self.is_there_new_prefs(1):
+        if self.forceui or self.is_there_new_prefs(1):
             shortcuts.update({
                 'copy_parm': {'label': 'Copy Parameter', 'default_shortcut': 'Ctrl+Shift+C', 'command': 'h.pane.parms.copy_parm'},
                 'paste_refs': {'label': 'Paste Parameter Reference', 'default_shortcut': 'Ctrl+Shift+V', 'command': 'h.pane.parms.paste_refs'},  # Remove existing shortcut
@@ -108,13 +109,13 @@ class FirstLaunch(QtWidgets.QDialog):
         In that case lots of the settings can't be set, that's why we delay the display of the UI"""
         if hou.getPreference('networkeditor.shownodeshapes') == '':
             return -1
-        elif int(max(hou.getPreference('custom.regnareb.firstlaunch'), hou.getPreference('custom.regnareb.installedversion')) or 0) < version:
+        elif (int(hou.getPreference('custom.regnareb.installedversion')) or 0) < version:
             return 1
         else:
             return 0
 
     def save_prefs(self):
-        if self.is_there_new_prefs(1):
+        if self.forceui or self.is_there_new_prefs(1):
             settings = {'networkeditor.shownodeshapes': '0', 'networkeditor.showsimpleshape': '1', 'networkeditor.doautomovenodes': '0', 'networkeditor.showanimations': '0', 'networkeditor.maxflyoutscale': '5', 'tools.createincontext.val': '1', 'tools.sopviewmode.val': '0', 'general.desk.val': self.interface['general.desk.val'].combobox.currentText()}
             for setting, val in settings.items():
                 if self.interface[setting].checkbox.checkState():
@@ -357,6 +358,6 @@ def show_prefs():
         return ui
 
 
-def show_firstlaunch():
-    ui = FirstLaunch()
+def show_firstlaunch(forceui=False):
+    ui = FirstLaunch(forceui)
     return ui

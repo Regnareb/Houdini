@@ -82,6 +82,13 @@ tools.node_preview.toggle_node_preview()
 ]]></script>
   </tool>
 
+  <tool name="br_paste_object_merge" label="Paste Object Merge" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[
+import common.networkeditor
+common.networkeditor.paste_objectmerge()
+]]></script>
+  </tool>
+
   <tool name="br_cycle_display_flag" label="Cycle Display Flag" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[
 import common.networkeditor
@@ -130,7 +137,6 @@ common.hou_utils.toggle_update_mode()
     <script scriptType="python"><![CDATA[
 import common.networkeditor
 common.sceneviewer.change_particles_display()
-
 ]]></script>
   </tool>
 

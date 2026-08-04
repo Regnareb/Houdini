@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <menuDocument>
     <menu>
-        <scriptItem id="detach_parameter_window">
-            <label>Detach Parameter Window</label>
+        <scriptItem id="tear_off_parameter_window">
+            <label>Tear off Parameter Window Copy</label>
             <scriptCode><![CDATA[
 node = kwargs['node']
 window = hou.ui.curDesktop().createFloatingPaneTab(hou.paneTabType.Parm)

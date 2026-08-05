@@ -1,3 +1,4 @@
+import os
 import logging
 import contextlib
 import hou
@@ -114,3 +115,18 @@ def netclipboard(copy):
         save_nodes_to_file(path)
     else:
         load_nodes_from_file(path)
+
+
+def load_hda_library(folder_path):
+    """Load all the HDA files from a folder
+
+    You can put your HDAs in the same folder as your hip and add this code to the "Python Source Window"
+    loadHdaLibrary(hou.getenv('HIP')+'/hda')
+    """
+    try:
+        loaded_hdas = [iopath.normpath(f) for f in hou.hda.loadedFiles()]
+        hdas = [iopath.pathjoin(folder_path, f) for f in os.listdir(folder_path) if os.path.splitext(f)[-1] in ['.otl', '.hda']]
+        hdas = [f for f in hdas if f not in loaded_hdas]
+        hou.hda.installFiles(hdas)
+    except FileNotFoundError:
+        pass

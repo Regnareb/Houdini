@@ -17,7 +17,7 @@
         <!-- Navigation-->
         <nav class="navbar navbar-light bg-light static-top">
             <div class="container">
-                <a class="navbar-brand" href="">Better Houdini Tools</a>
+                <a class="navbar-brand" href="index.html">Better Houdini Tools</a>
                 <a class="btn link-dark btn-outline-light" href="how-to-install.html">How to Install</a>
             </div>
         </nav>
@@ -89,7 +89,7 @@
                         </video>
                     </div>
                     <div class="col-lg-6 order-lg-1 my-auto showcase-text">
-                        <h2 class="d-inline-block">Propagate display flag to children</h2>
+                        <h2 class="d-inline">Propagate display flag to children</h2>
                         <p class="lead mb-0">Each time you connect a node to one with a display flag, the flag is transferred to the new one</p>
                     </div>
                 </div>
@@ -97,10 +97,10 @@
                     <div class="col-lg-6 text-white showcase-img">
                         <video playsinline="" autoplay="" muted="" loop="">
                             <source src="assets\videos\paste_object_merge.mp4" type="video/mp4">
-                        </video>                        
+                        </video>
                     </div>
                     <div class="col-lg-6 my-auto showcase-text">
-                        <h2 class="d-inline-block">Create object merge from clipboard</h2> <span class="mx-3 mb-5 text-black-50 fw-lighter fs-5">Alt+V</span>
+                        <h2 class="d-inline">Create object merge from clipboard</h2> <span class="mx-3 mb-5 text-black-50 fw-lighter fs-5">Alt+V</span>
                         <p class="lead mb-0">Create an Object merge with references to all copied nodes</p>
                     </div>
                 </div>
@@ -108,10 +108,10 @@
                     <div class="col-lg-6 order-lg-2 text-white showcase-img">
                         <video playsinline="" autoplay="" muted="" loop="">
                             <source src="assets\videos\create_nulls.mp4" type="video/mp4">
-                        </video>                                                
+                        </video>
                     </div>
                     <div class="col-lg-6 order-lg-1 my-auto showcase-text">
-                        <h2 class="d-inline-block">Easily Create Nulls</h2> <span class="mx-3 mb-5 text-black-50 fw-lighter fs-5">Alt+Click</span>
+                        <h2 class="d-inline">Easily Create Nulls</h2> <span class="mx-3 mb-5 text-black-50 fw-lighter fs-5">Alt+Click</span>
                         <p class="lead mb-0">Automatically create Nulls with correct names for all selected nodes</p>
                     </div>
                 </div>
@@ -119,10 +119,10 @@
                     <div class="col-lg-6 text-white showcase-img">
                         <video playsinline="" autoplay="" muted="" loop="">
                             <source src="assets\videos\connect_all_nodes.mp4" type="video/mp4">
-                        </video>                        
+                        </video>
                     </div>
                     <div class="col-lg-6 my-auto showcase-text">
-                        <h2 class="d-inline-block">Connect nodes by height position</h2> <span class="mx-3 mb-5 text-black-50 fw-lighter fs-5">Shift+Y</span>
+                        <h2 class="d-inline">Connect nodes by height position</h2> <span class="mx-3 mb-5 text-black-50 fw-lighter fs-5">Shift+Y</span>
                         <p class="lead mb-0">All selected nodes will be connected in the order of their height</p>
                     </div>
                 </div>
@@ -130,10 +130,10 @@
                     <div class="col-lg-6 order-lg-2 text-white showcase-img">
                         <video playsinline="" autoplay="" muted="" loop="">
                             <source src="assets\videos\cycle_display.mp4" type="video/mp4">
-                        </video>                        
+                        </video>
                     </div>
                     <div class="col-lg-6 order-lg-1 my-auto showcase-text">
-                        <h2 class="d-inline-block">Improved Cycle Display</h2> <span class="mx-3 mb-5 text-black-50 fw-lighter fs-5">R</span>
+                        <h2 class="d-inline">Improved Cycle Display</h2> <span class="mx-3 mb-5 text-black-50 fw-lighter fs-5">R</span>
                         <p class="lead mb-0">Cycle display flag between all selected nodes. Continue working even after deselecting them</p>
                     </div>
                 </div>
@@ -141,22 +141,59 @@
                     <div class="col-lg-6 text-white showcase-img">
                         <video playsinline="" autoplay="" muted="" loop="">
                             <source src="assets\videos\node_preview.mp4" type="video/mp4">
-                        </video>                        
+                        </video>
                     </div>
                     <div class="col-lg-6 my-auto showcase-text">
-                        <h2 class="d-inline-block">Create Node Previews</h2> <span class="mx-3 mb-5 text-black-50 fw-lighter fs-5">M</span>
+                        <h2 class="d-inline">Create Node Previews</h2> <span class="mx-3 mb-5 text-black-50 fw-lighter fs-5">M</span>
                         <p class="lead mb-0">Put a preview of the node like TouchDesigner. <br><em>Very slow and experimental</em>
                     </div>
                 </div>
+            </div>
+        </section> 
+        <!-- Shortcuts-->
+        <section class="showcase andmore">
+            <div class="container-fluid p-0">
                 <div class="row g-0">
-                    <div class="col-lg-6 order-lg-2 text-white showcase-img">
-                        <video playsinline="" autoplay="" muted="" loop="">
-                            <source src="assets\videos\change_viewport_color.mp4" type="video/mp4">
-                        </video>                        
+                    <div class="col-lg-6 showcase-text nav" id="v-pills-tab">
+                        <h3>And more</h3>
+                        <ul class="list-unstyled">
+                            <li><button class="nav-link link-dark active" id="viewport_colors-tab" data-bs-toggle="pill" data-bs-target="#viewport_colors" type="button">Change Viewport Color <span class="mx-3 text-black-50 fw-lighter fs-6">Shift+B / Ctrl+Shift+B</span></button></li>
+                            <li><button class="nav-link link-dark" id="paste_parameter-tab" data-bs-toggle="pill" data-bs-target="#paste_parameter" type="button">Paste parameters <span class="mx-3 text-black-50 fw-lighter fs-6">Ctrl+Shift+C / Ctrl+Shift+V</span></button></li>
+                            <li><button class="nav-link link-dark" id="scrub_timeline-tab" data-bs-toggle="pill" data-bs-target="#scrub_timeline" type="button">Scrub Timeline <span class="mx-3 text-black-50 fw-lighter fs-6">K</span></button></li>
+                            <li><button class="nav-link link-dark" id="particles-tab" data-bs-toggle="pill" data-bs-target="#particles" type="button">Change particle types of display <span class="mx-3 text-black-50 fw-lighter fs-6">Shift+D</span></button></li>
+                            <li><button class="nav-link link-dark" id="dependency-tab" data-bs-toggle="pill" data-bs-target="#dependency" type="button">Show dependency links <span class="mx-3 text-black-50 fw-lighter fs-6">Ctrl+D</span></button></li>
+                            <li><button class="nav-link link-dark" id="display_output-tab" data-bs-toggle="pill" data-bs-target="#display_output" type="button">Display Next Output <span class="mx-3 text-black-50 fw-lighter fs-6">Alt+X</span></button></li>
+                            <li><button class="nav-link link-dark" id="mplay-tab" data-bs-toggle="pill" data-bs-target="#mplay" type="button">Open image sequences in Mplay from Explorer</button></li>
+                            <!-- <li><button class="nav-link link-dark" id="networknode-tab" data-bs-toggle="pill" data-bs-target="#networknode" type="button">Network Clipboard - Send nodes to another user on the same network</button></li> -->
+                        </ul>
                     </div>
-                    <div class="col-lg-6 order-lg-1 my-auto showcase-text">
-                        <h2>Change Viewport Color</h2>
-                        <p class="lead mb-0">Add a shortcut to switch the background color of viewports</p>
+                    <div class="col-lg-6 text-white showcase-img nav tab-content" id="v-pills-tabContent">
+                        <div class="video tab-pane fade show active" id="viewport_colors">
+                            <video playsinline="" autoplay="" muted="" loop=""><source src="assets\videos\change_viewport_color.mp4" type="video/mp4"></video>  
+                        </div>
+                        <div class="tab-pane fade" id="paste_parameter">
+                            <video playsinline="" autoplay="" muted="" loop=""><source src="assets\videos\copy_paste_params.mp4" type="video/mp4"></video>  
+                        </div>
+                        <div class="tab-pane fade" id="scrub_timeline">
+                            <video playsinline="" autoplay="" muted="" loop=""><source src="assets\videos\scrub_timeline.mp4" type="video/mp4"></video>
+                        </div>
+                        <div class="tab-pane fade" id="particles">
+                            <video playsinline="" autoplay="" muted="" loop=""><source src="assets\videos\change_particle_types.mp4" type="video/mp4"></video>
+                        </div>
+                        <div class="tab-pane fade" id="dependency">
+                            <video playsinline="" autoplay="" muted="" loop=""><source src="assets\videos\show_dependancy_links.mp4" type="video/mp4"></video>
+                        </div>
+                        <div class="tab-pane fade" id="display_output">
+                            <video playsinline="" autoplay="" muted="" loop=""><source src="assets\videos\display_next_output.mp4" type="video/mp4"></video>
+                        </div>
+                        <div class="tab-pane fade showcase-text" id="mplay">
+                            <p>You can open any image sequence directly in Mplay by double clicking an image in the file explorer.<br>To activate it:</p>
+                            <ul>
+                                <li>Right click on an image file > Open With</li>
+                                <li>Find the open_with_mplay.bat in the tools folder</li>
+                            </ul>
+                            <p>Make sure python is in your environment variables. If not add the absolute path to a python.exe in the open_with_mplay.bat file.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -170,7 +207,7 @@
                         <div class="mx-auto mb-5 mb-lg-0">
                             <h5>v0.3.2</h5>
                             <ul class="font-weight-light mb-0">
-                                <li>Fix the update mode shortcut</li>
+                                <li>Fix the "Update mode" shortcut</li>
                                 <li>Add cursor to Scrub Timeline tool</li>
                                 <li>Add icons to shelf</li>
                                 <li>Add PySide6 compatibility</li>

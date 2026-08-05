@@ -12,6 +12,13 @@ common.preferences.show_prefs()
     ]]></script>
   </tool>
 
+  <tool name="br_ui_show_first_launch" label="First Launch UI" icon="MISC_generic">
+    <script scriptType="python"><![CDATA[
+import common.preferences as prefs
+prefs.show_firstlaunch(forceui=True)
+    ]]></script>
+  </tool>
+
   <tool name="br_ui_update_tools" label="Update" icon="TOP_downloadfile">
     <script scriptType="python"><![CDATA[
 import tools.installer
@@ -142,6 +149,7 @@ common.sceneviewer.change_particles_display()
 
   <toolshelf name="Regnareb" label="Regnareb">
     <memberTool name="br_ui_show_preferences"/>
+    <memberTool name="br_ui_show_first_launch"/>
     <memberTool name="br_ui_update_tools"/>
     <memberTool name="br_ui_viewports_colour"/>
     <memberTool name="br_ui_viewport_colour"/>

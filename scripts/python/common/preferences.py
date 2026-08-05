@@ -170,15 +170,15 @@ class FirstLaunch(QtWidgets.QDialog):
 
     def set_tooltips(self):
         tooltips = {
-            'networkeditor.shownodeshapes': 'Use rectangular node shapes only in the network editor.\nThis may speed up the display of extremely complex networks.',
+            'networkeditor.shownodeshapes': 'Use only rectangular node shapes in the network editor.\nThis may speed up the display of extremely complex networks.',
             'networkeditor.showsimpleshape': 'You can turn off display of custom node shapes in the network editor\nThis may speed up the display of extremely complex networks.',
             'networkeditor.doautomovenodes': "Won't auto move nodes when connecting a node in between other nodes that are too close",
             'networkeditor.showanimations': 'Disable animations with certain changes and transitions in the network editor (for example, moving nodes out the way when a new node is placed).',
-            'networkeditor.maxflyoutscale': 'Change the node ring apparition to the lowest setting.',
-            'tools.createincontext.val': 'Geometry will be created within the current context (eg. another piece of geometry in the same object).',
+            'networkeditor.maxflyoutscale': 'Set the node ring around nodes apparition to the lowest setting.',
+            'tools.createincontext.val': 'Shelf tools will be created within the current context\nInstead of at the obj level.',
             'tools.sopviewmode.val': 'The node displayed in the viewport will be the one with the display flag enabled instead of the selected node.',
             'compact_mode': 'Change the playbar and UI icon size to compact.',
-            'general.ui.scale': 'Change the UI scale globally.',
+            # 'general.ui.scale': 'Change the UI scale globally.',
             'general.desk.val': 'Always force this Desktop when launching Houdini or opening a new scene.',
         }
         for key, tooltip in tooltips.items():

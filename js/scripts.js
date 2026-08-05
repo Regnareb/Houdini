@@ -3,16 +3,12 @@ document.getElementById('copy').removeAttribute('href');
 // get_changelogs();
 
 
-if (!in_houdini()) {
-    window.addEventListener('load', videoScroll);
-    window.addEventListener('scroll', videoScroll);
-}
-
-
 window.onload = function() {
     if (!qt || !qt.webChannelTransport) {
         // The web channel transport does not exist so we must not
         // be running in the embedded browser.
+        window.addEventListener('load', videoScroll);
+        window.addEventListener('scroll', videoScroll);
         return;
     }
     new QWebChannel(qt.webChannelTransport, function(channel) {

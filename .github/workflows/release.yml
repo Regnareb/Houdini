@@ -1,0 +1,50 @@
+name: Build Release Archive
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version to publish. Leave blank to use the Git tag.'
+        required: true
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Find previous release tag
+        id: previous-tag
+        run: |
+          release_tag="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' && github.event.inputs.version || github.ref_name }}"
+          previous_tag=$(git tag --sort=-v:refname | grep -xv "$release_tag" | head -n1 || true)
+          echo "previous_tag=$previous_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Create release archive
+        run: |
+          mkdir -p dist
+          repo_name="$(basename "$GITHUB_WORKSPACE")"
+          zip -r "dist/${repo_name}.zip" . \
+            -x '.git/*' '.github/*' 'dist/*' '**/.git*'
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' && github.event.inputs.version || github.ref_name }}
+          name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' && format('Release {0}', github.event.inputs.version) || format('Release {0}', github.ref_name) }}
+          previous_tag: ${{ steps.previous-tag.outputs.previous_tag }}
+          files: dist/*.zip
+          draft: false
+          prerelease: false
+          generate_release_notes: true

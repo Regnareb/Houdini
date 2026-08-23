@@ -71,8 +71,8 @@ class FirstLaunch(QtWidgets.QDialog):
                 'toggle_dependancy_links': {'label': 'Toggle dependancy Links', 'default_shortcut': 'Ctrl+D', 'command': 'h.pane.wsheet.tool:br_toggle_dependancy_links', 'description': 'Disable/enable dependancy links'},
                 'connect_selected_nodes': {'label': 'Connect Selected Nodes', 'default_shortcut': 'Shift+Y', 'command': 'h.pane.wsheet.tool:br_connect_selected_nodes', 'description': 'Connect all selected node in order of height'},
                 'scrub_timeline': {'label': 'Scrub Timeline', 'default_shortcut': 'K', 'command': 'h.pane.gview.tool:br_scrub_timeline', 'description': 'Move the current frame while clicking in the viewport'},
-                'switch_viewport_background': {'label': 'Switch Viewports Background', 'default_shortcut': 'Ctrl+Shift+B', 'command': 'h.pane.gview.tool:br_ui_viewports_colour', 'description': 'Change colors scheme of all viewports'},
-                'switch_viewports_background': {'label': 'Switch Current Viewport Background', 'default_shortcut': 'Shift+B', 'command': 'h.pane.gview.tool:br_ui_viewport_colour', 'description': 'Change colors scheme of the current viewport'},
+                'switch_viewport_background': {'label': 'Switch All Viewports Background', 'default_shortcut': 'Alt+B', 'command': 'h.pane.gview.tool:br_ui_viewports_colour', 'description': 'Change colors scheme of all viewports', 'remove_command': 'h.pane.edit_bookmark'},
+                'switch_viewports_background': {'label': 'Switch Current Viewport Background', 'default_shortcut': 'Ctrl+Alt+B', 'command': 'h.pane.gview.tool:br_ui_viewport_colour', 'description': 'Change colors scheme of the current viewport'},
                 'change_particles_display': {'label': 'Change Particles Display', 'default_shortcut': 'Shift+D', 'command': 'h.pane.gview.tool:br_change_particles_display', 'description': 'Cycle between particle types of display'},
                 'toggle_update_mode': {'label': 'Toggle Cooking Mode', 'default_shortcut': 'F10', 'command': 'h.tool:br_toggle_update_mode', 'description': 'Cycle between manual and cooking mode'},
                 'reset_viewport': {'label': 'Reset Viewport', 'default_shortcut': 'F12', 'command': 'h.reset_viewport', 'description': 'Reset and reload the viewport'},
@@ -122,12 +122,12 @@ class FirstLaunch(QtWidgets.QDialog):
                     hou.setPreference(setting, val)
 
             if self.interface['compact_mode'].checkbox.checkState():
-                hou.setPreference('general.ui.icon_size', 'Compact')  # DOESNT WORK
+                # hou.setPreference('general.ui.icon_size', 'Compact')  # DOESNT WORK
                 hou.setPreference('general.uiplaybar.menu', '1')  # Set the playbar to compact mode
 
             # if self.interface['general.ui.scale'].checkbox.checkState():
-            #     hou.setPreference('ui.scale', str(self.interface['general.ui.scale'].field.text()))  # DOESNT WORK
-            #     hou.setPreference('general.ui.scale', str(self.interface['general.ui.scale'].field.text()))  # DOESNT WORK
+            #     hou.setPreference('ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
+            #     hou.setPreference('general.ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
 
             # Custom Tools Default Preferences
             set_preference('custom.regnareb.scrub_timeline_mode', 'Relative')
@@ -150,7 +150,7 @@ class FirstLaunch(QtWidgets.QDialog):
             return
         for interface in self.shortcuts.values():
             if interface.data['command']:
-                if not interface.shortcut.displayText():
+                if not interface.shortcut.displayText():  # If the user specified no shortcut do nothing
                     continue
                 if interface.data.get('remove_command') and interface.shortcut.displayText().lower()==interface.data['default_shortcut'].lower():
                     hou.hotkeys.removeAssignment(interface.data['remove_command'], interface.shortcut.displayText())
@@ -159,16 +159,18 @@ class FirstLaunch(QtWidgets.QDialog):
                 hou.hotkeys.addAssignment(interface.data['command'], interface.shortcut.displayText())
         if not hou.hotkeys.saveOverrides():
             logger.error("Couldn't save hotkey override file.")
-        pass
 
     def check_shortcut(self):
+        # TODO
         # for each shortcut :
         # - check if it exists and is in the same scope as the current tool
         # - unassign it if it already exists
         # - assign the new shortcut
+        # Grey out shortcut that have nothing
         pass
 
     def set_tooltips(self):
+        self.shortcuts_groupbox.setToolTip('Set shortcut to "Escape" to not set a shortcut.')
         tooltips = {
             'networkeditor.shownodeshapes': 'Use only rectangular node shapes in the network editor.\nThis may speed up the display of extremely complex networks.',
             'networkeditor.showsimpleshape': 'You can turn off display of custom node shapes in the network editor\nThis may speed up the display of extremely complex networks.',

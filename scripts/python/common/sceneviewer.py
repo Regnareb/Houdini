@@ -16,6 +16,8 @@ COLORSCHEMES = {
     hou.viewportColorScheme.Dark: "config/3DSceneColors.dark",
     hou.viewportColorScheme.Grey: "config/3DSceneColors.bw"
     }
+if common.hou_utils.get_houdini_version() >= 22:
+    COLORSCHEMES[hou.viewportColorScheme.DarkGrey] = "config/3DSceneColors.dg"
 colorschemes_enum = pythonlib.Enum(COLORSCHEMES.keys())
 
 DISPLAYPARTICLES = [hou.viewportParticleDisplay.Points, hou.viewportParticleDisplay.Pixels, hou.viewportParticleDisplay.Lines, hou.viewportParticleDisplay.Discs]

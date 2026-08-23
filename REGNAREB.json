@@ -6,6 +6,6 @@
     ],
     "hpath": "$REGNAREB",
     "load_package_once": true,
-    "version": "18.5",
+    "version": "20",
     "enable": true
 }

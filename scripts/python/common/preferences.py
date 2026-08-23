@@ -223,7 +223,8 @@ class Preferences(QtWidgets.QDialog):
         self.viewport['scrub_timeline_mode'].addCombobox(['Relative', 'Absolute'])  # 'Scrub Timeline tool relative mode'
         self.viewport['viewport_colors'].addLabel('Viewport Colors')
         # self.viewport['viewport_colors'].addSpacer()
-        scheme = self.viewport['viewport_colors'].addCombobox(['Light', 'Dark', 'Grey'])
+        viewports = ['Light', 'Dark', 'Grey', 'DarkGrey'] if common.hou_utils.get_houdini_version() >= 22 else ['Light', 'Dark', 'Grey']
+        scheme = self.viewport['viewport_colors'].addCombobox(viewports)
         topcolor = self.viewport['viewport_colors'].addButton('Top')
         bottomcolor = self.viewport['viewport_colors'].addButton('Bot')
         scheme.currentIndexChanged.connect(self.get_scheme)

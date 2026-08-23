@@ -2,6 +2,7 @@ import os
 import logging
 import contextlib
 import hou
+import lib.pythonlib.common as common
 import lib.pythonlib.iopath as iopath
 
 logger = logging.getLogger(__name__)
@@ -115,6 +116,11 @@ def netclipboard(copy):
         save_nodes_to_file(path)
     else:
         load_nodes_from_file(path)
+
+
+def get_houdini_version():
+    v = common.rreplace(hou.applicationVersionString(), '.', '', 1)
+    return float(v)
 
 
 def load_hda_library(folder_path):

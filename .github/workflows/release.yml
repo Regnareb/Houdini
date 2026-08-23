@@ -35,7 +35,7 @@ jobs:
         run: |
           mkdir -p dist
           repo_name="$(basename "$GITHUB_WORKSPACE")"
-          zip -r "dist/${repo_name}.zip" . \
+          zip -r "dist/Houdini-tools.zip" . \
             -x '.git/*' '.github/*' 'dist/*' '**/.git*'
 
       - name: Create GitHub Release

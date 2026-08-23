@@ -22,11 +22,11 @@ prefs.show_firstlaunch(forceui=True)
   <tool name="br_ui_update_tools" label="Update" icon="TOP_downloadfile">
     <script scriptType="python"><![CDATA[
 import tools.installer
-tools.installer.Installer().install(update=True)
+tools.installer.PackageInstaller().install(update=True)
     ]]></script>
   </tool>
 
-  <tool name="br_ui_viewports_colour" label="Change Viewports Colour" icon="VIEW_layout_4">
+  <tool name="br_ui_viewports_colour" label="Change All Viewports Colour" icon="VIEW_layout_4">
     <toolMenuContext name="viewer">
       <contextNetType>OBJ</contextNetType>
       <contextNetType>SOP</contextNetType>

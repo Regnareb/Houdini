@@ -1,3 +1,5 @@
+"""Some IO functions are duplicated so that we can use this module outside of the environment"""
+
 import os
 import errno
 import shutil
@@ -44,18 +46,16 @@ def normpath(path):
 
 
 
-
-class Installer():
+class PackageInstaller():
 
     def __init__(self):
-        self.tmp_folder = tempfile.gettempdir()
-        self.tmp_zip = os.path.join(self.tmp_folder, 'regnareb-tools.zip')
-        self.tmp_unzipped = os.path.join(self.tmp_folder, 'regnareb-tools')
-        self.packages_folder = os.path.join(hou.homeHoudiniDirectory(), 'packages')
-        self.package_json = os.path.join(self.packages_folder, 'REGNAREB.json')
-        self.response = requests.get("https://api.github.com/repos/regnareb/Houdini/releases/latest")
-        self.version = self.response.json()['name']
+        response = requests.get('https://api.github.com/repos/regnareb/Houdini/releases/latest')
+        self.version = response.json()['name']
+        self.download_url = response.json()['assets'][0]['browser_download_url']
+        self.changelog = response.json()['body']
         self.tool_folder = os.path.join(hou.homeHoudiniDirectory(), 'REGNAREB-TOOLS', self.version)
+        self.package_json = 'REGNAREB.json'
+        self.replace_string = '%TOOLSPATH%'
 
     def install(self, update=False):
         newversion = self.is_there_newversion()
@@ -66,26 +66,31 @@ class Installer():
             if donothing:
                 return True
 
-        urllib.request.urlretrieve(self.response.json()['assets'][0]['browser_download_url'], self.tmp_zip)  # Does this always overwrite the current file?
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp_folder:
+            package_folder = os.path.join(hou.homeHoudiniDirectory(), 'packages')
+            tmp_zip = os.path.join(tmp_folder, 'download.zip')
+            tmp_unzipped = os.path.join(tmp_folder, 'download')
 
-        with zipfile.ZipFile(self.tmp_zip, 'r') as zip_ref:
-            zip_ref.extractall(self.tmp_unzipped)
+            urllib.request.urlretrieve(self.download_url, tmp_zip)
 
-        delete_dir(self.tool_folder)
-        shutil.move(os.path.join(self.tmp_unzipped, 'Houdini-tools'), self.tool_folder)
+            with zipfile.ZipFile(tmp_zip, 'r') as zip_ref:
+                zip_ref.extractall(tmp_unzipped)
+                folder = [i for i in os.scandir(tmp_unzipped) if i.is_dir()][0].path
 
-        create_dir(self.packages_folder)
-        shutil.move(os.path.join(self.tool_folder, 'REGNAREB.json'), self.package_json)
+            delete_dir(self.tool_folder)
+            shutil.move(folder, self.tool_folder)
 
-        path = pathlib.Path(self.package_json)
-        text = path.read_text()
-        text = text.replace('%TOOLSPATH%', normpath(self.tool_folder))
-        path.write_text(text)
+            create_dir(package_folder)
+            shutil.move(os.path.join(self.tool_folder, self.package_json), os.path.join(package_folder, self.package_json))
 
-        self.clean_temp()
+            if self.replace_string:
+                path = pathlib.Path(os.path.join(package_folder, self.package_json))
+                text = path.read_text()
+                text = text.replace(self.replace_string, normpath(self.tool_folder))
+                path.write_text(text)
 
         if update:
-            hou.ui.displayMessage(f'The tools have been updated to version "{self.version}"\n\nChangelog:', details_expanded=True, details=self.response.json()['body'])
+            hou.ui.displayMessage(f'The tools have been updated to version "{self.version}"\n\nChangelog:', details_expanded=True, details=self.changelog)
         else:
             hou.ui.displayMessage(f'The tools ({self.version}) have been installed in the folder "{self.tool_folder}"')
 
@@ -96,14 +101,30 @@ class Installer():
     def update_ui(self):
         newversion = self.is_there_newversion()
         if newversion:
-            update = hou.ui.displayMessage(f'There is a new version of the Regnareb tools. Do you want to update to version "{self.version}"\n\nChangelog:', details_expanded=True, details=self.response.json()['body'])
+            update = hou.ui.displayMessage(f'There is a new version of the Regnareb tools. Do you want to update to version "{self.version}"\n\nChangelog:', details_expanded=True, details=self.changelog)
         if update:
             self.install(update)
 
-    def clean_temp(self):
-        delete_file(self.tmp_zip)
-        delete_dir(self.tmp_unzipped)
+
+class QLibPackageInstaller(PackageInstaller):
+    def __init__(self):
+        self.version = 'qLib'
+        self.download_url = 'https://github.com/qLab/qLib/archive/refs/heads/dev.zip'
+        self.changelog = 'No Changelog Available - https://qlab.github.io/qLib/'
+        self.tool_folder = os.path.join(hou.homeHoudiniDirectory(), 'qLib-master')
+        self.package_json = 'qLib_package.json'
+        self.replace_string = ''
+
+
+class AELibPackageInstaller(PackageInstaller):
+    def __init__(self):
+        self.version = 'Aelib'
+        self.download_url = 'https://github.com/Aeoll/Aelib/archive/refs/heads/master.zip'
+        self.changelog = 'No Changelog Available - https://github.com/Aeoll/Aelib'
+        self.tool_folder = os.path.join(hou.homeHoudiniDirectory(), 'AeLib')
+        self.package_json = 'Aelib.json'
+        self.replace_string = 'PATH/TO/aelib'
 
 
 if __name__ in ['__main__', 'hou.session']:
-    Installer().install()
+    PackageInstaller().install()

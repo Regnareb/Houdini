@@ -11160,3 +11160,22 @@ footer.footer {
     left: calc(var(--bs-gutter-x) * -0.5);
   }
 }
+
+.navbar .patreon:before {
+  content: '';
+  display:  inline-block;
+  height: 2rem;
+  width: 2rem;
+  background: url('/assets/img/icon_patreon.svg');
+  vertical-align: -40%;
+}
+.navbar .patreon {
+  color: #929292;
+  text-decoration: none;
+}
+footer .patreon {
+  height: 2rem;
+  width: 2rem;
+  vertical-align: -20%;
+}
+

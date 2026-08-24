@@ -26,6 +26,20 @@ tools.installer.PackageInstaller().install(update=True)
     ]]></script>
   </tool>
 
+  <tool name="br_ui_install_qlib" label="Install qLib" icon="TOP_downloadfile">
+    <script scriptType="python"><![CDATA[
+import tools.installer
+tools.installer.QLibPackageInstaller().install()
+    ]]></script>
+  </tool>
+
+  <tool name="br_ui_install_aelib" label="Install aeLib" icon="TOP_downloadfile">
+    <script scriptType="python"><![CDATA[
+import tools.installer
+tools.installer.AELibPackageInstaller().install()
+    ]]></script>
+  </tool>
+
   <tool name="br_ui_viewports_colour" label="Change All Viewports Colour" icon="VIEW_layout_4">
     <toolMenuContext name="viewer">
       <contextNetType>OBJ</contextNetType>
@@ -151,6 +165,8 @@ common.sceneviewer.change_particles_display()
     <memberTool name="br_ui_show_preferences"/>
     <memberTool name="br_ui_show_first_launch"/>
     <memberTool name="br_ui_update_tools"/>
+    <memberTool name="br_ui_install_qlib"/>
+    <memberTool name="br_ui_install_aelib"/>
     <memberTool name="br_ui_viewports_colour"/>
     <memberTool name="br_ui_viewport_colour"/>
     <memberTool name="br_scrub_timeline"/>

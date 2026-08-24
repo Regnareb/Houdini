@@ -160,3 +160,11 @@ def save_node_stats(nodetype):
     data['_br_previous']['type'] = nodetype
     data['_br_previous']['timestamp'] = time.time()
     iopath.json_write(data, filepath)
+
+
+def is_qlib_installed():
+    return bool(hou.nodeType(hou.sopNodeTypeCategory(), 'qLib::box_ql::4'))
+
+
+def is_aelib_installed():
+    return bool(hou.nodeType(hou.sopNodeTypeCategory(), 'ae::Clip::1'))

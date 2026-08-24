@@ -6,13 +6,16 @@ try:
 except ImportError:
     from PySide2 import QtCore, QtWidgets
 import hou
+import hdefereval
 import lib.houqt as qt
+import common.hou_utils as hou_utils
 import common.sceneviewer
+import tools.installer
 logger = logging.getLogger(__name__)
 
 # TODO: Make the creation of first launch prefs and shortcuts procedural by loading a JSON file
 
-VERSION = 1
+VERSION = 2
 
 def set_preference(name, value):
     if not hou.getPreference(name):
@@ -35,6 +38,19 @@ class FirstLaunch(QtWidgets.QDialog):
         self.row_layout = QtWidgets.QVBoxLayout()
         self.setLayout(self.row_layout)
         self.interface = collections.defaultdict(qt.RowLayout)
+
+        if self.forceui or self.is_there_new_prefs(2):
+            qlib_installed = hou_utils.is_qlib_installed()
+            aelib_installed = hou_utils.is_aelib_installed()
+            qlib_label = 'Install qLib (already installed)' if qlib_installed else 'Install qLib'
+            aelib_label = 'Install aeLib (already installed)' if qlib_installed else 'Install aeLib'
+            self.interface['install_qlib'].addCheckbox(qlib_label, not qlib_installed)
+            self.interface['install_aelib'].addCheckbox(aelib_label, not aelib_installed)
+            self.interface['install_qlib'].setEnabledChildren(not qlib_installed)
+            self.interface['install_aelib'].setEnabledChildren(not aelib_installed)
+            self.interface['install_qlib'].checkbox.setStyleSheet('font-weight: bold');
+            self.interface['install_aelib'].checkbox.setStyleSheet('font-weight: bold');
+
         if self.forceui or self.is_there_new_prefs(1):
             self.interface['networkeditor.shownodeshapes'].addCheckbox('Disable Nodes Shapes', True)
             self.interface['networkeditor.showsimpleshape'].addCheckbox('Use Simple Node Shapes', True)
@@ -53,7 +69,8 @@ class FirstLaunch(QtWidgets.QDialog):
             self.interface['general.desk.val'].addCombobox([i.name() for i in hou.ui.desktops()])
             self.interface['general.desk.val'].combobox.setCurrentIndex(self.interface['general.desk.val'].combobox.findText('Compact'))
             self.interface['general.desk.val'].checkbox.toggled.connect(self.interface['general.desk.val'].connectCheckboxState)
-        # if self.is_there_new_prefs(2):
+
+        # if self.is_there_new_prefs(3):
         #     self.interface['check_for_updates'].addCheckbox('Check for updates', False)
         [self.row_layout.addLayout(self.interface[i]) for i in self.interface]
 
@@ -118,14 +135,14 @@ class FirstLaunch(QtWidgets.QDialog):
         if self.forceui or self.is_there_new_prefs(1):
             settings = {'networkeditor.shownodeshapes': '0', 'networkeditor.showsimpleshape': '1', 'networkeditor.doautomovenodes': '0', 'networkeditor.showanimations': '0', 'networkeditor.maxflyoutscale': '5', 'tools.createincontext.val': '1', 'tools.sopviewmode.val': '0', 'general.desk.val': self.interface['general.desk.val'].combobox.currentText()}
             for setting, val in settings.items():
-                if self.interface[setting].checkbox.checkState():
+                if self.interface[setting].checkbox.isChecked():
                     hou.setPreference(setting, val)
 
-            if self.interface['compact_mode'].checkbox.checkState():
+            if self.interface['compact_mode'].checkbox.isChecked():
                 # hou.setPreference('general.ui.icon_size', 'Compact')  # DOESNT WORK
                 hou.setPreference('general.uiplaybar.menu', '1')  # Set the playbar to compact mode
 
-            # if self.interface['general.ui.scale'].checkbox.checkState():
+            # if self.interface['general.ui.scale'].checkbox.isChecked():
             #     hou.setPreference('ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
             #     hou.setPreference('general.ui.scale', str(self.interface['general.ui.scale'].field.value()))  # DOESNT WORK
 
@@ -139,6 +156,12 @@ class FirstLaunch(QtWidgets.QDialog):
             set_preference('custom.regnareb.on_open_go_manual', '1')
             set_preference('custom.regnareb.on_open_sopviewmode', '1')
             set_preference('custom.regnareb.on_open_hide_other_objects', '1')
+
+        if self.forceui or self.is_there_new_prefs(2):
+            if self.interface['install_qlib'].checkbox.isChecked():
+                hdefereval.executeDeferred(tools.installer.QLibPackageInstaller().install)
+            if self.interface['install_aelib'].checkbox.isChecked():
+                hdefereval.executeDeferred(tools.installer.AELibPackageInstaller().install)
 
         self.save_shortcuts()
         # Set this custom preference so that the window is only displayed once or when new settings are implemented
@@ -182,6 +205,8 @@ class FirstLaunch(QtWidgets.QDialog):
             'compact_mode': 'Change the playbar and UI icon size to compact.',
             # 'general.ui.scale': 'Change the UI scale globally.',
             'general.desk.val': 'Always force this Desktop when launching Houdini or opening a new scene.',
+            'install_qlib': 'Install the package qlib.',
+            'install_aelib': 'Install the package aelib.',
         }
         for key, tooltip in tooltips.items():
             self.interface[key].setToolTip(tooltip)
@@ -301,7 +326,7 @@ class Preferences(QtWidgets.QDialog):
         all_checkboxes = self.get_allcheckoxes_ui()
         for name, values in all_checkboxes.items():
             name = 'custom.regnareb.{}'.format(name)
-            state = values.checkbox.checkState()
+            state = values.checkbox.isChecked()
             value = '1' if state==QtCore.Qt.Checked else '0'
             set_preference(name, value)
         set_preference('custom.regnareb.scrub_timeline_mode', self.viewport['scrub_timeline_mode'].combobox.currentText())

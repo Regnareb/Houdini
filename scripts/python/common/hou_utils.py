@@ -1,4 +1,5 @@
 import os
+import time
 import logging
 import contextlib
 import hou
@@ -136,3 +137,26 @@ def load_hda_library(folder_path):
         hou.hda.installFiles(hdas)
     except FileNotFoundError:
         pass
+
+
+def save_node_stats(nodetype):
+    """Increment the count creation of a node type in a .json. Also track the consecutive nodes creation by checking how long after the previous one it was created."""
+    filepath = os.path.join(hou.homeHoudiniDirectory(), 'br_nodestats.json')
+    try:
+        data = iopath.json_load(filepath)
+        data[nodetype]['count'] += 1
+    except FileNotFoundError:
+        data = {nodetype: {'count': 1, 'next': {}}, '_br_previous': {'type': '', 'timestamp': 0}}
+    except KeyError:
+        data[nodetype] = {'count': 1, 'next': {}}
+
+    if time.time() - data['_br_previous']['timestamp'] < 5:
+        try:
+            previous = data['_br_previous']['type']
+            data[previous]['next'][nodetype] += 1
+        except KeyError:
+            data[previous]['next'][nodetype] = 1
+
+    data['_br_previous']['type'] = nodetype
+    data['_br_previous']['timestamp'] = time.time()
+    iopath.json_write(data, filepath)

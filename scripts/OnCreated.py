@@ -1,5 +1,6 @@
 import hou
 import common.events
+import common.hou_utils
 
 
 node = kwargs['node']
@@ -28,3 +29,4 @@ elif kwargs['type'] in [sops.nodeType('rop_alembic')]:
 
 # Add callback to add a background image for animated nodes
 node.addEventCallback((hou.nodeEventType.ParmTupleAnimated, ), common.events.event_is_animated)
+common.hou_utils.save_node_stats(kwargs['type'].name())

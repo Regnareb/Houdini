@@ -11166,7 +11166,7 @@ footer.footer {
   display:  inline-block;
   height: 2rem;
   width: 2rem;
-  background: url('/assets/img/icon_patreon.svg');
+  background: url('../assets/img/icon_patreon.svg');
   vertical-align: -40%;
 }
 .navbar .patreon {

@@ -66,7 +66,7 @@ class FirstLaunch(QtWidgets.QDialog):
             # self.interface['general.ui.scale'].addSlider(0.95, mode='float', minimum=0.75, maximum=3)
             # self.interface['general.ui.scale'].connectFieldSlider()
             self.interface['general.desk.val'].addCheckbox('Startup In Desktop', True)
-            self.interface['general.desk.val'].addCombobox([i.name() for i in hou.ui.desktops()])
+            self.interface['general.desk.val'].addCombobox(hou.ui.desktopNames())
             self.interface['general.desk.val'].combobox.setCurrentIndex(self.interface['general.desk.val'].combobox.findText('Compact'))
             self.interface['general.desk.val'].checkbox.toggled.connect(self.interface['general.desk.val'].connectCheckboxState)
 

@@ -8,7 +8,13 @@ on:
       version:
         description: 'Release version to publish. Leave blank to use the Git tag.'
         required: true
+        default: 'v'
+      changelog:
+        description: 'Changelog text to add to the release description.'
+        required: false
         default: ''
+        type: string
+
 
 permissions:
   contents: write
@@ -31,20 +37,39 @@ jobs:
           previous_tag=$(git tag --sort=-v:refname | grep -xv "$release_tag" | head -n1 || true)
           echo "previous_tag=$previous_tag" >> "$GITHUB_OUTPUT"
 
+      - name: Prepare release changelog
+        id: changelog
+        shell: bash
+        run: |   
+          changelog="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.changelog || '' }}"
+          echo "changelog<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$changelog" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
       - name: Create release archive
         run: |
           mkdir -p dist
-          repo_name="$(basename "$GITHUB_WORKSPACE")"
-          zip -r "dist/Houdini-tools.zip" . \
-            -x '.git/*' '.github/*' 'dist/*' '**/.git*'
+          staging_dir="$(mktemp -d)"
+          trap 'rm -rf "$staging_dir"' EXIT
+
+          mkdir -p "$staging_dir/Houdini-tools"
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='dist' \
+            "$GITHUB_WORKSPACE/" "$staging_dir/Houdini-tools/"
+
+          cd "$staging_dir"
+          zip -r "$GITHUB_WORKSPACE/dist/Houdini-tools.zip" "Houdini-tools"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' && github.event.inputs.version || github.ref_name }}
-          name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' && format('Release {0}', github.event.inputs.version) || format('Release {0}', github.ref_name) }}
+          name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' && format('{0}', github.event.inputs.version) || format('{0}', github.ref_name) }}
           previous_tag: ${{ steps.previous-tag.outputs.previous_tag }}
+          body: ${{ steps.changelog.outputs.changelog }}
           files: dist/*.zip
-          draft: false
+          draft: true
           prerelease: false
           generate_release_notes: true

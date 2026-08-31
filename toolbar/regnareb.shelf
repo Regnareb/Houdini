@@ -5,35 +5,39 @@
  Note, that two definitions of the same element are not allowed in
  a single file. -->
 
-  <tool name="br_ui_show_preferences" label="Preferences" icon="MISC_generic">
+  <tool name="br_shelf_separator" label=" " icon="hicon:/SVGIcons.index?MISC_tree_vline.svg">
+    <script scriptType="python"><![CDATA[]]></script>
+  </tool>
+
+  <tool name="br_ui_show_preferences" label="Preferences" icon="hicon:/SVGIcons.index?SHELF_preflight.svg">
     <script scriptType="python"><![CDATA[
 import common.preferences
 common.preferences.show_prefs()
     ]]></script>
   </tool>
 
-  <tool name="br_ui_show_first_launch" label="First Launch UI" icon="MISC_generic">
+  <tool name="br_ui_show_first_launch" label="First Launch UI" icon="hicon:/SVGIcons.index?CHOP_band.svg">
     <script scriptType="python"><![CDATA[
 import common.preferences as prefs
 prefs.show_firstlaunch(forceui=True)
     ]]></script>
   </tool>
 
-  <tool name="br_ui_update_tools" label="Update" icon="TOP_downloadfile">
+  <tool name="br_ui_update_tools" label="Update" icon="hicon:/SVGIcons.index?BUTTONS_download.svg">
     <script scriptType="python"><![CDATA[
 import tools.installer
 tools.installer.PackageInstaller().install(update=True)
     ]]></script>
   </tool>
 
-  <tool name="br_ui_install_qlib" label="Install qLib" icon="TOP_downloadfile">
+  <tool name="br_ui_install_qlib" label="Install qLib" icon="$REGNAREB/images/qlib.svg">
     <script scriptType="python"><![CDATA[
 import tools.installer
 tools.installer.QLibPackageInstaller().install()
     ]]></script>
   </tool>
 
-  <tool name="br_ui_install_aelib" label="Install aeLib" icon="TOP_downloadfile">
+  <tool name="br_ui_install_aelib" label="Install aeLib" icon="$REGNAREB/images/aelib.svg">
     <script scriptType="python"><![CDATA[
 import tools.installer
 tools.installer.AELibPackageInstaller().install()
@@ -167,6 +171,7 @@ common.sceneviewer.change_particles_display()
     <memberTool name="br_ui_update_tools"/>
     <memberTool name="br_ui_install_qlib"/>
     <memberTool name="br_ui_install_aelib"/>
+    <memberTool name="br_shelf_separator"/>
     <memberTool name="br_ui_viewports_colour"/>
     <memberTool name="br_ui_viewport_colour"/>
     <memberTool name="br_scrub_timeline"/>

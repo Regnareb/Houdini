@@ -11,7 +11,6 @@ lights = [objs.nodeType(i) for i in ['hlight::2.0', 'ambient', 'indirectlight', 
 
 if kwargs['type'] in lights:
     # Light nodes will show the "enabled" status by changing the background color of the node
-    common.events.event_light_enabled(node)
     node.addEventCallback((hou.nodeEventType.ParmTupleChanged, ), common.events.event_light_enabled)
 elif kwargs['type'] in [sops.nodeType('color')]:
     # The background color of the Color node reflect the color selected

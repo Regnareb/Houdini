@@ -44,8 +44,8 @@ class FirstLaunch(QtWidgets.QDialog):
             aelib_installed = hou_utils.is_aelib_installed()
             qlib_label = 'Install qLib (already installed)' if qlib_installed else 'Install qLib'
             aelib_label = 'Install aeLib (already installed)' if qlib_installed else 'Install aeLib'
-            self.interface['install_qlib'].addCheckbox(qlib_label, not qlib_installed)
-            self.interface['install_aelib'].addCheckbox(aelib_label, not aelib_installed)
+            self.interface['install_qlib'].addCheckbox(qlib_label, False)
+            self.interface['install_aelib'].addCheckbox(aelib_label, False)
             self.interface['install_qlib'].setEnabledChildren(not qlib_installed)
             self.interface['install_aelib'].setEnabledChildren(not aelib_installed)
             self.interface['install_qlib'].checkbox.setStyleSheet('font-weight: bold');
@@ -369,8 +369,8 @@ class Preferences(QtWidgets.QDialog):
 
     def set_tooltips(self):
         self.onnewscene['on_open_go_manual'].setToolTip('When opening a scene, the cooking will be set to Manual to prevent the loading of a heavy scene.')
-        self.onnewscene['on_open_hide_other_objects'].setToolTip('[NOT IMPLEMENTED]\nWhen opening a scene the viewports will be set to "Hide other obects" to prevent the loading of all objects.')
-        self.onnewscene['on_open_sopviewmode'].setToolTip('Only show the displayed flag and not the selected nodes too.\nOtherwise it can lead to a lot of slowness and crashes because it cooks and change the viewport each time you select a node.')
+        self.onnewscene['on_open_hide_other_objects'].setToolTip('[NOT IMPLEMENTED IN HOUDINI]\nWhen opening a scene the viewports will be set to "Hide other obects" to prevent the loading of all objects.')
+        self.onnewscene['on_open_sopviewmode'].setToolTip('[NOT IMPLEMENTED IN HOUDINI]\nOnly show the displayed flag and not the selected nodes too.\nOtherwise it can lead to a lot of slowness and crashes because it cooks and change the viewport each time you select a node.')
         self.network['transfer_display_node'].setToolTip("When connecting a child node to a Displayed one, the connected node will inherit the Display flag unless the child is on the ignore list (in case it's a heavy node)")
         self.network['create_null_shift_click'].setToolTip('If you have a node selected in the network view and shift click on an empty area, it will create a NULL node connected to that selected node.')
         self.network['drag_and_drop_in_context'].setToolTip('If this is checked, drag and dropping a file in Houdini will always create the nodes in the current context. Otherwise it follows the Houdini preference.')

@@ -66,7 +66,7 @@ class FirstLaunch(QtWidgets.QDialog):
             # self.interface['general.ui.scale'].addSlider(0.95, mode='float', minimum=0.75, maximum=3)
             # self.interface['general.ui.scale'].connectFieldSlider()
             self.interface['general.desk.val'].addCheckbox('Startup In Desktop', True)
-            self.interface['general.desk.val'].addCombobox(hou.ui.desktopNames())
+            self.interface['general.desk.val'].addCombobox(hou.ui.desktopNames() if common.hou_utils.get_houdini_version() >= 22 else [i.name() for i in hou.ui.desktops()])  # Houdini 21 compatibility
             self.interface['general.desk.val'].combobox.setCurrentIndex(self.interface['general.desk.val'].combobox.findText('Compact'))
             self.interface['general.desk.val'].checkbox.toggled.connect(self.interface['general.desk.val'].connectCheckboxState)
 
@@ -327,7 +327,7 @@ class Preferences(QtWidgets.QDialog):
         for name, values in all_checkboxes.items():
             name = 'custom.regnareb.{}'.format(name)
             state = values.checkbox.isChecked()
-            value = '1' if state==QtCore.Qt.Checked else '0'
+            value = '1' if state else '0'
             set_preference(name, value)
         set_preference('custom.regnareb.scrub_timeline_mode', self.viewport['scrub_timeline_mode'].combobox.currentText())
         set_preference('custom.regnareb.preview_resolutionX', str(self.network['nodepreview_resolution'].fields[0].value()))

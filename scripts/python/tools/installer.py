@@ -52,7 +52,7 @@ class PackageInstaller():
         response = requests.get('https://api.github.com/repos/regnareb/Houdini/releases/latest')
         self.version = response.json()['name']
         self.download_url = response.json()['assets'][0]['browser_download_url']
-        self.changelog = response.json()['body']
+        self.changelog = requests.get('https://raw.githubusercontent.com/Regnareb/Houdini/refs/heads/main/CHANGELOG.md').text.replace('<sup><sub><sup><sub>', '')
         self.tool_folder = os.path.join(hou.homeHoudiniDirectory(), 'REGNAREB-TOOLS', self.version)
         self.package_json = 'REGNAREB.json'
         self.replace_string = '%TOOLSPATH%'
@@ -60,11 +60,11 @@ class PackageInstaller():
     def install(self, update=False):
         newversion = self.is_there_newversion()
         if update and not newversion:
-            return
+            return False
         if not newversion:
             donothing = hou.ui.displayCustomConfirmation('This version of the tool already exists.\nDelete the current one and replace it from Github?', buttons=('Replace', 'Do Nothing'), default_choice=1, close_choice=1)
             if donothing:
-                return True
+                return False
 
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp_folder:
             package_folder = os.path.join(hou.homeHoudiniDirectory(), 'packages')
@@ -93,9 +93,10 @@ class PackageInstaller():
             hou.ui.displayMessage(f'The tools have been updated to version "{self.version}"\n\nChangelog:', details_expanded=True, details=self.changelog)
         else:
             hou.ui.displayMessage(f'The tools ({self.version}) have been installed in the folder "{self.tool_folder}"')
+        return True
 
     def is_there_newversion(self):
-        """Check if the last version on Github is present on the local disk"""
+        """Check if the last version is present on the local disk"""
         return not os.path.isdir(self.tool_folder)
 
     def update_ui(self):

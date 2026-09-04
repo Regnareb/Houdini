@@ -119,10 +119,10 @@ class QLibPackageInstaller(PackageInstaller):
 
 class AELibPackageInstaller(PackageInstaller):
     def __init__(self):
-        self.version = 'Aelib'
+        self.version = 'aeLib'
         self.download_url = 'https://github.com/Aeoll/Aelib/archive/refs/heads/master.zip'
         self.changelog = 'No Changelog Available - https://github.com/Aeoll/Aelib'
-        self.tool_folder = os.path.join(hou.homeHoudiniDirectory(), 'AeLib')
+        self.tool_folder = os.path.join(hou.homeHoudiniDirectory(), 'aeLib')
         self.package_json = 'Aelib.json'
         self.replace_string = 'PATH/TO/aelib'
 

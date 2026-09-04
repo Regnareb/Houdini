@@ -26,6 +26,8 @@ elif kwargs['type'] in [sops.nodeType('rop_alembic')]:
     node.parm('filename').set(path)
 
 
-# Add callback to add a background image for animated nodes
+# Add callback to add a background image for nodes with key animation
 node.addEventCallback((hou.nodeEventType.ParmTupleAnimated, ), common.events.event_is_animated)
+
+# Increment the counter for that node for statistics
 common.hou_utils.save_node_stats(kwargs['type'].name())

@@ -13,7 +13,6 @@ import common.sceneviewer
 import tools.installer
 logger = logging.getLogger(__name__)
 
-# TODO: Make the creation of first launch prefs and shortcuts procedural by loading a JSON file
 
 VERSION = 2
 

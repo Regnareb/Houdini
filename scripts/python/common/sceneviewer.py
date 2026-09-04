@@ -8,7 +8,6 @@ import toolutils
 import common.hou_utils
 import lib.pythonlib.common as pythonlib
 import lib.pythonlib.iopath as iopath
-# TODO: Test which file has priority if there is one in $HOME and one in $REGNAREB import utils
 
 
 COLORSCHEMES = {

@@ -6,8 +6,6 @@ import common.hou_utils
 logger = logging.getLogger(__name__)
 
 
-# TODO: Pouvoir drop une image pour faire une refimage dans /obj/ ou une background image dans /obj/geo
-
 
 IMAGES = ['.als', '.bmp', '.cin', '.dds', '.dsm', '.exr', '.hdr', '.ies', '.jpeg', '.jpg', '.kdk', '.pic', '.pic.gz', '.pic.z', '.pix', '.png', '.psb', '.psd', '.ptex', '.ptx', '.qtl', '.rat', '.rgb', '.rgba', '.rla', '.rla16', '.rlb', '.rlb16', '.sgi', '.si', '.tbf', '.tga']
 DISPLACE_TYPES = {'_bump': 0, '_bmp': 0, '_normal': 1, '_displace':2, '_displacen':2, '_displacev':3}

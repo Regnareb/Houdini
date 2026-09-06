@@ -9,7 +9,7 @@ import lib.pythonlib.iopath as iopath
 logger = logging.getLogger(__name__)
 
 
-UPDATEMODE = hou.updateMode.AutoUpdate
+UPDATEMODE = None
 
 
 def create_node(parent, nodetype, name, params={}, position=None, filepath='', get_sequence=False):
@@ -56,13 +56,24 @@ def get_node_parent_categories(node_type):
 def toggle_update_mode(mode=None):
     """Use a global variable to be able to set the setting back to the users one instead of choosing arbitrarily between Auto Update or On Mouse Up"""
     global UPDATEMODE
-    if not mode:
-        mode = hou.updateModeSetting()
-    if mode == hou.updateMode.Manual:
-        hou.setUpdateMode(UPDATEMODE)
+    current = hou.updateModeSetting()
+    if current != hou.updateMode.Manual:
+        UPDATEMODE = current
+    if mode:
+        hou.setUpdateMode(mode)
+    elif current == hou.updateMode.Manual:
+        hou.setUpdateMode(UPDATEMODE or hou.updateMode.AutoUpdate)
     else:
-        UPDATEMODE = mode
         hou.setUpdateMode(hou.updateMode.Manual)
+
+
+def toggle_simulations(mode=None):
+    if mode != None:
+        hou.setSimulationEnabled(mode)
+    elif hou.simulationEnabled() == 0:
+        hou.setSimulationEnabled(True)
+    else:
+        hou.setSimulationEnabled(False)
 
 
 def parse_strings(filepath, params):

@@ -81,8 +81,3 @@ def has_linked_animated_badge(node):
         return i
     else:
         return None
-
-
-# import common.events
-# common.events.event_clear_all_animated()
-# common.events.event_add_all_animated()

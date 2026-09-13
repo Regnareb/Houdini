@@ -64,10 +64,10 @@ class FirstLaunch(QtWidgets.QDialog):
             # self.interface['general.ui.scale'].addField(0.95, validator='float', minimum=0.75, maximum=3, decimals=2)
             # self.interface['general.ui.scale'].addSlider(0.95, mode='float', minimum=0.75, maximum=3)
             # self.interface['general.ui.scale'].connectFieldSlider()
-            self.interface['general.desk.val'].addCheckbox('Startup In Desktop', True)
-            self.interface['general.desk.val'].addCombobox(hou.ui.desktopNames() if common.hou_utils.get_houdini_version() >= 22 else [i.name() for i in hou.ui.desktops()])  # Houdini 21 compatibility
-            self.interface['general.desk.val'].combobox.setCurrentIndex(self.interface['general.desk.val'].combobox.findText('Compact'))
-            self.interface['general.desk.val'].checkbox.toggled.connect(self.interface['general.desk.val'].connectCheckboxState)
+            self.interface['custom.regnareb.on_open_change_desktop'].addCheckbox('Start In Desktop', True)
+            self.interface['custom.regnareb.on_open_change_desktop'].addCombobox(hou.ui.desktopNames() if common.hou_utils.get_houdini_version() >= 22 else [i.name() for i in hou.ui.desktops()])  # Houdini 21 compatibility
+            self.interface['custom.regnareb.on_open_change_desktop'].combobox.setCurrentIndex(self.interface['custom.regnareb.on_open_change_desktop'].combobox.findText('Compact'))
+            self.interface['custom.regnareb.on_open_change_desktop'].checkbox.toggled.connect(self.interface['custom.regnareb.on_open_change_desktop'].connectCheckboxState)
 
         # if self.is_there_new_prefs(3):
         #     self.interface['check_for_updates'].addCheckbox('Check for updates', False)
@@ -132,10 +132,14 @@ class FirstLaunch(QtWidgets.QDialog):
 
     def save_prefs(self):
         if self.forceui or self.is_there_new_prefs(1):
-            settings = {'networkeditor.shownodeshapes': '0', 'networkeditor.showsimpleshape': '1', 'networkeditor.doautomovenodes': '0', 'networkeditor.showanimations': '0', 'networkeditor.maxflyoutscale': '5', 'tools.createincontext.val': '1', 'tools.sopviewmode.val': '0', 'general.desk.val': self.interface['general.desk.val'].combobox.currentText()}
+            settings = {'networkeditor.shownodeshapes': '0', 'networkeditor.showsimpleshape': '1', 'networkeditor.doautomovenodes': '0', 'networkeditor.showanimations': '0', 'networkeditor.maxflyoutscale': '5', 'tools.createincontext.val': '1', 'tools.sopviewmode.val': '0'}
             for setting, val in settings.items():
                 if self.interface[setting].checkbox.isChecked():
                     hou.setPreference(setting, val)
+
+            hou.setPreference('custom.regnareb.on_open_change_desktop', '1' if self.interface['custom.regnareb.on_open_change_desktop'].checkbox.isChecked() else '0')
+            if self.interface['custom.regnareb.on_open_change_desktop'].checkbox.isChecked():
+                hou.setPreference('general.desk.val', self.interface['custom.regnareb.on_open_change_desktop'].combobox.currentText())
 
             if self.interface['compact_mode'].checkbox.isChecked():
                 # hou.setPreference('general.ui.icon_size', 'Compact')  # DOESNT WORK
@@ -151,10 +155,8 @@ class FirstLaunch(QtWidgets.QDialog):
             set_preference('custom.regnareb.preview_resolutionX', '640')
             set_preference('custom.regnareb.preview_resolutionY', '640')
             set_preference('custom.regnareb.preview_widthratio', '1')
-            set_preference('custom.regnareb.on_open_change_desktop', '1')
             set_preference('custom.regnareb.on_open_go_manual', '1')
-            set_preference('custom.regnareb.on_open_sopviewmode', '1')
-            set_preference('custom.regnareb.on_open_hide_other_objects', '1')
+            # set_preference('custom.regnareb.on_open_hide_other_objects', '1')
 
         if self.forceui or self.is_there_new_prefs(2):
             if self.interface['install_qlib'].checkbox.isChecked():
@@ -199,7 +201,7 @@ class FirstLaunch(QtWidgets.QDialog):
             'networkeditor.doautomovenodes': "Won't auto move nodes when connecting a node in between other nodes that are too close",
             'networkeditor.showanimations': 'Disable animations with certain changes and transitions in the network editor (for example, moving nodes out the way when a new node is placed).',
             'networkeditor.maxflyoutscale': 'Set the node ring around nodes apparition to the lowest setting.',
-            'tools.createincontext.val': 'Shelf tools will be created within the current context\nInstead of at the obj level.',
+            'tools.createincontext.val': 'Shelf tools will be created inside the selected node\nInstead of at the obj level.',
             'tools.sopviewmode.val': 'The node displayed in the viewport will be the one with the display flag enabled instead of the selected node.',
             'compact_mode': 'Change the playbar and UI icon size to compact.',
             # 'general.ui.scale': 'Change the UI scale globally.',
@@ -222,18 +224,18 @@ class Preferences(QtWidgets.QDialog):
 
         self.onnewscene = collections.defaultdict(qt.RowLayout)
         self.onnewscene['on_open_change_desktop'].addCheckbox('Apply Default Desktop')
+        self.onnewscene['on_open_change_desktop'].addCombobox(hou.ui.desktopNames() if common.hou_utils.get_houdini_version() >= 22 else [i.name() for i in hou.ui.desktops()])  # Houdini 21 compatibility
+        self.onnewscene['on_open_change_desktop'].checkbox.toggled.connect(self.onnewscene['on_open_change_desktop'].connectCheckboxState)
+        self.onnewscene['on_open_change_desktop'].combobox.setCurrentIndex(self.onnewscene['on_open_change_desktop'].combobox.findText('Compact'))
+        self.onnewscene['on_open_change_desktop'].combobox.setEnabled(False)
         self.onnewscene['on_open_go_manual'].addCheckbox('Set cooking to Manual')
-        self.onnewscene['on_open_sopviewmode'].addCheckbox('Set view to "Show Display Operator"')
-        self.onnewscene['on_open_sopviewmode'].setEnabledChildren(False)
-        self.onnewscene['on_open_hide_other_objects'].addCheckbox('Set view to "Hide other objects"')
-        self.onnewscene['on_open_hide_other_objects'].setEnabledChildren(False)
-        # self.onnewscene['on_open_disable_nodes_shapes'].addCheckbox('Disable nodes shapes', True)
+
 
         self.network = collections.defaultdict(qt.RowLayout)
         self.network['transfer_display_node'].addCheckbox('Transfer Display Flag on child connection')
         self.network['create_null_shift_click'].addCheckbox('Create a NULL when Alt+click with a node selected')
         self.network['drag_and_drop'].addCheckbox('Enable Drag And Drop of files from File Explorer')
-        self.network['drag_and_drop_in_context'].addCheckbox('Always try to create drag and dropped files in the current context')
+        self.network['drag_and_drop_in_context'].addCheckbox('Drag and dropped files create nodes in the current context')
         self.network['nodepreview_resolution'].addLabel('Node Preview Resolution')
         self.network['nodepreview_resolution'].addField(maximum=1000)
         self.network['nodepreview_resolution'].addField(maximum=1000)
@@ -307,6 +309,14 @@ class Preferences(QtWidgets.QDialog):
             value = hou.getPreference(name) or '1'  # set default state if the pref does not exists
             value = QtCore.Qt.Checked if value=='1' else QtCore.Qt.Unchecked
             values.checkbox.setCheckState(value)
+
+        if hou.getPreference('custom.regnareb.on_open_change_desktop') == '1':
+            self.onnewscene['on_open_change_desktop'].checkbox.setCheckState(QtCore.Qt.Checked)
+            index = self.onnewscene['on_open_change_desktop'].combobox.findText(hou.getPreference('general.desk.val'))
+            self.onnewscene['on_open_change_desktop'].combobox.setCurrentIndex(index)
+        else:
+            self.onnewscene['on_open_change_desktop'].checkbox.setCheckState(QtCore.Qt.Unchecked)
+
         index = self.viewport['scrub_timeline_mode'].combobox.findText(hou.getPreference('custom.regnareb.scrub_timeline_mode') or 'Relative')
         self.viewport['scrub_timeline_mode'].combobox.setCurrentIndex(index)
         self.network['nodepreview_resolution'].setFields([hou.getPreference('custom.regnareb.preview_resolutionX'), hou.getPreference('custom.regnareb.preview_resolutionY')])
@@ -328,6 +338,9 @@ class Preferences(QtWidgets.QDialog):
             state = values.checkbox.isChecked()
             value = '1' if state else '0'
             set_preference(name, value)
+
+        if self.onnewscene['on_open_change_desktop'].checkbox.isChecked():
+            set_preference('general.desk.val', self.onnewscene['on_open_change_desktop'].combobox.currentText())
         set_preference('custom.regnareb.scrub_timeline_mode', self.viewport['scrub_timeline_mode'].combobox.currentText())
         set_preference('custom.regnareb.preview_resolutionX', str(self.network['nodepreview_resolution'].fields[0].value()))
         set_preference('custom.regnareb.preview_resolutionY', str(self.network['nodepreview_resolution'].fields[1].value()))
@@ -368,11 +381,11 @@ class Preferences(QtWidgets.QDialog):
 
     def set_tooltips(self):
         self.onnewscene['on_open_go_manual'].setToolTip('When opening a scene, the cooking will be set to Manual to prevent the loading of a heavy scene.')
-        self.onnewscene['on_open_hide_other_objects'].setToolTip('[NOT IMPLEMENTED IN HOUDINI]\nWhen opening a scene the viewports will be set to "Hide other obects" to prevent the loading of all objects.')
-        self.onnewscene['on_open_sopviewmode'].setToolTip('[NOT IMPLEMENTED IN HOUDINI]\nOnly show the displayed flag and not the selected nodes too.\nOtherwise it can lead to a lot of slowness and crashes because it cooks and change the viewport each time you select a node.')
+        # self.onnewscene['on_open_hide_other_objects'].setToolTip('[NOT IMPLEMENTED IN HOUDINI]\nWhen opening a scene the viewports will be set to "Hide other obects" to prevent the loading of all objects.')
+        # self.onnewscene['on_open_show_display_operator'].setToolTip('Only show the displayed flag and not the selected nodes too.\nOtherwise it can lead to a lot of slowness and crashes because it cooks and change the viewport each time you select a node.')
         self.network['transfer_display_node'].setToolTip("When connecting a child node to a Displayed one, the connected node will inherit the Display flag unless the child is on the ignore list (in case it's a heavy node)")
         self.network['create_null_shift_click'].setToolTip('If you have a node selected in the network view and shift click on an empty area, it will create a NULL node connected to that selected node.')
-        self.network['drag_and_drop_in_context'].setToolTip('If this is checked, drag and dropping a file in Houdini will always create the nodes in the current context. Otherwise it follows the Houdini preference.')
+        self.network['drag_and_drop_in_context'].setToolTip('If this is checked, drag and dropping a file in Houdini will always create the nodes in the current context.\nOtherwise it use the roots "/obj /ch /stage /out /shop /tasks /mat"')
         self.viewport['scrub_timeline_keep_pressed'].setToolTip('You need to keep the shortcut pressed then click on the viewport to change the current time like in Maya.\nOtherwise it is used as a classic shortcut.')
         self.viewport['scrub_timeline_mode'].setToolTip('Relative mode means the timeline moves with mouse movement.\nAbsolute mode means the horizontal axis of the viewport is the same as the timline,\nif you click on the left you are set to the beginning, on the right at the end.')
         self.viewport['viewport_colors'].setToolTip('Set your viewport color sceme and background colors.')

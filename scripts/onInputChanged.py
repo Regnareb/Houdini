@@ -20,5 +20,5 @@ def automatic_display_flag(node, index):
         pass
 
 
-
-automatic_display_flag(kwargs["node"], kwargs["input_index"])
+if hou.getPreference('custom.regnareb.transfer_display_node') == '1':
+    automatic_display_flag(kwargs["node"], kwargs["input_index"])

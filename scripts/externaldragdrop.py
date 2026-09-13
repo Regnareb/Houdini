@@ -42,6 +42,8 @@ NODE_CATEGORIES = {
 
 
 def dropAccept(files):
+    if hou.getPreference('custom.regnareb.drag_and_drop') == '0':
+        return False
     merge = hou.getPreference('custom.regnareb.dragndrop.always_merge')
     pane = hou.ui.paneTabUnderCursor()
     if isinstance(pane, hou.NetworkEditor):
@@ -70,7 +72,7 @@ def dropAccept(files):
                 hou.hipFile.load(filepath)
                 return True
 
-        extension = filter(filepath.lower().endswith, list(FILETYPES.keys()) + IMAGES)  # TODO: Remove list() when python2 is far away
+        extension = filter(filepath.lower().endswith, list(FILETYPES) + IMAGES)
         for ext in extension:
             if ext in IMAGES:
                 categories = [hou.vopNodeTypeCategory()]
@@ -93,7 +95,7 @@ def dropAccept(files):
             else:
                 # If the node can't be created in the current context, create a context manager compatible with it
                 logger.debug('Not compatible with current context {} {}'.format(ext, root.childTypeCategory()))
-                if hou.getPreference('tools.createincontext.val'):
+                if hou.getPreference('custom.regnareb.drag_and_drop_in_context') == '1':
                     if len(categories) > 1:
                         index = hou.ui.displayMessage('The current context is not compatible with the "{}" extension.\nMultiple context manager are compatible, which one do you want to create?'.format(ext), buttons=([i.name().upper() for i in categories]))
                     else:
@@ -108,7 +110,7 @@ def dropAccept(files):
             common.hou_utils.create_node(parent, nodetype, name, params, position, filepath)
             break
         else:
-            # If it's not a supported extension, try to create generic nodes for each context
+            # If it's not a supported extension (extension = []), try to create generic nodes for each context
             if root.childTypeCategory() == hou.objNodeTypeCategory():
                 parent = root.createNode('geo', 'Geo')
                 parent.setPosition(position)

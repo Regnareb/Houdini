@@ -1,3 +1,16 @@
+## v0.4.1 | <sup><sub><sup><sub>2026/09/13
+
+- The tool preferences are correctly applied now
+- Completely rewrite the "Animated Badge": it's way more reliable and the background network images are not saved in the .hip files anymore
+- Fix the shortcut of "Toggle Update Mode"
+- Fix the "set specific Desktop" on open file
+- The "compact" desktop is even more compact while having more stowed panels available by default : Tree View (left), Scene Graph Tree (bottom), Parameters - (right)
+- Install the tools in the 'package' folder instead of the root of Houdini's preferences
+- Show full changelog when installing the tool
+- Add links to qLib and aeLib websites in the First Launch UI
+- Fixed regression in Houdini 21 for First Launch UI
+
+
 ## v0.4.0 | <sup><sub><sup><sub>2026/08/31
 
 - Add Houdini 22 compatibility

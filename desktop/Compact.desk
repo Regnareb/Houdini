@@ -1,6 +1,5 @@
 fullscreen   -1
 playbarshown 1
-animbarshown 0
 playbar      -1
 shelf        -1
 menubar      -1
@@ -33,7 +32,7 @@ root {
 }
 shelfdock -o 0 -l icon_and_text -G "0.46 0.50" add shelf_set_1 shelf_set_2
 treecontrol -a 0 -h 0 -i 1 -f 0 -O 0 -S 0 -D 0 -H 0 -V 0 -C 0 -I 0 -R 0 panetab1
-viewerstow -x stow -b stow -l stow -m hide -c hide -d open ${DESKNAME}.panetab6.world
+viewerstow -x stow -b stow -l stow -m hide -c hide -d stow ${DESKNAME}.panetab6.world
 vieweroption -a 2 ${DESKNAME}.panetab6.world
 viewlayout -s 2 ${DESKNAME}.panetab6.world
 viewtype -t ortho_right ${DESKNAME}.panetab6.world.`vpname("${DESKNAME}.panetab6.world",4)`
@@ -41,7 +40,7 @@ viewtype -t ortho_front ${DESKNAME}.panetab6.world.`vpname("${DESKNAME}.panetab6
 viewtype -t ortho_top ${DESKNAME}.panetab6.world.`vpname("${DESKNAME}.panetab6.world",1)`
 viewtype -t perspective ${DESKNAME}.panetab6.world.`vpname("${DESKNAME}.panetab6.world",2)`
 scenegraphtree -S 0.25 -m 2 -p "/collections /lights" -c  -i  -o  -x 1 -s 1 -M 0 -C primtype,childcount,kind,populated,loaded,activation,visibility,solo,selectability  panetab2
-networkeditor -p '{\n	"backgroundimagebrightness":"1.0",\n	"gridmode":"0",\n	"showcopsmenu":"1",\n	"taskgraphcollapsemode":"Off",\n	"showtasksmenu":"1",\n	"useworkitemcolorattribute":"1",\n	"typesidebarsplit":"0.25",\n	"showmenu":"0",\n	"gridxstep":"2.0",\n	"treesplit":"0.25",\n	"showparmdialogmax":"1",\n	"perfstatname":"Time",\n	"palettemode":"0",\n	"taskgraphsortdirection":"0",\n	"showchilddep":"1",\n	"backgroundimageediting":"0",\n	"showtaskgraphperf":"0",\n	"showgrouplist":"0",\n	"showperfstats":"1",\n	"showparmdialog":"1",\n	"overviewmode":"2",\n	"sop:listmode":"0",\n	"showdep":"0",\n	"palettecolors":"",\n	"obj:listmode":"0",\n	"showspareinputdep":"1",\n	"workitemcolorattribute":"",\n	"palettesize":"150 150",\n	"showtypesidebar":"0",\n	"showtimedep":"0",\n	"showtree":"0",\n	"overviewbounds":"0.000000 0.000000 109.933333 191.857143",\n	"taskgraphperfstatname":"Cook Time",\n	"gridystep":"1.0",\n	"taskgraphsortcriteria":"Automatic",\n	"workitemattrtocollapseby":"",\n	"grouplistsplit":"0.75"\n}\n' panetab7
+networkeditor -p '{\n	"backgroundimagebrightness":"1.0",\n	"gridmode":"0",\n	"showcopsmenu":"1",\n	"taskgraphcollapsemode":"Off",\n	"showtasksmenu":"1",\n	"useworkitemcolorattribute":"1",\n	"typesidebarsplit":"0.25",\n	"showmenu":"0",\n	"gridxstep":"2.0",\n	"treesplit":"0.25",\n	"showparmdialogmax":"1",\n	"perfstatname":"Time",\n	"palettemode":"0",\n	"taskgraphsortdirection":"0",\n	"showchilddep":"1",\n	"backgroundimageediting":"0",\n	"showtaskgraphperf":"0",\n	"showgrouplist":"0",\n	"showperfstats":"1",\n	"showparmdialog":"1",\n	"overviewmode":"2",\n	"sop:listmode":"0",\n	"showdep":"0",\n	"palettecolors":"",\n	"obj:listmode":"0",\n	"showspareinputdep":"1",\n	"workitemcolorattribute":"",\n	"palettesize":"150 150",\n	"showtypesidebar":"0",\n	"showtimedep":"0",\n	"showtree":"0",\n	"overviewbounds":"0.000000 0.000000 87.565528 159.300000",\n	"taskgraphperfstatname":"Cook Time",\n	"gridystep":"1.0",\n	"taskgraphsortcriteria":"Automatic",\n	"workitemattrtocollapseby":"",\n	"grouplistsplit":"0.75"\n}\n' panetab7
 netcolumns -c display,xray,select,origin,capture,bone -n OBJ panetab7
 netcolumns -c display,render,template,selectabletemplate,highlight,unload,bypass,lock -n SOP panetab7
 netcolumns -c delscript,comment -n CHOPNET panetab7

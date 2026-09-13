@@ -53,7 +53,7 @@ class PackageInstaller():
         self.version = response.json()['name']
         self.download_url = response.json()['assets'][0]['browser_download_url']
         self.changelog = requests.get('https://raw.githubusercontent.com/Regnareb/Houdini/refs/heads/main/CHANGELOG.md').text.replace('<sup><sub><sup><sub>', '')
-        self.tool_folder = os.path.join(hou.homeHoudiniDirectory(), 'REGNAREB-TOOLS', self.version)
+        self.tool_folder = os.path.join(hou.homeHoudiniDirectory(), 'packages', 'REGNAREB-TOOLS', self.version)
         self.package_json = 'REGNAREB.json'
         self.replace_string = '%TOOLSPATH%'
 
@@ -112,9 +112,9 @@ class QLibPackageInstaller(PackageInstaller):
         self.version = 'qLib'
         self.download_url = 'https://github.com/qLab/qLib/archive/refs/heads/dev.zip'
         self.changelog = 'No Changelog Available - https://qlab.github.io/qLib/'
-        self.tool_folder = os.path.join(hou.homeHoudiniDirectory(), 'qLib-master')
+        self.tool_folder = os.path.join(hou.homeHoudiniDirectory(), 'packages', 'qLib-master')
         self.package_json = 'qLib_package.json'
-        self.replace_string = ''
+        self.replace_string = '$HOUDINI_USER_PREF_DIR/qLib-master'
 
 
 class AELibPackageInstaller(PackageInstaller):
@@ -122,7 +122,7 @@ class AELibPackageInstaller(PackageInstaller):
         self.version = 'aeLib'
         self.download_url = 'https://github.com/Aeoll/Aelib/archive/refs/heads/master.zip'
         self.changelog = 'No Changelog Available - https://github.com/Aeoll/Aelib'
-        self.tool_folder = os.path.join(hou.homeHoudiniDirectory(), 'aeLib')
+        self.tool_folder = os.path.join(hou.homeHoudiniDirectory(), 'packages', 'aeLib')
         self.package_json = 'Aelib.json'
         self.replace_string = 'PATH/TO/aelib'
 

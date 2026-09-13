@@ -45,6 +45,12 @@ class FirstLaunch(QtWidgets.QDialog):
             aelib_label = 'Install aeLib (already installed)' if qlib_installed else 'Install aeLib'
             self.interface['install_qlib'].addCheckbox(qlib_label, False)
             self.interface['install_aelib'].addCheckbox(aelib_label, False)
+            qlib_label = self.interface['install_qlib'].addLabel('<a style=\"text-decoration: none\" href=\"https://qlab.github.io/qLib/\">Website</a>')
+            aelib_label = self.interface['install_aelib'].addLabel('<a style=\"text-decoration: none\" href=\"https://github.com/Aeoll/Aelib\">Website</a>')
+            qlib_label.setOpenExternalLinks(True)
+            aelib_label.setOpenExternalLinks(True)
+            qlib_label.setAlignment(QtCore.Qt.AlignRight)
+            aelib_label.setAlignment(QtCore.Qt.AlignRight)
             self.interface['install_qlib'].setEnabledChildren(not qlib_installed)
             self.interface['install_aelib'].setEnabledChildren(not aelib_installed)
             self.interface['install_qlib'].checkbox.setStyleSheet('font-weight: bold');

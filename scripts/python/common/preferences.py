@@ -9,6 +9,7 @@ import hou
 import hdefereval
 import lib.houqt as qt
 import common.hou_utils as hou_utils
+import common.events
 import common.sceneviewer
 import tools.installer
 logger = logging.getLogger(__name__)

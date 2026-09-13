@@ -78,11 +78,12 @@ def switch_viewports_colorscheme(scheme=None, current_viewport=False):
 
 
 def get_current_colorscheme():
-    scene_viewer = toolutils.sceneViewer()
-    viewports = scene_viewer.viewports()
-    for viewport in viewports:
-        return viewport.settings().colorScheme()
-    else:
+    try:
+        scene_viewer = toolutils.sceneViewer()
+        viewports = scene_viewer.viewports()
+        for viewport in viewports:
+            return viewport.settings().colorScheme()
+    except hou.NotAvailable:  # Prevent an exception when no viewport pane exists
         return hou.viewportColorScheme.Light
 
 

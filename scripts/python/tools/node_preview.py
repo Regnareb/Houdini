@@ -11,13 +11,12 @@ def toggle_node_preview(image_path=None):
         if not image_path:
             image_path = os.path.join(hou.text.expandString('$HIP'), 'screenshots', '%NODE%.png')
         image_path = lib.pythonlib.iopath.normpath(image_path)
-        editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
 
         selection = hou.selectedNodes()
         for node in selection:
             node.setDisplayFlag(True)
             filepath = image_path.replace('%NODE%', node.name())
-            image_exists = [i for i in editor.backgroundImages() if lib.pythonlib.iopath.normpath(i.path())==filepath]
+            image_exists = [i for i in nodegraphutils.loadBackgroundImages(node.parent()) if lib.pythonlib.iopath.normpath(i.path())==filepath]
             if image_exists:
                 event_remove_background_image(node)
             else:
@@ -27,7 +26,7 @@ def toggle_node_preview(image_path=None):
                 widthratio = int(hou.getPreference('custom.regnareb.preview_widthratio'))
 
                 common.networkeditor.take_screenshot(filepath, resolution=resolution)
-                common.networkeditor.add_background_image(editor, filepath, node=node, relative=True, width_ratio=widthratio)
+                common.networkeditor.add_background_image(node, filepath, relative=True, width_ratio=widthratio)
                 node.addEventCallback((hou.nodeEventType.InputDataChanged, hou.nodeEventType.InputRewired, hou.nodeEventType.ParmTupleChanged), event_update_background_image)
                 node.addEventCallback((hou.nodeEventType.BeingDeleted,), event_remove_background_image)
                 node.addEventCallback((hou.nodeEventType.FlagChanged,), event_visibility_background_image)

@@ -18,4 +18,5 @@ elif kwargs['type'] in [sops.nodeType('color')]:
 
 
 # Add callback to add a background image for animated nodes
-node.addEventCallback((hou.nodeEventType.ParmTupleAnimated, ), common.events.event_is_animated)
+node.addEventCallback((hou.nodeEventType.ParmTupleAnimated,), common.events.event_is_animated)
+node.addEventCallback((hou.nodeEventType.BeingDeleted,), common.events.event_delete_animated_badge)

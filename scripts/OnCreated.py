@@ -28,6 +28,8 @@ elif kwargs['type'] in [sops.nodeType('rop_alembic')]:
 
 # Add callback to add a background image for nodes with key animation
 node.addEventCallback((hou.nodeEventType.ParmTupleAnimated, ), common.events.event_is_animated)
+node.addEventCallback((hou.nodeEventType.BeingDeleted,), common.events.event_delete_animated_badge)
+
 
 # Increment the counter for that node for statistics
 common.hou_utils.save_node_stats(kwargs['type'].name())

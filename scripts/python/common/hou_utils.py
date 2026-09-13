@@ -1,6 +1,7 @@
 import os
 import time
 import logging
+import functools
 import contextlib
 import hou
 import lib.pythonlib.common as common
@@ -179,3 +180,14 @@ def is_qlib_installed():
 
 def is_aelib_installed():
     return bool(hou.nodeType(hou.sopNodeTypeCategory(), 'ae::Clip::1'))
+
+
+def check_preference(preference, value):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if hou.getPreference(preference) == value:
+                result = func(*args, **kwargs)
+                return result
+        return wrapper
+    return decorator

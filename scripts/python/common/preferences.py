@@ -240,6 +240,7 @@ class Preferences(QtWidgets.QDialog):
         self.network = collections.defaultdict(qt.RowLayout)
         self.network['transfer_display_node'].addCheckbox('Transfer Display Flag on child connection')
         self.network['create_null_shift_click'].addCheckbox('Create a NULL when Alt+click with a node selected')
+        self.network['add_animated_badge'].addCheckbox('Add a badge to animated nodes')
         self.network['drag_and_drop'].addCheckbox('Enable Drag And Drop of files from File Explorer')
         self.network['drag_and_drop_in_context'].addCheckbox('Drag and dropped files create nodes in the current context')
         self.network['nodepreview_resolution'].addLabel('Node Preview Resolution')
@@ -345,6 +346,11 @@ class Preferences(QtWidgets.QDialog):
             value = '1' if state else '0'
             set_preference(name, value)
 
+        if self.network['add_animated_badge'].checkbox.isChecked():
+            common.events.event_add_all_animated_badges()
+        else:
+            common.events.event_delete_all_animated_badges()
+
         if self.onnewscene['on_open_change_desktop'].checkbox.isChecked():
             set_preference('general.desk.val', self.onnewscene['on_open_change_desktop'].combobox.currentText())
         set_preference('custom.regnareb.scrub_timeline_mode', self.viewport['scrub_timeline_mode'].combobox.currentText())
@@ -391,6 +397,7 @@ class Preferences(QtWidgets.QDialog):
         # self.onnewscene['on_open_show_display_operator'].setToolTip('Only show the displayed flag and not the selected nodes too.\nOtherwise it can lead to a lot of slowness and crashes because it cooks and change the viewport each time you select a node.')
         self.network['transfer_display_node'].setToolTip("When connecting a child node to a Displayed one, the connected node will inherit the Display flag unless the child is on the ignore list (in case it's a heavy node)")
         self.network['create_null_shift_click'].setToolTip('If you have a node selected in the network view and shift click on an empty area, it will create a NULL node connected to that selected node.')
+        self.network['add_animated_badge'].setToolTip('Add a badge that shows if a node is animated (green), one of its children is (orange) or if both are (green and orange).')
         self.network['drag_and_drop_in_context'].setToolTip('If this is checked, drag and dropping a file in Houdini will always create the nodes in the current context.\nOtherwise it use the roots "/obj /ch /stage /out /shop /tasks /mat"')
         self.viewport['scrub_timeline_keep_pressed'].setToolTip('You need to keep the shortcut pressed then click on the viewport to change the current time like in Maya.\nOtherwise it is used as a classic shortcut.')
         self.viewport['scrub_timeline_mode'].setToolTip('Relative mode means the timeline moves with mouse movement.\nAbsolute mode means the horizontal axis of the viewport is the same as the timline,\nif you click on the left you are set to the beginning, on the right at the end.')

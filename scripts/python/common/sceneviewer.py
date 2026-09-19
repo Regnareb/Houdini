@@ -26,8 +26,10 @@ displayparticles_enum = pythonlib.Enum(DISPLAYPARTICLES)
 def get_viewports(current_viewport=False):
     if current_viewport:
         under_cursor = hou.ui.paneTabUnderCursor()
-        if isinstance(under_cursor.type(), hou.paneTabType.SceneViewer.__class__):
+        if under_cursor and isinstance(under_cursor.type(), hou.paneTabType.SceneViewer.__class__):
             return [under_cursor.curViewport()]
+        else:
+            return []
     sceneviewers = common.hou_utils.get_tabs_type(hou.paneTabType.SceneViewer)
     viewports = [i.viewports() for i in sceneviewers]
     return pythonlib.flatten(viewports)

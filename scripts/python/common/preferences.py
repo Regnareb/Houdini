@@ -18,10 +18,9 @@ logger = logging.getLogger(__name__)
 VERSION = 2
 
 def set_preference(name, value):
-    if not hou.getPreference(name):
+    if not hou.setPreference(name, value):
         return hou.addPreference(name, value)
-    else:
-        return hou.setPreference(name, value)
+    return True
 
 
 class FirstLaunch(QtWidgets.QDialog):

@@ -5,22 +5,14 @@ import shutil
 import hou
 import toolutils
 
+import common.constants
 import common.hou_utils
 import lib.pythonlib.common as pythonlib
 import lib.pythonlib.iopath as iopath
+import lib.pythonlib.common as pythonlib
 
-
-COLORSCHEMES = {
-    hou.viewportColorScheme.Light: "config/3DSceneColors.light",
-    hou.viewportColorScheme.Dark: "config/3DSceneColors.dark",
-    hou.viewportColorScheme.Grey: "config/3DSceneColors.bw"
-    }
-if common.hou_utils.get_houdini_version() >= 22:
-    COLORSCHEMES[hou.viewportColorScheme.DarkGrey] = "config/3DSceneColors.dg"
-colorschemes_enum = pythonlib.Enum(COLORSCHEMES.keys())
-
-DISPLAYPARTICLES = [hou.viewportParticleDisplay.Points, hou.viewportParticleDisplay.Pixels, hou.viewportParticleDisplay.Lines, hou.viewportParticleDisplay.Discs]
-displayparticles_enum = pythonlib.Enum(DISPLAYPARTICLES)
+COLORSCHEMES = pythonlib.Enum(common.constants.COLORSCHEMES.keys())
+DISPLAYPARTICLES = pythonlib.Enum(common.constants.DISPLAYPARTICLES)
 
 
 def get_viewports(current_viewport=False):
@@ -51,7 +43,7 @@ def change_particles_display(displaytype=None, current_viewport=False):
             viewport.settings().particleDisplayType(displaytype)
         else:
             current = viewport.settings().particleDisplayType()
-            new_displaytype = new_displaytype if new_displaytype else displayparticles_enum.next(current)
+            new_displaytype = new_displaytype if new_displaytype else DISPLAYPARTICLES.next(current)
             viewport.settings().particleDisplayType(new_displaytype)
 
 
@@ -75,7 +67,7 @@ def switch_viewports_colorscheme(scheme=None, current_viewport=False):
             viewport.settings().setColorScheme(scheme)
         else:
             current = viewport.settings().colorScheme()
-            new_scheme = new_scheme if new_scheme else colorschemes_enum.next(current)
+            new_scheme = new_scheme if new_scheme else COLORSCHEMES.next(current)
             viewport.settings().setColorScheme(new_scheme)
 
 

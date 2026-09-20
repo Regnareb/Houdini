@@ -4,14 +4,11 @@ import logging
 import hou
 import common.hou_utils
 logger = logging.getLogger(__name__)
+import common.constants
 
 
-
-IMAGES = ['.als', '.bmp', '.cin', '.dds', '.dsm', '.exr', '.hdr', '.ies', '.jpeg', '.jpg', '.kdk', '.pic', '.pic.gz', '.pic.z', '.pix', '.png', '.psb', '.psd', '.ptex', '.ptx', '.qtl', '.rat', '.rgb', '.rgba', '.rla', '.rla16', '.rlb', '.rlb16', '.sgi', '.si', '.tbf', '.tga']
 DISPLACE_TYPES = {'_bump': 0, '_bmp': 0, '_normal': 1, '_displace':2, '_displacen':2, '_displacev':3}
 REGEX = re.compile('{}'.format('|'.join(DISPLACE_TYPES.keys())))
-
-
 
 FILETYPES = {
     '.txt': {'nodetype': 'font', 'params': {'text': '%CONTENT%', 'usefile': 1, 'file': '%FILEPATH%'}},
@@ -25,7 +22,6 @@ FILETYPES = {
     '.ass': {'nodetype': 'arnold_asstoc', 'params': {'ass_file': '%FILEPATH%'}},
     '.rs': {'nodetype': 'redshift_packedProxySOP', 'params': {'RS_proxy_file': '%FILEPATH%'}}
 }
-
 
 NODE_CATEGORIES = {
     hou.chopNodeTypeCategory(): {'incontext': 'chopnet', 'root': '/ch', 'nodetype': 'file', 'params': {'file': '%FILEPATH%'}},
@@ -72,9 +68,9 @@ def dropAccept(files):
                 hou.hipFile.load(filepath)
                 return True
 
-        extension = filter(filepath.lower().endswith, list(FILETYPES) + IMAGES)
+        extension = filter(filepath.lower().endswith, list(FILETYPES) + common.constants.IMAGE_FORMATS)
         for ext in extension:
-            if ext in IMAGES:
+            if ext in common.constants.IMAGE_FORMATS:
                 categories = [hou.vopNodeTypeCategory()]
                 displace = re.search(REGEX, filename.lower())
                 if displace:

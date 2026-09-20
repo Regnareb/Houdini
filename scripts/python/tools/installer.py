@@ -103,8 +103,8 @@ class PackageInstaller():
         newversion = self.is_there_newversion()
         if newversion:
             update = hou.ui.displayMessage(f'There is a new version of the Regnareb tools. Do you want to update to version "{self.version}"\n\nChangelog:', details_expanded=True, details=self.changelog)
-        if update:
-            self.install(update)
+            if update:
+                self.install(update)
 
 
 class QLibPackageInstaller(PackageInstaller):

@@ -19,7 +19,7 @@ def create_node(parent, nodetype, name, params={}, position=None, filepath='', g
         if get_sequence:
             _, filepath = iopath.get_file_sequence(filepath, '$F')
         parse_strings(filepath, params)
-    logger.debug(parent, nodetype, name, params, filepath, position)
+    logger.debug('{} {} {} {} {} {}'.format(parent, nodetype, name, params, filepath, position))
     node = parent.createNode(nodetype, name, force_valid_node_name=True)
     for k, v in params.items():
         try:
@@ -187,7 +187,20 @@ def check_preference(preference, value):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             if hou.getPreference(preference) == value:
-                result = func(*args, **kwargs)
-                return result
+                return func(*args, **kwargs)
         return wrapper
     return decorator
+
+
+def wrong_image_format(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except hou.OperationFailed as e:
+            if 'Could not find the image file' in str(e):
+                hou.ui.setStatusMessage('Image format not compatible', severity=hou.severityType.Error)
+                return None
+            else:
+                raise
+    return wrapper

@@ -23,7 +23,7 @@ def toggle_node_preview(image_path=None):
                 resolutionX = int(hou.getPreference('custom.regnareb.preview_resolutionX'))
                 resolutionY = int(hou.getPreference('custom.regnareb.preview_resolutionY'))
                 resolution = [resolutionX, resolutionY]
-                widthratio = int(hou.getPreference('custom.regnareb.preview_widthratio'))
+                widthratio = float(hou.getPreference('custom.regnareb.preview_widthratio'))
 
                 common.networkeditor.take_screenshot(filepath, resolution=resolution)
                 common.networkeditor.add_background_image(node, filepath, relative=True, width_ratio=widthratio)

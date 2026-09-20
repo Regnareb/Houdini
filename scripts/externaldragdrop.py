@@ -1,9 +1,11 @@
 import os
 import re
 import logging
+from PySide6 import QtWidgets, QtCore
 import hou
 import common.hou_utils
 logger = logging.getLogger(__name__)
+import common.networkeditor
 import common.constants
 
 
@@ -71,6 +73,13 @@ def dropAccept(files):
         extension = filter(filepath.lower().endswith, list(FILETYPES) + common.constants.IMAGE_FORMATS)
         for ext in extension:
             if ext in common.constants.IMAGE_FORMATS:
+                modifiers = QtWidgets.QApplication.keyboardModifiers()
+                ctrl  = bool(modifiers & QtCore.Qt.ControlModifier)
+                alt  = bool(modifiers & QtCore.Qt.AltModifier)
+                shift  = bool(modifiers & QtCore.Qt.ShiftModifier)
+                if isinstance(pane, hou.NetworkEditor) and any(ctrl, alt, shift):
+                    common.networkeditor.add_background_image_to_editor(pane, filepath, position)
+                    break
                 categories = [hou.vopNodeTypeCategory()]
                 displace = re.search(REGEX, filename.lower())
                 if displace:

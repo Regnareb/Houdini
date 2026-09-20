@@ -26,7 +26,7 @@ def toggle_node_preview(image_path=None):
                 widthratio = float(hou.getPreference('custom.regnareb.preview_widthratio'))
 
                 common.networkeditor.take_screenshot(filepath, resolution=resolution)
-                common.networkeditor.add_background_image(node, filepath, relative=True, width_ratio=widthratio)
+                common.networkeditor.add_background_image_to_node(node, filepath, relative=True, width_ratio=widthratio)
                 node.addEventCallback((hou.nodeEventType.InputDataChanged, hou.nodeEventType.InputRewired, hou.nodeEventType.ParmTupleChanged), event_update_background_image)
                 node.addEventCallback((hou.nodeEventType.BeingDeleted,), event_remove_background_image)
                 node.addEventCallback((hou.nodeEventType.FlagChanged,), event_visibility_background_image)

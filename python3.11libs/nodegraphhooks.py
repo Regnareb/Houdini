@@ -1,6 +1,6 @@
 import hou
 import canvaseventtypes
-
+import common.networkeditor
 
 def create_null(parent, position):
     null = parent.parent().createNode('null')
@@ -35,6 +35,15 @@ def createEventHandler(uievent, pending_actions):
                 position[1] = mousepos[1]
                 create_null(parent, position)
         return None, True
+
+    if isinstance(uievent, canvaseventtypes.KeyboardEvent) and \
+       uievent.eventtype == 'keyhit' and \
+       uievent.rawkey == 'Ctrl+V' and \
+       hou.getPreference('custom.regnareb.paste_images_to_network') == '1':
+        editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
+        common.networkeditor.paste_clipboard_images(editor, editor.cursorPosition())
+        return None, True
+
     return None, False
 
     if isinstance(uievent, canvaseventtypes.MouseEvent) and \

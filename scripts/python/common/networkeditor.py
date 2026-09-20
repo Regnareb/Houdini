@@ -1,12 +1,16 @@
 import os
 import logging
+import platform
 import contextlib
+from PySide6 import QtWidgets
 import hou
 import toolutils
 import nodegraphutils
 import lib.pythonlib.iopath
+import lib.pythonlib.network
 import lib.pythonlib.common as pythonlib
 import common.hou_utils
+import common.constants
 logger = logging.getLogger(__name__)
 
 
@@ -97,6 +101,15 @@ def paste_objectmerge():
     return merge, True
 
 
+def connect_selected_nodes():
+    # TODO: Create a merge if nodes have the same height
+    nodes = sorted(hou.selectedNodes(), key=lambda x: x.position()[1], reverse=True)
+    for index, node in enumerate(nodes):
+        if not index or index==len(nodes) - 1: # To check
+            continue
+        node.setInput(0, nodes[index-1], 0)
+
+
 def toggle_dependancy_links(mode=None):
     editor = hou.ui.paneTabUnderCursor()
     if isinstance(editor, hou.NetworkEditor):
@@ -133,7 +146,8 @@ def take_screenshot(filepath, frame=None, viewername='', resolution=[640, 640]):
     refplane.setIsVisible(current)
 
 
-def add_background_image(node, image_path, rect=None, relative=True, width_ratio=1, stick_to_side='bottom', offset=hou.Vector2(0, 0)):
+@common.hou_utils.wrong_image_format
+def add_background_image_to_node(node, image_path, rect=None, relative=True, width_ratio=1, stick_to_side='bottom', offset=hou.Vector2(0, 0)):
     image = hou.NetworkImage()
     image.setPath(image_path)
     rez = hou.imageResolution(image_path)
@@ -159,17 +173,69 @@ def add_background_image(node, image_path, rect=None, relative=True, width_ratio
     return image
 
 
+@common.hou_utils.wrong_image_format
+def add_background_image_to_editor(editor, image_path, position, rect=None, width_ratio=5):
+    image = hou.NetworkImage()
+    image.setPath(image_path)
+    if not rect:
+        rez = hou.imageResolution(image_path)
+        ratio = 1.0 * rez[1] / rez[0]
+        rect = hou.BoundingRect(position[0] - width_ratio/2, position[1] - width_ratio*ratio/2, position[0] + width_ratio/2, position[1] + width_ratio*ratio/2)
+    image.setRect(rect)
+    images = editor.backgroundImages() + (image,)
+    nodegraphutils.saveBackgroundImages(editor.pwd(), images, editor)
+    return image
+
+
 def remove_background_image(node):
-    """Remove all linked images"""
+    """Remove all linked images of a node"""
     editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
     images = tuple(i for i in editor.backgroundImages() if i.relativeToPath() != node.path())
     nodegraphutils.saveBackgroundImages(node.parent(), images)
 
 
-def connect_selected_nodes():
-    # TODO: Create a merge if nodes have the same height
-    nodes = sorted(hou.selectedNodes(), key=lambda x: x.position()[1], reverse=True)
-    for index, node in enumerate(nodes):
-        if not index or index==len(nodes):
+def paste_clipboard_images(editor, position):
+    """Check the clipboard and create background images accordingly.
+    It checks for local file paths, URL to download, or image directly in the clipboard"""
+    clipboard = QtWidgets.QApplication.clipboard()
+    hip = lib.pythonlib.iopath.normpath(hou.expandString('$HIP'))
+    # Local Files
+    result = []
+    if platform.system() == "Windows":
+        pattern = common.constants.REGEX_WINDOWS_PATH
+    else:
+        pattern = common.constants.REGEX_UNIX_PATH
+    matches = pattern.finditer(clipboard.text())
+    for match in matches:
+        path = lib.pythonlib.iopath.normpath(match.group())
+        if hou.node(path):
             continue
-        node.setInput(0, nodes[index-1], 0)
+        if filename.lower().endswith(common.constants.IMAGE_FORMATS) and os.path.isfile(path):
+            logger.debug('Paste local image: ' + path)
+            add_background_image_to_editor(editor, path, position)
+            result.append(path)
+
+    # Clipboard
+    if image := clipboard.image():
+        path = lib.pythonlib.iopath.pathjoin(hip, 'pasted.jpg')
+        if not image.save(path):
+            return []
+        else:
+            logger.debug('Paste clipboard image: ' + path)
+            add_background_image_to_editor(editor, path, position)
+            return [path]
+
+    # URLs
+    pattern = common.constants.REGEX_URL
+    matches = pattern.finditer(clipboard.text())
+    for match in matches:
+        url = match.group()
+        filename = lib.pythonlib.network.get_filename_from_url(url) or 'downloaded.jpg'  # Get the next available file name in $HIP
+        lib.pythonlib.iopath.create_dir(os.path.join(hip, 'images'))
+        path = hou.expandString(os.path.join(hip, 'images', filename))
+        path = lib.pythonlib.iopath.normpath(path)
+        if filename.lower().endswith(common.constants.IMAGE_FORMATS) and lib.pythonlib.network.download_file(url, path): # download and put in $HIP/images/filename
+            logger.debug('Paste url image: ' + url)
+            add_background_image_to_editor(editor, path, position)
+            result.append(path)
+    return result

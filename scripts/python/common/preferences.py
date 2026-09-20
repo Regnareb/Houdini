@@ -42,7 +42,7 @@ class FirstLaunch(QtWidgets.QDialog):
             qlib_installed = hou_utils.is_qlib_installed()
             aelib_installed = hou_utils.is_aelib_installed()
             qlib_label = 'Install qLib (already installed)' if qlib_installed else 'Install qLib'
-            aelib_label = 'Install aeLib (already installed)' if qlib_installed else 'Install aeLib'
+            aelib_label = 'Install aeLib (already installed)' if aelib_installed else 'Install aeLib'
             self.interface['install_qlib'].addCheckbox(qlib_label, False)
             self.interface['install_aelib'].addCheckbox(aelib_label, False)
             qlib_label = self.interface['install_qlib'].addLabel('<a style=\"text-decoration: none\" href=\"https://qlab.github.io/qLib/\">Website</a>')
@@ -162,6 +162,12 @@ class FirstLaunch(QtWidgets.QDialog):
             set_preference('custom.regnareb.preview_resolutionY', '640')
             set_preference('custom.regnareb.preview_widthratio', '1')
             set_preference('custom.regnareb.on_open_go_manual', '1')
+            set_preference('custom.regnareb.add_animated_badge', '1')
+            set_preference('custom.regnareb.transfer_display_node', '1')
+            set_preference('custom.regnareb.paste_images_to_network', '1')
+            set_preference('custom.regnareb.create_null_shift_click', '1')
+            set_preference('custom.regnareb.drag_and_drop', '1')
+            set_preference('custom.regnareb.drag_and_drop_in_context', '1')
             # set_preference('custom.regnareb.on_open_hide_other_objects', '1')
 
         if self.forceui or self.is_there_new_prefs(2):
@@ -376,7 +382,7 @@ class Preferences(QtWidgets.QDialog):
             if '@' in top:
                 top = self.viewport_colors.colors[top.replace('@', '')]
             self.viewport['viewport_colors'].buttons[0].setStyleSheet('background-color: rgba({}); border: none;'.format(','.join(str(i) for i in top)))
-        if bot and '@' and 'ALPHA' not in bot:
+        if bot and 'ALPHA' not in bot:
             if '@' in bot:
                 bot = self.viewport_colors.colors[bot.replace('@', '')]
             self.viewport['viewport_colors'].buttons[1].setStyleSheet('background-color: rgba({}); border: none;'.format(','.join(str(i) for i in bot)))

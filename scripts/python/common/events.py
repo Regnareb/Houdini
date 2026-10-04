@@ -62,12 +62,14 @@ def event_delete_animated_badge(node, **kwargs):
         nodegraphutils.saveBackgroundImages(node.parent(), images)
 
 
+@common.hou_utils.create_undo_group("Delete Animated Badges")
 def event_delete_all_animated_badges(**kwargs):
     nodes = hou.node("/").allSubChildren()
     for node in nodes:
         event_delete_animated_badge(node)
 
 
+@common.hou_utils.create_undo_group("Add Animated Badges")
 def event_add_all_animated_badges(**kwargs):
     nodes = hou.node("/").allSubChildren()
     for node in nodes:

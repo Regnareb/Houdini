@@ -1,3 +1,4 @@
+import traceback
 import hou
 import common.events
 
@@ -7,14 +8,15 @@ objs = hou.objNodeTypeCategory()
 sops = hou.sopNodeTypeCategory()
 lights = [objs.nodeType(i) for i in ['hlight::2.0', 'ambient', 'indirectlight', 'envlight', 'rslight', 'rslightdome', 'rslightsun']]
 
-
-if kwargs['type'] in lights:
-    # Light nodes will show the "enabled" status by changing the background color of the node
-    node.addEventCallback((hou.nodeEventType.ParmTupleChanged, ), common.events.event_light_enabled)
-elif kwargs['type'] in [sops.nodeType('color')]:
-    # The background color of the Color node reflect the color selected
-    node.addEventCallback((hou.nodeEventType.ParmTupleChanged, ), common.events.event_color_changed)
-
+try:
+    if kwargs['type'] in lights:
+        # Light nodes will show the "enabled" status by changing the background color of the node
+        node.addEventCallback((hou.nodeEventType.ParmTupleChanged, ), common.events.event_light_enabled)
+    elif kwargs['type'] in [sops.nodeType('color')]:
+        # The background color of the Color node reflect the color selected
+        node.addEventCallback((hou.nodeEventType.ParmTupleChanged, ), common.events.event_color_changed)
+except:
+    print(traceback.format_exc())
 
 
 # Add callback to add a background image for animated nodes

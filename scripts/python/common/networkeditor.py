@@ -194,6 +194,7 @@ def remove_background_image(node):
     nodegraphutils.saveBackgroundImages(node.parent(), images)
 
 
+@common.hou_utils.create_undo_group("Paste Images")
 def paste_clipboard_images(editor, position):
     """Check the clipboard and create background images accordingly.
     It checks for local file paths, URL to download, or image directly in the clipboard"""
@@ -210,7 +211,7 @@ def paste_clipboard_images(editor, position):
         path = lib.pythonlib.iopath.normpath(match.group())
         if hou.node(path):
             continue
-        if filename.lower().endswith(common.constants.IMAGE_FORMATS) and os.path.isfile(path):
+        if path.lower().endswith(common.constants.IMAGE_FORMATS) and os.path.isfile(path):
             logger.debug('Paste local image: ' + path)
             add_background_image_to_editor(editor, path, position)
             result.append(path)

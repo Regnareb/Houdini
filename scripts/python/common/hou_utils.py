@@ -192,6 +192,16 @@ def check_preference(preference, value):
     return decorator
 
 
+def create_undo_group(name):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            with hou.undos.group(name):
+                return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
 def wrong_image_format(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):

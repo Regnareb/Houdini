@@ -23,7 +23,7 @@ def createEventHandler(uievent, pending_actions):
             uievent.editor.setPwd(geo)
             return None, True
 
-        if hou.getPreference('custom.regnareb.create_null_shift_click') == '1':
+        if hou.getPreference('custom.regnareb.create_null_alt_click') == '1':
             mousepos = uievent.editor.posFromScreen(uievent.mousepos) - hou.Vector2(0.5, 0.2)
             selected = hou.selectedNodes()
             if len(selected) == 1:

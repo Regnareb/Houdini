@@ -206,7 +206,7 @@ def paste_clipboard_images(editor, position):
         pattern = common.constants.REGEX_WINDOWS_PATH
     else:
         pattern = common.constants.REGEX_UNIX_PATH
-    matches = pattern.finditer(clipboard.text())
+    matches = pattern.finditer(clipboard.text().replace('file:///', ''))
     for match in matches:
         path = lib.pythonlib.iopath.normpath(match.group())
         if hou.node(path):

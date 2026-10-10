@@ -42,7 +42,6 @@ NODE_CATEGORIES = {
 def dropAccept(files):
     if hou.getPreference('custom.regnareb.drag_and_drop') == '0':
         return False
-    merge = hou.getPreference('custom.regnareb.dragndrop.always_merge')
     pane = hou.ui.paneTabUnderCursor()
     if isinstance(pane, hou.NetworkEditor):
         position = pane.cursorPosition()
@@ -59,24 +58,24 @@ def dropAccept(files):
         root = pane.pwd()
         filename = os.path.basename(filepath)
         name = filename.split('.')[0]
+        modifiers = QtWidgets.QApplication.keyboardModifiers()
+        ctrl  = bool(modifiers & QtCore.Qt.ControlModifier)
+        alt  = bool(modifiers & QtCore.Qt.AltModifier)
+        shift  = bool(modifiers & QtCore.Qt.ShiftModifier)
         if hou.node(filepath):
             common.hou_utils.create_node(root, 'object_merge', name, {'objpath1': '%FILEPATH%'}, position, filepath)
+            continue
         elif filename.endswith('.hip'):
-            if merge or hou.ui.displayMessage('Do you want to open the .hip file or merge into the current one?', buttons=('Open', 'Merge')):
+            if ctrl:
                 hou.hipFile.merge(filepath)
-                merge = True  # Don't ask again for all consecutive files
                 continue
             else:
                 hou.hipFile.load(filepath)
-                return True
+                return True  # Load the file and forget about all other elements drag and dropped.
 
-        extension = filter(filepath.lower().endswith, list(FILETYPES) + common.constants.IMAGE_FORMATS)
+        extension = filter(filepath.lower().endswith, list(FILETYPES) + list(common.constants.IMAGE_FORMATS))
         for ext in extension:
             if ext in common.constants.IMAGE_FORMATS:
-                modifiers = QtWidgets.QApplication.keyboardModifiers()
-                ctrl  = bool(modifiers & QtCore.Qt.ControlModifier)
-                alt  = bool(modifiers & QtCore.Qt.AltModifier)
-                shift  = bool(modifiers & QtCore.Qt.ShiftModifier)
                 if isinstance(pane, hou.NetworkEditor) and any(ctrl, alt, shift):
                     common.networkeditor.add_background_image_to_editor(pane, filepath, position)
                     break

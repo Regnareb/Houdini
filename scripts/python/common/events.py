@@ -51,7 +51,7 @@ def event_is_animated(node, event_type=None, **kwargs):
         return True
     if image:
         event_delete_animated_badge(node)
-    return common.networkeditor.add_background_image_to_node(node, hou.text.expandString(filepath), rect=None, relative=True, width_ratio=0.7, stick_to_side='right', offset=hou.Vector2(0.1, -0.55))
+    return common.networkeditor.add_background_image_to_node(node, hou.text.expandString(filepath), rect=None, relative=True, width_ratio=0.7, stick_to_side='right', offset=hou.Vector2(0.1, 0.2))
 
 
 

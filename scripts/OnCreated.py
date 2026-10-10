@@ -32,5 +32,6 @@ except:
     print(traceback.format_exc())
 
 # Add callback to add a background image for nodes with key animation
-node.addEventCallback((hou.nodeEventType.ParmTupleAnimated, ), common.events.event_is_animated)
-node.addEventCallback((hou.nodeEventType.BeingDeleted,), common.events.event_delete_animated_badge)
+if hou.getPreference('custom.regnareb.add_animated_badge') == '1':
+    hdefereval.executeDeferred(node.addEventCallback, (hou.nodeEventType.ParmTupleAnimated, ), common.events.event_is_animated)
+    node.addEventCallback((hou.nodeEventType.BeingDeleted,), common.events.event_delete_animated_badge)

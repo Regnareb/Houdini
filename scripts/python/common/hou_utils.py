@@ -202,6 +202,29 @@ def create_undo_group(name):
     return decorator
 
 
+def reselect_nodes(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        selected = hou.selectedNodes()
+        result = func(*args, **kwargs)
+        hou.clearAllSelected()
+        [n.setSelected(True) for n in selected]
+        return result
+    return wrapper
+
+
+def select_new_nodes(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        before = hou.node("/").allSubChildren()
+        result = func(*args, **kwargs)
+        hou.clearAllSelected()
+        newnodes = [n for n in hou.node("/").allSubChildren() if n not in before]
+        [n.setSelected(True) for n in newnodes]
+        return result
+    return wrapper
+
+
 def wrong_image_format(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):

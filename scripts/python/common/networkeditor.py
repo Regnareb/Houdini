@@ -111,10 +111,16 @@ def connect_selected_nodes():
 
 
 def toggle_dependancy_links(mode=None):
+    """Cycle the network editor's dependency link display.
+
+    With no mode, cycle through 0, 1, 2. With a mode, toggle between
+    off ('0') and that mode.
+    """
     editor = hou.ui.paneTabUnderCursor()
     if isinstance(editor, hou.NetworkEditor):
-        modes = pythonlib.Enum(['0', '1', '2'])
-        mode = mode if mode is not None else modes.next(editor.getPref('showdep'))
+        modes = pythonlib.Enum(['0', mode] if mode is not None else ['0', '1', '2'])
+        current = editor.getPref('showdep')
+        mode = modes.next(current) if current in modes else str(mode)
         editor.setPref('showdep', mode)
 
 

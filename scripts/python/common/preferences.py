@@ -166,7 +166,6 @@ class FirstLaunch(QtWidgets.QDialog):
             set_preference('custom.regnareb.preview_resolutionY', '640')
             set_preference('custom.regnareb.preview_widthratio', '1')
             set_preference('custom.regnareb.on_open_go_manual', '1')
-            set_preference('custom.regnareb.add_animated_badge', '1')
             set_preference('custom.regnareb.transfer_display_node', '1')
             set_preference('custom.regnareb.paste_images_to_network', '1')
             set_preference('custom.regnareb.create_null_alt_click', '1')
@@ -179,6 +178,7 @@ class FirstLaunch(QtWidgets.QDialog):
                 hdefereval.executeDeferred(tools.installer.QLibPackageInstaller().install)
             if self.interface['install_aelib'].checkbox.isChecked():
                 hdefereval.executeDeferred(tools.installer.AELibPackageInstaller().install)
+            set_preference('custom.regnareb.add_animated_badge', '0')
 
         self.save_shortcuts()
         # Set this custom preference so that the window is only displayed once or when new settings are implemented
@@ -250,7 +250,7 @@ class Preferences(QtWidgets.QDialog):
         self.network = collections.defaultdict(qt.RowLayout)
         self.network['transfer_display_node'].addCheckbox('Transfer Display Flag on child connection')
         self.network['create_null_alt_click'].addCheckbox('Create a NULL when Alt+click with a node selected')
-        self.network['add_animated_badge'].addCheckbox('Add a badge to animated nodes')
+        self.network['add_animated_badge'].addCheckbox('Add a badge to animated nodes (experimental)')
         self.network['drag_and_drop'].addCheckbox('Enable Drag And Drop of files from File Explorer')
         self.network['drag_and_drop_in_context'].addCheckbox('Drag and dropped files create nodes in the current context')
         self.network['nodepreview_resolution'].addLabel('Node Preview Resolution')

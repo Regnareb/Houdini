@@ -10,6 +10,9 @@
   </tool>
 
   <tool name="br_ui_show_preferences" label="Preferences" icon="hicon:/SVGIcons.index?SHELF_preflight.svg">
+    <helpText><![CDATA[
+    Show the preferences UI for the BetterHoudini tools allowing you to customize it further. If you want to set the base settings open the First Launch UI instead.
+    ]]></helpText>
     <script scriptType="python"><![CDATA[
 import common.preferences
 common.preferences.show_prefs()
@@ -17,6 +20,9 @@ common.preferences.show_prefs()
   </tool>
 
   <tool name="br_ui_show_first_launch" label="First Launch UI" icon="hicon:/SVGIcons.index?CHOP_band.svg">
+    <helpText><![CDATA[
+    Set the base Houdini settings and keyboard shortcuts for the BetterHoudini tools.
+    ]]></helpText>
     <script scriptType="python"><![CDATA[
 import common.preferences as prefs
 prefs.show_firstlaunch(forceui=True)
@@ -24,6 +30,9 @@ prefs.show_firstlaunch(forceui=True)
   </tool>
 
   <tool name="br_ui_update_tools" label="Update" icon="hicon:/SVGIcons.index?BUTTONS_download.svg">
+    <helpText><![CDATA[
+    Update the BetterHoudini tools to the latest version.
+    ]]></helpText>
     <script scriptType="python"><![CDATA[
 import tools.installer
 tools.installer.PackageInstaller().install(update=True)
@@ -31,6 +40,14 @@ tools.installer.PackageInstaller().install(update=True)
   </tool>
 
   <tool name="br_ui_install_qlib" label="Install qLib" icon="$REGNAREB/images/qlib.svg">
+    <helpText><![CDATA[
+qLib is a digital asset library for SideFX's Houdini. It is a collection of tools designed to work flawlessly with each other and Houdini's native toolset. It is driven by (and used in) real production environments, but at the same time it fully respects and conforms to all the important Houdini concepts.
+
+Strong emphasis on the following things:
+ - Backwards-compatibility: old scenes will not break over time
+ - Performance: we press for VEX/multithreading as much as possible
+ - Usability: our tools try to avoid the "in-house" look-and-feel
+    ]]></helpText>
     <script scriptType="python"><![CDATA[
 import tools.installer
 tools.installer.QLibPackageInstaller().install()
@@ -38,6 +55,29 @@ tools.installer.QLibPackageInstaller().install()
   </tool>
 
   <tool name="br_ui_install_aelib" label="Install aeLib" icon="$REGNAREB/images/aelib.svg">
+    <helpText><![CDATA[
+A library of Digital Assets, Tools and Scripts for SideFX Houdini.
+
+
+The /otls folder contains approximately 100 SOP level HDAs which are available from the 'aelib' Tab submenu. These are categorised into the following sections:
+
+ - Creators: Geometry creation SOPs, usually not requiring input geometry
+ - Deformer: Modify geometry positions
+ - Modify: Involve creating or destroying points/primitives and require input geometry
+ - Curves: A variety of tools acting on polyline curves
+ - IO: Operations for reading or writing files to disk
+ - Solvers: Simulations and feedback loops
+ - Utility: General purpose tools and miscellaneous items
+ - Extensions: Similar to existing Houdini or 3rd-Party SOPs but with extra functionality
+
+ 
+As well as the HDA collection, Aelib includes:
+
+ - A shelf containing macros and useful python scripts
+ - Several VEX include files adding a range of new functions
+ - A VEXpressions.txt file which adds presets to wrangles
+ - Bundled python libraries required for a small number of SOP nodes
+    ]]></helpText>
     <script scriptType="python"><![CDATA[
 import tools.installer
 tools.installer.AELibPackageInstaller().install()
@@ -45,6 +85,9 @@ tools.installer.AELibPackageInstaller().install()
   </tool>
 
   <tool name="br_ui_viewports_colour" label="Change All Viewports Colour" icon="VIEW_layout_4">
+    <helpText><![CDATA[
+Change all viewports colour to cycle between the Houdini colour schemes (Ctrl+Alt+B by default).
+    ]]></helpText>
     <toolMenuContext name="viewer">
       <contextNetType>OBJ</contextNetType>
       <contextNetType>SOP</contextNetType>
@@ -61,6 +104,9 @@ common.sceneviewer.switch_viewports_colorscheme()
   </tool>
 
   <tool name="br_ui_viewport_colour" label="Change Current Viewport Colour" icon="BUTTONS_aovs">
+    <helpText><![CDATA[
+Change the viewport colour to cycle between the Houdini colour schemes (Alt+B by default). Can only be called by a shortcut as the mouse need to be over a viewport to know which one has to change colour.
+    ]]></helpText>
     <toolMenuContext name="viewer">
       <contextOpType>*</contextOpType>
       <contextNetType>OBJ</contextNetType>
@@ -81,6 +127,10 @@ except AttributeError:
   </tool>
 
   <tool name="br_scrub_timeline" label="Scrub Timeline" icon="COP2_timefilter">
+    <helpText><![CDATA[
+Click in the viewport and drag your mouse on the right to advance in time (K by default). Go to the left to go back in the timeline.
+Right click in the viewport to change some options of the tool.
+    ]]></helpText>
     <toolMenuContext name="viewer">
       <contextNetType>OBJ</contextNetType>
       <contextNetType>SOP</contextNetType>
@@ -101,6 +151,9 @@ if current_state != 'br_scrub_timeline':
   </tool>
 
   <tool name="br_create_node_preview" label="Add Preview" icon="VIEW_visualization_slice">
+    <helpText><![CDATA[
+Add thumbnails to the selected node in the Network pane (M by default). It renders the viewport for each node with a screenshot of the viewport and add it as a background image each time a parameter is changed.
+    ]]></helpText>
     <script scriptType="python"><![CDATA[
 import tools.node_preview
 tools.node_preview.toggle_node_preview()
@@ -108,6 +161,9 @@ tools.node_preview.toggle_node_preview()
   </tool>
 
   <tool name="br_paste_object_merge" label="Paste Object Merge" icon="PLASMA_App">
+    <helpText><![CDATA[
+Copy several nodes then use this tool (Alt+V by default) to paste it as a Merge node with all previously copied nodes as links.
+    ]]></helpText>
     <script scriptType="python"><![CDATA[
 import common.networkeditor
 common.networkeditor.paste_objectmerge()
@@ -115,6 +171,9 @@ common.networkeditor.paste_objectmerge()
   </tool>
 
   <tool name="br_cycle_display_flag" label="Cycle Display Flag" icon="PLASMA_App">
+    <helpText><![CDATA[
+The cycle display flag tool (R by default) can now cycle between several nodes and even after they got unselected.
+    ]]></helpText>
     <script scriptType="python"><![CDATA[
 import common.networkeditor
 common.networkeditor.cycle_display_flag()
@@ -122,6 +181,9 @@ common.networkeditor.cycle_display_flag()
   </tool>
 
   <tool name="br_display_next_output" label="Cycle Display Output" icon="PLASMA_App">
+    <helpText><![CDATA[
+When the selected node has different outputs, this tool (Alt+X by default) cycles it's display output that will show in the viewports.
+    ]]></helpText>
     <script scriptType="python"><![CDATA[
 import common.networkeditor
 common.networkeditor.display_next_output()
@@ -129,6 +191,11 @@ common.networkeditor.display_next_output()
   </tool>
 
   <tool name="br_toggle_dependancy_links" label="Toggle Dependancy Links" icon="PLASMA_App">
+    <helpText><![CDATA[
+This tool (Ctrl+D by default) will show the dependancy links between all nodes, only selected nodes or none. It's possible to change the shelf to toggle only between "None" and the mode you prefer:
+- common.networkeditor.toggle_dependancy_links('1')  # use this for showing links only on selected nodes
+- common.networkeditor.toggle_dependancy_links('2')  # use this for showing links on all nodes
+    ]]></helpText>
     <script scriptType="python"><![CDATA[
 import common.networkeditor
 common.networkeditor.toggle_dependancy_links()
@@ -136,6 +203,9 @@ common.networkeditor.toggle_dependancy_links()
   </tool>
 
   <tool name="br_connect_selected_nodes" label="Connect Selected Nodes" icon="PLASMA_App">
+    <helpText><![CDATA[
+Connect all selected nodes by their heights (Shift+Y by default)
+    ]]></helpText>
     <script scriptType="python"><![CDATA[
 import common.networkeditor
 common.networkeditor.connect_selected_nodes()
@@ -143,6 +213,9 @@ common.networkeditor.connect_selected_nodes()
   </tool>
 
   <tool name="br_toggle_update_mode" label="Toggle Update Mode" icon="PLASMA_App">
+    <helpText><![CDATA[
+Toggle the update mode between "Manual" and "On Mouse Up/Auto Update" (F10 by default).
+    ]]></helpText>
     <script scriptType="python"><![CDATA[
 import common.hou_utils
 common.hou_utils.toggle_update_mode()
@@ -150,6 +223,9 @@ common.hou_utils.toggle_update_mode()
   </tool>
 
   <tool name="br_change_particles_display" label="Cycle Particles Display" icon="TOOLS_select_groups_point">
+    <helpText><![CDATA[
+Cycle between particles display: Points/Pixels/Lines/Discs (Shift+D by default)
+    ]]></helpText>
     <toolMenuContext name="viewer">
       <contextNetType>OBJ</contextNetType>
       <contextNetType>SOP</contextNetType>

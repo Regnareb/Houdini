@@ -101,7 +101,7 @@ class ViewportColor():
     def get_colors(self):
         """Retrieve viewport colors from the corresponding UI file"""
         try:
-            self.colorfilepath = os.path.join(hou.text.expandString("$REGNAREB"), COLORSCHEMES[self.scheme])
+            self.colorfilepath = os.path.join(hou.text.expandString("$REGNAREB"), common.constants.COLORSCHEMES[self.scheme])
             with open(self.colorfilepath, "r") as f:
                 content = f.read()
                 values = re.findall(self.regex, content)
@@ -109,7 +109,7 @@ class ViewportColor():
                 # Convert rgb to a 255 values instead of the normalized Houdini one. Don't do it for reference colors and ALPHA
                 self.colors = {key: [int(round(float(i)*255)) for i in value.split()] if '@' not in value and 'ALPHA' not in value else value.strip() for key, value in values.items()}
         except IOError:  # Copy the original color scheme from Houdini install if it doesn't exists
-            originalpath = os.path.join(hou.text.expandString("$HFS"), 'houdini', COLORSCHEMES[self.scheme])
+            originalpath = os.path.join(hou.text.expandString("$HFS"), 'houdini', common.constants.COLORSCHEMES[self.scheme])
             iopath.create_dir(os.path.dirname(self.colorfilepath))
             shutil.copyfile(originalpath, self.colorfilepath)
             self.get_colors()

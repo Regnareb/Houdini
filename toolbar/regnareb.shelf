@@ -170,6 +170,16 @@ common.networkeditor.paste_objectmerge()
 ]]></script>
   </tool>
 
+  <tool name="br_paste_and_connect_to_selected" label="Paste and Connect to Selected" icon="PLASMA_App">
+    <helpText><![CDATA[
+Copy several nodes then use this tool (Ctrl+Shift+V by default) to paste those nodes below each selected nodes and connect the top pasted node to the selected nodes.
+    ]]></helpText>
+    <script scriptType="python"><![CDATA[
+import common.networkeditor
+common.networkeditor.paste_and_connect_to_selected()
+]]></script>
+  </tool>
+
   <tool name="br_cycle_display_flag" label="Cycle Display Flag" icon="PLASMA_App">
     <helpText><![CDATA[
 The cycle display flag tool (R by default) can now cycle between several nodes and even after they got unselected.

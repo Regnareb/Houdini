@@ -15,7 +15,7 @@ import tools.installer
 logger = logging.getLogger(__name__)
 
 
-VERSION = 2
+VERSION = 3
 
 def set_preference(name, value):
     if not hou.setPreference(name, value):
@@ -99,6 +99,10 @@ class FirstLaunch(QtWidgets.QDialog):
                 'toggle_update_mode': {'label': 'Toggle Cooking Mode', 'default_shortcut': 'F10', 'command': 'h.tool:br_toggle_update_mode', 'description': 'Cycle between manual and cooking mode'},
                 'reset_viewport': {'label': 'Reset Viewport', 'default_shortcut': 'F12', 'command': 'h.reset_viewport', 'description': 'Reset and reload the viewport'},
                 'create_node_preview': {'label': 'Create Node Preview', 'default_shortcut': 'M', 'command': 'h.pane.wsheet.tool:br_create_node_preview', 'description': 'Create preview for selected nodes'}
+                })
+        if self.forceui or self.is_there_new_prefs(3):
+            shortcuts.update({
+                'paste_and_connect_to_selected': {'label': 'Paste and Connect to Selected Nodes', 'default_shortcut': 'Ctr+Shift+V', 'command': 'h.pane.wsheet.tool:br_paste_and_connect_to_selected', 'description': 'Paste all nodes in clipboard to each selected nodes and connect to the top pasted node'}
                 })
         if shortcuts:
             self.shortcuts_groupbox.setCheckable(True)

@@ -101,6 +101,37 @@ def paste_objectmerge():
     return merge, True
 
 
+@common.hou_utils.create_undo_group("Paste and Connect to Selected")
+@common.hou_utils.select_new_nodes
+def paste_and_connect_to_selected():
+    """Paste the clipboard nodes under each selected node and connect
+    the top nodes of each pasted block to that selected node."""
+    newitems = []
+    for sel in hou.selectedNodes():
+        parent = sel.parent()
+        parent.pasteItemsFromClipboard()
+        pasted_nodes = hou.selectedNodes()
+        pasted_items = hou.selectedItems()
+        # "Top" nodes: pasted nodes that accept inputs and have none coming from other pasted nodes
+        tops = [
+            n for n in pasted_nodes
+            if n.type().maxNumInputs() > 0
+            and not any(i in pasted_nodes for i in n.inputs() if i)
+        ]
+
+        # Move the pasted block under the selected node
+        ref = tops[0] if tops else max(pasted_items, key=lambda n: n.position().y())
+        offset = (sel.position() + hou.Vector2(0, -2)) - ref.position()
+        for n in pasted_items:
+            if n.parentNetworkBox():
+                continue
+            n.setPosition(n.position() + offset)
+
+        for t in tops:
+            t.setInput(0, sel)
+        newitems.extend(pasted_items)
+    return newitems
+
 def connect_selected_nodes():
     # TODO: Create a merge if nodes have the same height
     nodes = sorted(hou.selectedNodes(), key=lambda x: x.position()[1], reverse=True)

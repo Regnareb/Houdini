@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Houdini File Viewer</title>
+<style>
+:root{--bg:#fff;--panel:#f6f7f9;--fg:#1d2129;--mut:#6b7280;--line:#e2e5ea;--acc:#e8671c;--expr:#7c3aed;--sel:#fde9dc;--add-bg:#e4f5e9;--add-fg:#1e8e4a;--del-bg:#fdeaea;--del-fg:#d9363e;--chg-bg:#fff3d1;--chg-fg:#b7791f;--mark:rgba(255,196,0,.5);color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#16181d;--panel:#1d2026;--fg:#e6e8ec;--mut:#8b93a1;--line:#2c313a;--acc:#ff8a3d;--expr:#b794f6;--sel:#3a2a20;--add-bg:#1a3325;--add-fg:#4cc77f;--del-bg:#3b1f23;--del-fg:#ff7b83;--chg-bg:#38321c;--chg-fg:#e8b447;--mark:rgba(255,196,0,.35);color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,sans-serif;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:16px;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+h1{font-size:15px;margin:0;color:var(--acc)}
+header .info{color:var(--mut);font-size:13px;flex:1}
+button,input{font:inherit;color:inherit}
+button{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 12px;cursor:pointer}
+button:disabled{opacity:.5;cursor:default}
+#drop{flex:1;display:flex;align-items:center;justify-content:center;margin:24px;border:2px dashed var(--line);border-radius:12px;color:var(--mut);text-align:center;flex-direction:column;gap:8px;cursor:pointer}
+#drop.hide{display:none}
+#drop .big{font-size:40px}
+#drop .t{font-size:12px}
+body.over #drop,body.over main{outline:3px dashed var(--acc);outline-offset:-6px}
+main{flex:1;display:flex;min-height:0}
+#drop:not(.hide)+main{display:none}
+#treePane{width:340px;min-width:200px;border-right:1px solid var(--line);display:flex;flex-direction:column;background:var(--panel)}
+#filter{margin:8px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
+#tree{overflow:auto;flex:1;padding:0 8px 12px;font-size:13px}
+.row{display:flex;align-items:center;gap:6px;padding:1px 4px;border-radius:4px;cursor:pointer;white-space:nowrap}
+.row:hover{background:var(--line)}
+.row.sel{background:var(--sel)}
+.arrow{width:14px;text-align:center;color:var(--mut);flex:none;user-select:none}
+.tag,.t{color:var(--mut);font-size:12px}
+.kids{margin-left:14px}
+.hidden{display:none}
+#details{flex:1;overflow:auto;padding:16px 24px;min-width:0}
+#details h2{margin:0 0 2px;font-size:18px;word-break:break-all}
+.path{color:var(--mut);font-family:ui-monospace,monospace;font-size:12px;word-break:break-all}
+#details h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin:20px 0 6px}
+.chip{display:inline-block;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:0 8px;margin:2px 4px 2px 0;font-size:12px}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:4px 10px 4px 0;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:ui-monospace,monospace;font-weight:400;white-space:nowrap;color:var(--acc);width:1%}
+tr.hd th{font-family:inherit;color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.05em;width:auto}
+td.val{font-family:ui-monospace,monospace;word-break:break-word;white-space:pre-wrap}
+.anim{color:var(--expr);font-size:11px;margin-left:6px}
+.link,a{color:var(--acc);cursor:pointer;text-decoration:underline}
+.chhead{margin:14px 0 4px;font-weight:600}
+.empty{color:var(--mut);padding:8px 0}
+details{margin:4px 0}summary{cursor:pointer;color:var(--mut)}
+pre.val{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px;overflow:auto;max-height:300px;font-size:12px;white-space:pre-wrap}
+#err{color:#d9363e;margin-top:12px}
+
+/* ================= Compare mode ================= */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:var(--panel)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--acc);color:#fff}
+.grow{flex:1}
+#cmp{display:none;flex:1;min-height:0;flex-direction:column;position:relative}
+body[data-mode=compare] #cmp{display:flex}
+body[data-mode=compare] #drop,body[data-mode=compare] main,body[data-mode=compare] .vonly{display:none}
+
+#cmpBar{display:flex;flex-direction:column;gap:6px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--panel);font-size:13px}
+#cmpBar .brow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px}
+#cmpBar .grp{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+#cmpBar .lbl{font-weight:600}
+#cmpBar button.mini{padding:1px 8px;font-size:12px}
+#cmpBar .arr{color:var(--mut)}
+#cmpBar label{display:inline-flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap}
+#cmpBar input[type=text],#cmpBar select{padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);width:150px}
+#cmpBar select{width:auto}
+#cmpBar input[type=text]:focus,#cmpBar select:focus{outline:2px solid var(--acc);outline-offset:-1px}
+.rinfo{color:var(--mut);font-size:12px}
+.rinfo.warn{color:var(--chg-fg)}
+.rinfo.bad{color:var(--del-fg)}
+.pill{display:inline-block;border-radius:10px;padding:0 9px;font-size:12px;font-weight:600;border:1px solid transparent}
+.pill.added{color:var(--add-fg);background:var(--add-bg)}
+.pill.removed{color:var(--del-fg);background:var(--del-bg)}
+.pill.changed{color:var(--chg-fg);background:var(--chg-bg)}
+.pill.same,.pill.warn{color:var(--mut);background:var(--bg);border-color:var(--line)}
+.pill.warn{color:var(--chg-fg)}
+
+#cmpHeads{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-bottom:1px solid var(--line)}
+.chead{display:flex;align-items:center;gap:8px;padding:6px 16px;min-width:0}
+.chead+.chead{border-left:1px solid var(--line)}
+.chead .side{font-weight:700;font-size:12px;color:#fff;border-radius:4px;padding:0 7px;flex:none}
+.chead .side.a{background:var(--del-fg)}
+.chead .side.b{background:var(--add-fg)}
+.chead .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.chead .mt{color:var(--mut);font-size:12px;white-space:nowrap}
+.chead button{padding:2px 9px;font-size:12px;flex:none}
+
+#cmpStage{flex:1;min-height:0;position:relative}
+#cmpDrops{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#cmpDrops.hide,#cmpDiff.hide{display:none}
+.cdrop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;margin:20px;border:2px dashed var(--line);border-radius:12px;color:var(--mut);text-align:center;padding:16px;cursor:pointer}
+.cdrop:hover{border-color:var(--acc)}
+.cdrop.loaded{border-style:solid;cursor:default}
+.cdrop.loaded:hover{border-color:var(--line)}
+.cdrop .big{font-size:36px;line-height:1.1}
+.cdrop .fn{color:var(--fg);font-weight:600;word-break:break-all}
+.cdrop .t{font-size:12px}
+.cdrop .err{color:var(--del-fg);font-size:13px;word-break:break-word}
+#cmpOver{position:absolute;top:0;bottom:0;width:50%;pointer-events:none;display:none;z-index:5;border:3px dashed var(--acc);background:rgba(232,103,28,.07)}
+
+#cmpDiff{position:absolute;inset:0;overflow:auto;font-size:13px}
+.cmpEmpty{padding:48px 24px;text-align:center;color:var(--mut);font-size:15px}
+.cmpEmpty .big{font-size:36px;color:var(--add-fg)}
+.drow,.prow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.drow{border-bottom:1px solid var(--line);cursor:pointer;min-width:640px}
+.prow{min-width:640px}
+.cell{display:flex;align-items:center;gap:6px;padding:2px 8px;min-width:0;white-space:nowrap;overflow:hidden}
+.cell+.cell,.pcell+.pcell{border-left:1px solid var(--line)}
+.cell .arrow{cursor:pointer}
+.cell .nmn{overflow:hidden;text-overflow:ellipsis}
+.cell .was{color:var(--mut);font-size:11px}
+.bdg{margin-left:auto;font-size:11px;border-radius:9px;padding:0 8px;color:#fff;flex:none}
+.bdg.added{background:var(--add-fg)}.bdg.removed{background:var(--del-fg)}.bdg.changed{background:var(--chg-fg)}
+.gap{background:repeating-linear-gradient(135deg,transparent 0 6px,var(--line) 6px 7px)}
+.st-added .cell.b,.st-added .pcell.b{background:var(--add-bg)}
+.st-removed .cell.a,.st-removed .pcell.a{background:var(--del-bg)}
+.st-changed>.drow .cell{background:var(--chg-bg)}
+.st-same>.drow .nmn{color:var(--mut)}
+.st-same>.drow .tag{opacity:.7}
+.drow:hover .cell:not(.gap){filter:brightness(.96)}
+.ddet{border-bottom:1px solid var(--line);padding-bottom:4px}
+.pgrp{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);padding:6px 8px 2px;min-width:640px}
+.pcell{display:flex;gap:10px;padding:3px 8px;min-width:0}
+.pk{font-family:ui-monospace,monospace;color:var(--acc);flex:none;max-width:45%;word-break:break-all}
+.pv{font-family:ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;min-width:0}
+.pv.none{color:var(--mut);font-style:italic;font-family:inherit}
+.pcell.mod.a,.pcell.only.a{background:var(--del-bg)}
+.pcell.mod.b,.pcell.only.b{background:var(--add-bg)}
+.pcell.only.gap{background:repeating-linear-gradient(135deg,transparent 0 6px,var(--line) 6px 7px)}
+mark.m{background:var(--mark);color:inherit;border-radius:2px;padding:0 1px}
+@media(prefers-color-scheme:dark){.bdg,.chead .side{color:#14161a}}
+</style>
+</head>
+<body data-mode="viewer">
+
+<header>
+  <h1>Houdini File Viewer</h1>
+  <div class="seg" role="tablist" aria-label="Mode"><button id="modeViewer" class="on">Viewer</button><button id="modeCompare">Compare</button></div>
+  <div class="info vonly" id="info">No file loaded</div>
+  <button id="animBtn" class="vonly" disabled>Animation overview</button>
+  <button id="jsonBtn" class="vonly" disabled>Download JSON</button>
+  <button id="openBtn" class="vonly">Open file…</button>
+  <input type="file" id="fileInput" accept=".hip,.hipnc,.hiplc" hidden>
+</header>
+
+<div id="drop"><div class="big">⬇</div><div>Drop a .hip / .hipnc / .hiplc file here, or click to browse</div><div class="t">Files are read locally in your browser — nothing is uploaded.</div><div id="err"></div></div>
+<main>
+  <div id="treePane">
+    <input type="search" id="filter" placeholder="Filter nodes by name or type…">
+    <div id="tree"></div>
+  </div>
+  <div id="details"><div class="empty">Select a node to see its parameters.</div></div>
+</main>
+
+<section id="cmp" aria-label="Compare two Houdini files">
+  <div id="cmpBar">
+    <div class="brow">
+      <div class="grp">
+        <span class="lbl">Replace in node names</span>
+        <input type="text" id="rSearch" placeholder="Search" spellcheck="false" autocomplete="off" aria-label="Search for">
+        <span class="arr">→</span>
+        <input type="text" id="rReplace" placeholder="Replace with" spellcheck="false" autocomplete="off" aria-label="Replace with">
+        <select id="rSide" aria-label="Apply rule to">
+          <option value="b">in right file (B)</option>
+          <option value="a">in left file (A)</option>
+          <option value="ab">in both files</option>
+        </select>
+      </div>
+      <div class="grp">
+        <label><input type="checkbox" id="rRegex"> Regex</label>
+        <label><input type="checkbox" id="rCase"> Match case</label>
+        <label title="Also rewrite parameter values, expressions and comments, so references like ch(&quot;../box_v2/size&quot;) still line up"><input type="checkbox" id="rValues" checked> Also in parameters &amp; expressions</label>
+      </div>
+      <span id="rInfo" class="rinfo"></span>
+    </div>
+    <div class="brow">
+      <div class="grp" id="cmpCats">
+        <span class="lbl">Compare</span>
+        <label><input type="checkbox" data-grp="Node" checked> Node</label>
+        <label><input type="checkbox" data-grp="Inputs" checked> Inputs</label>
+        <label><input type="checkbox" data-grp="Parameters" checked> Parameters</label>
+        <label><input type="checkbox" data-grp="Animation" checked> Animation</label>
+        <label><input type="checkbox" data-grp="Other .def" checked> Other .def</label>
+        <label><input type="checkbox" data-grp="Other files" checked> Other files</label>
+        <label><input type="checkbox" data-grp="User data" checked> User data</label>
+        <button id="catAll" class="mini" title="Select all categories">All</button>
+        <button id="catNone" class="mini" title="Clear all categories">None</button>
+      </div>
+    </div>
+    <div class="brow">
+      <div class="grp" id="cmpSum"></div>
+      <span class="grow"></span>
+      <div class="grp">
+        <label><input type="checkbox" id="oPos" checked> Ignore node positions</label>
+        <label><input type="checkbox" id="oSame"> Show unchanged nodes</label>
+        <button id="cExpand" disabled>Expand all</button>
+        <button id="cCollapse" disabled>Collapse all</button>
+        <button id="cSwap" title="Swap left and right files">⇄ Swap</button>
+        <button id="cCopy" disabled>Copy report</button>
+      </div>
+    </div>
+  </div>
+  <div id="cmpHeads">
+    <div class="chead" id="hA"><span class="side a">A</span><span class="nm"></span><span class="mt"></span><span class="grow"></span><button data-open="a">Open…</button><button data-clear="a" title="Remove file" aria-label="Remove file A">✕</button></div>
+    <div class="chead" id="hB"><span class="side b">B</span><span class="nm"></span><span class="mt"></span><span class="grow"></span><button data-open="b">Open…</button><button data-clear="b" title="Remove file" aria-label="Remove file B">✕</button></div>
+  </div>
+  <div id="cmpStage">
+    <div id="cmpDrops"><div class="cdrop" id="dA"></div><div class="cdrop" id="dB"></div></div>
+    <div id="cmpDiff" class="hide"></div>
+  </div>
+  <div id="cmpOver"></div>
+  <input type="file" id="cmpFile" accept=".hip,.hipnc,.hiplc" multiple hidden>
+</section>
+
+
+<!-- Keep houdini-reader.js in the same folder as this file -->
+<script src="houdini-reader.js"></script>
+<script src="houdini-diff.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var dropEl = $('drop'), treeEl = $('tree'), detEl = $('details'), errEl = $('err');
+  var items = new Map();   // node -> {wrap,row,kids,arrow}
+  var selected = null;
+
+  // ---------- file loading ----------
+  function pick() { $('fileInput').click(); }
+  $('openBtn').onclick = pick;
+  dropEl.onclick = pick;
+  $('fileInput').onchange = function (e) { if (e.target.files[0]) load(e.target.files[0]); };
+
+  var dragDepth = 0;
+  var comparing = function () { return document.body.dataset.mode === 'compare'; };
+  window.addEventListener('dragenter', function (e) { e.preventDefault(); if (comparing()) return; dragDepth++; document.body.classList.add('over'); });
+  window.addEventListener('dragleave', function () { if (comparing()) return; if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('over'); } });
+  window.addEventListener('dragover', function (e) { e.preventDefault(); });
+  window.addEventListener('drop', function (e) {
+    e.preventDefault(); dragDepth = 0; document.body.classList.remove('over');
+    if (comparing()) return;
+    var f = e.dataTransfer.files[0];
+    if (f) load(f);
+  });
+
+  async function load(file) {
+    errEl.textContent = '';
+    try {
+      var hip = await HoudiniReader.fromFile(file);
+      show(hip, file);
+      dropEl.classList.add('hide');
+    } catch (err) {
+      console.error(err);
+      errEl.textContent = 'Could not read "' + file.name + '": ' + err.message;
+      if (!items.size) dropEl.classList.remove('hide');
+    }
+  }
+
+  // ---------- JSON download ----------
+  var current = null;   // {hip, file}
+  $('jsonBtn').onclick = function () {
+    if (!current) return;
+    var json = JSON.stringify(current.hip.toJSON(), null, 2);
+    var url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = current.file.name.replace(/\.[^.]+$/, '') + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  };
+
+  // ---------- tree ----------
+  function show(hip, file) {
+    current = { hip: hip, file: file };
+    $('jsonBtn').disabled = false; $('animBtn').disabled = false;
+    var all = hip.allNodes();
+    $('info').textContent = file.name + ' — ' + all.length + ' nodes' +
+      (hip.houdiniVersion ? ' — saved with Houdini ' + hip.houdiniVersion : '');
+    treeEl.textContent = ''; items.clear(); selected = null; $('filter').value = '';
+    detEl.innerHTML = '<div class="empty">Select a node to see its parameters.</div>';
+    var openDepth = all.length > 300 ? 1 : 99;
+    hip.root.children.forEach(function (n) { treeEl.appendChild(build(n, 0, openDepth)); });
+  }
+
+  function build(node, depth, openDepth) {
+    var wrap = document.createElement('div');
+    var row = document.createElement('div'); row.className = 'row';
+    var arrow = document.createElement('span'); arrow.className = 'arrow';
+    var name = document.createElement('span'); name.textContent = node.name;
+    row.append(arrow, name);
+    if (node.isSticky) { var st = document.createElement('span'); st.textContent = '📝'; row.append(st); }
+    if (node.type) { var tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = node.type; row.append(tag); }
+    wrap.appendChild(row);
+
+    var kids = null;
+    if (node.children.length) {
+      kids = document.createElement('div'); kids.className = 'kids';
+      node.children.forEach(function (c) { kids.appendChild(build(c, depth + 1, openDepth)); });
+      wrap.appendChild(kids);
+      var open = depth < openDepth;
+      var setOpen = function (o) { open = o; arrow.textContent = o ? '▾' : '▸'; kids.classList.toggle('hidden', !o); };
+      setOpen(open);
+      arrow.onclick = function (e) { e.stopPropagation(); setOpen(!open); };
+      row.ondblclick = function () { setOpen(!open); };
+      items.set(node, { wrap: wrap, row: row, kids: kids, setOpen: setOpen });
+    } else {
+      items.set(node, { wrap: wrap, row: row, kids: null });
+    }
+    row.onclick = function () { select(node); };
+    return wrap;
+  }
+
+  function select(node) {
+    if (selected) items.get(selected).row.classList.remove('sel');
+    selected = node;
+    var it = items.get(node);
+    it.row.classList.add('sel');
+    // make sure ancestors are open
+    for (var p = node.parent; p; p = p.parent) { var pi = items.get(p); if (pi && pi.setOpen) pi.setOpen(true); }
+    it.row.scrollIntoView({ block: 'nearest' });
+    renderDetails(node);
+  }
+
+  $('filter').oninput = function () {
+    var q = this.value.trim().toLowerCase();
+    function visit(n) {
+      var it = items.get(n);
+      var self = !q || n.name.toLowerCase().indexOf(q) >= 0 || (n.type || '').toLowerCase().indexOf(q) >= 0;
+      var kid = false;
+      n.children.forEach(function (c) { if (visit(c)) kid = true; });
+      var vis = self || kid;
+      it.wrap.classList.toggle('hidden', !vis);
+      if (q && kid && it.setOpen) it.setOpen(true);
+      return vis;
+    }
+    treeEl.childNodes.forEach(function () {});
+    items.forEach(function (_, n) { if (!n.parent || !n.parent.parent) visit(n); });
+  };
+
+  // ---------- details ----------
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+
+  function fmtValue(v) {
+    if (v.type === 'string') return JSON.stringify(v.value);
+    if (v.type === 'group') return '[' + v.raw.join(' ') + ']';
+    return String(v.value);
+  }
+
+  function nodeLink(n, fallback) {
+    if (!n) return document.createTextNode(fallback || '?');
+    var a = el('span', 'link', n.path);
+    a.onclick = function () { select(n); };
+    return a;
+  }
+
+  function metaRow(tbl, k, content) {
+    var tr = el('tr'); tr.appendChild(el('th', '', k));
+    var td = el('td'); if (typeof content === 'string') td.textContent = content; else td.appendChild(content);
+    tr.appendChild(td); tbl.appendChild(tr);
+  }
+
+  // ---------- animation ----------
+  function fmt(v) { return Array.isArray(v) ? v.join(' ') : String(v); }
+  function round(x) { return typeof x === 'number' ? +x.toFixed(4) : x; }
+
+  function keyTable(ch) {
+    var base = ['index', 'frame', 'time', 'length'];
+    var extraCols = [];
+    ch.keys.forEach(function (k) {
+      Object.keys(k).forEach(function (c) { if (base.indexOf(c) < 0 && extraCols.indexOf(c) < 0) extraCols.push(c); });
+    });
+    var cols = base.concat(extraCols);
+    var t = el('table'), hr = el('tr', 'hd');
+    cols.forEach(function (c) { hr.appendChild(el('th', '', c === 'index' ? '#' : c === 'time' ? 'time (s)' : c)); });
+    t.appendChild(hr);
+    ch.keys.forEach(function (k) {
+      var tr = el('tr');
+      cols.forEach(function (c) { tr.appendChild(el('td', 'val', k[c] === undefined ? '' : fmt(Array.isArray(k[c]) ? k[c].map(round) : round(k[c])))); });
+      t.appendChild(tr);
+    });
+    return t;
+  }
+
+  function animSection(n) {
+    var names = Object.keys(n.channels);
+    if (!names.length) return;
+    detEl.appendChild(el('h3', '', 'Animation (' + names.length + ' channel' + (names.length > 1 ? 's' : '') + ')'));
+    names.forEach(function (name) {
+      var ch = n.channels[name];
+      var head = name + ' — ' + ch.keys.length + ' key(s)';
+      if (ch.keys.length) head += ', frames ' + round(ch.keys[0].frame) + ' to ' + round(ch.keys[ch.keys.length - 1].frame);
+      detEl.appendChild(el('div', 'chhead', head));
+      var at = Object.keys(ch.attrs).map(function (k) { return k + ' = ' + fmt(ch.attrs[k]); }).join('   ');
+      if (at) detEl.appendChild(el('div', 'empty', at + '   (fps ' + ch.fps + ')'));
+      if (ch.keys.length) detEl.appendChild(keyTable(ch));
+    });
+  }
+
+  function renderOverview() {
+    if (selected) items.get(selected).row.classList.remove('sel');
+    selected = null;
+    detEl.textContent = '';
+    detEl.appendChild(el('h2', '', 'Animation overview'));
+    var t = el('table'), hr = el('tr', 'hd');
+    ['Node', 'Channel', 'Keys', 'Frame range'].forEach(function (h) { hr.appendChild(el('th', '', h)); });
+    t.appendChild(hr);
+    var count = 0;
+    items.forEach(function (_, n) {
+      Object.keys(n.channels).forEach(function (name) {
+        var ch = n.channels[name], tr = el('tr'), td = el('td');
+        td.appendChild(nodeLink(n));
+        tr.appendChild(td);
+        tr.appendChild(el('td', 'val', name));
+        tr.appendChild(el('td', 'val', String(ch.keys.length)));
+        tr.appendChild(el('td', 'val', ch.keys.length ? round(ch.keys[0].frame) + ' – ' + round(ch.keys[ch.keys.length - 1].frame) : ''));
+        t.appendChild(tr); count++;
+      });
+    });
+    if (!count) detEl.appendChild(el('div', 'empty', 'No animated channels found in this file.'));
+    else detEl.appendChild(t);
+  }
+  $('animBtn').onclick = renderOverview;
+
+  function renderDetails(n) {
+    detEl.textContent = '';
+    detEl.appendChild(el('h2', '', n.name || n.path));
+    detEl.appendChild(el('div', 'path', n.path));
+    var chips = el('div');
+    chips.appendChild(el('span', 'chip', 'type: ' + (n.type || '?')));
+    if (n.position) chips.appendChild(el('span', 'chip', 'pos ' + n.position.join(', ')));
+    detEl.appendChild(chips);
+
+    detEl.appendChild(el('h3', '', 'Node'));
+    var meta = el('table');
+    metaRow(meta, 'Children', String(n.children.length));
+    if (n.comment) metaRow(meta, 'Comment', n.comment);
+    if (n.color) metaRow(meta, 'Color', n.color.join(' '));
+    var on = Object.keys(n.flags).filter(function (k) { return n.flags[k]; });
+    if (Object.keys(n.flags).length) {
+      var fw = el('span'); on.forEach(function (k) { fw.appendChild(el('span', 'chip', k)); });
+      if (!on.length) fw.textContent = '(none on)';
+      metaRow(meta, 'Flags on', fw);
+    }
+    if (n.stat.author) metaRow(meta, 'Author', n.stat.author);
+    if (n.stat.createDate) metaRow(meta, 'Created', n.stat.createDate.toLocaleString());
+    if (n.stat.modifyDate) metaRow(meta, 'Modified', n.stat.modifyDate.toLocaleString());
+    n.inputs.forEach(function (c) {
+      var w = el('span'); w.appendChild(nodeLink(c.node, c.sourceName));
+      if (c.outputIndex) w.appendChild(document.createTextNode(' (output ' + c.outputIndex + ')'));
+      metaRow(meta, 'Input ' + c.index, w);
+    });
+    n.outputs.forEach(function (c) { metaRow(meta, 'Feeds input ' + c.index, nodeLink(c.node)); });
+    detEl.appendChild(meta);
+
+    detEl.appendChild(el('h3', '', 'Parameters (' + n.parms.length + ', non-default only)'));
+    if (!n.parms.length) { detEl.appendChild(el('div', 'empty', 'No non-default parameters stored.')); }
+    else {
+      var t = el('table');
+      n.parms.forEach(function (p) {
+        var tr = el('tr');
+        var th = el('th', '', p.name);
+        tr.appendChild(th);
+        var td = el('td', 'val');
+        td.appendChild(document.createTextNode(p.values.map(fmtValue).join('   ')));
+        if (p.channels) {
+          td.appendChild(el('span', 'anim', 'animated'));
+          p.channels.forEach(function (ch, i) {
+            if (!ch) return;
+            ch.segments.forEach(function (s) {
+              if (s.expr) td.appendChild(el('div', '', '  [' + i + '] expr: ' + s.expr));
+            });
+          });
+        }
+        tr.appendChild(td); t.appendChild(tr);
+      });
+      detEl.appendChild(t);
+    }
+
+    animSection(n);
+
+    var oth = Object.keys(n.other);
+    if (oth.length) {
+      detEl.appendChild(el('h3', '', 'Other .def properties'));
+      var ot = el('table');
+      oth.forEach(function (k) {
+        var v = n.other[k], txt = Array.isArray(v) ? v.join(' ') : [v.args.join(' ')].concat(v.lines).join('\n');
+        var tr = el('tr'); tr.appendChild(el('th', '', k)); tr.appendChild(el('td', 'val', txt)); ot.appendChild(tr);
+      });
+      detEl.appendChild(ot);
+    }
+
+    var ex = Object.keys(n.extra);
+    if (ex.length) {
+      detEl.appendChild(el('h3', '', n.isSticky ? 'Note content' : 'Other files'));
+      var et = el('table');
+      ex.forEach(function (k) { var tr = el('tr'); tr.appendChild(el('th', '', '.' + k)); tr.appendChild(el('td', 'val', n.extra[k])); et.appendChild(tr); });
+      detEl.appendChild(et);
+    }
+
+    var rawExts = Object.keys(n.files);
+    if (rawExts.length) {
+      detEl.appendChild(el('h3', '', 'Raw files'));
+      rawExts.forEach(function (k) {
+        var d = el('details'); d.appendChild(el('summary', '', n.name + '.' + k + ' (' + n.files[k].length + ' bytes)'));
+        d.appendChild(el('pre', 'val', n.getRaw(k)));
+        detEl.appendChild(d);
+      });
+    }
+
+    var ud = Object.keys(n.userData);
+    if (ud.length) {
+      detEl.appendChild(el('h3', '', 'User data'));
+      var ut = el('table');
+      ud.forEach(function (k) { var tr = el('tr'); tr.appendChild(el('th', '', k)); tr.appendChild(el('td', 'val', n.userData[k])); ut.appendChild(tr); });
+      detEl.appendChild(ut);
+    }
+  }
+})();
+</script>
+<script>
+/* ================= Compare mode ================= */
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function other(k) { return k === 'a' ? 'b' : 'a'; }
+  function blank() { return { hip: null, file: null, err: '', count: 0 }; }
+
+  var S = { a: blank(), b: blank() };
+  var result = null, ui = [], pickSide = 'a';
+
+  // ---------- mode switch ----------
+  function setMode(m) {
+    document.body.dataset.mode = m;
+    $('modeViewer').classList.toggle('on', m === 'viewer');
+    $('modeCompare').classList.toggle('on', m === 'compare');
+  }
+  $('modeViewer').onclick = function () { setMode('viewer'); };
+  $('modeCompare').onclick = function () { setMode('compare'); };
+
+  // ---------- loading ----------
+  var input = $('cmpFile');
+  function pick(k) { pickSide = k; input.value = ''; input.click(); }
+  input.onchange = function () { assign(Array.prototype.slice.call(input.files), pickSide); };
+  document.querySelectorAll('[data-open]').forEach(function (b) { b.onclick = function () { pick(b.dataset.open); }; });
+  document.querySelectorAll('[data-clear]').forEach(function (b) {
+    b.onclick = function () { S[b.dataset.clear] = blank(); render(); };
+  });
+  $('dA').onclick = function () { if (!S.a.hip) pick('a'); };
+  $('dB').onclick = function () { if (!S.b.hip) pick('b'); };
+
+  async function loadSide(k, file) {
+    var s = S[k];
+    try {
+      var hip = await HoudiniReader.fromFile(file);
+      S[k] = { hip: hip, file: file, err: '', count: hip.allNodes().length };
+    } catch (err) {
+      console.error(err);
+      s.err = 'Could not read "' + file.name + '": ' + err.message;
+    }
+  }
+  // first file -> `k`, an optional second file -> the other side
+  async function assign(files, k) {
+    if (!files.length) return;
+    await Promise.all([loadSide(k, files[0]), files[1] ? loadSide(other(k), files[1]) : null]);
+    render();
+  }
+
+  // ---------- drag & drop: the half of the screen under the cursor is the target ----------
+  var cmp = $('cmp'), over = $('cmpOver');
+  function sideAt(e) { var r = cmp.getBoundingClientRect(); return e.clientX < r.left + r.width / 2 ? 'a' : 'b'; }
+  cmp.addEventListener('dragover', function (e) {
+    e.preventDefault(); e.stopPropagation();
+    over.style.display = 'block';
+    over.style.left = sideAt(e) === 'a' ? '0' : '50%';
+  });
+  cmp.addEventListener('dragleave', function (e) { if (!cmp.contains(e.relatedTarget)) over.style.display = 'none'; });
+  cmp.addEventListener('drop', function (e) {
+    e.preventDefault(); e.stopPropagation();
+    over.style.display = 'none';
+    assign(Array.prototype.slice.call(e.dataTransfer.files), sideAt(e));
+  });
+
+  // ---------- options ----------
+  function ruleFor(k) {
+    var search = $('rSearch').value;
+    if (!search || $('rSide').value.indexOf(k) < 0) return null;
+    return { search: search, replace: $('rReplace').value, regex: $('rRegex').checked,
+             caseSensitive: $('rCase').checked, values: $('rValues').checked };
+  }
+  var timer = null;
+  function scheduled() { clearTimeout(timer); timer = setTimeout(render, 220); }
+  ['rSearch', 'rReplace'].forEach(function (id) { $(id).oninput = scheduled; });
+  ['rRegex', 'rCase', 'rValues', 'rSide', 'oPos', 'oSame'].forEach(function (id) { $(id).onchange = render; });
+
+  // category filter
+  var catBoxes = Array.prototype.slice.call(document.querySelectorAll('#cmpCats input[data-grp]'));
+  catBoxes.forEach(function (b) { b.onchange = render; });
+  function setAllCats(v) { catBoxes.forEach(function (b) { b.checked = v; }); render(); }
+  $('catAll').onclick = function () { setAllCats(true); };
+  $('catNone').onclick = function () { setAllCats(false); };
+  function activeGroups() {
+    var on = catBoxes.filter(function (b) { return b.checked; }).map(function (b) { return b.dataset.grp; });
+    return on.length === catBoxes.length ? null : on;     // null = everything
+  }
+
+  $('cSwap').onclick = function () {
+    var t = S.a; S.a = S.b; S.b = t;
+    var sd = $('rSide'); if (sd.value === 'a') sd.value = 'b'; else if (sd.value === 'b') sd.value = 'a';
+    render();
+  };
+  $('cExpand').onclick = function () { for (var i = 0; i < ui.length; i++) { ui[i].setK(true); ui[i].setD(ui[i].changed); } };
+  $('cCollapse').onclick = function () { ui.forEach(function (u) { u.setK(false); u.setD(false); }); };
+  $('cCopy').onclick = function () {
+    if (!result) return;
+    var text = HoudiniReader.formatDiff(result, { names: [S.a.file.name, S.b.file.name] });
+    var done = function () { var b = $('cCopy'); b.textContent = 'Copied ✓'; setTimeout(function () { b.textContent = 'Copy report'; }, 1400); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+    function fallback() {
+      var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
+      ta.select(); try { document.execCommand('copy'); done(); } catch (e) {} ta.remove();
+    }
+  };
+
+  // ---------- render ----------
+  function setInfo(text, cls) { var r = $('rInfo'); r.textContent = text; r.className = 'rinfo' + (cls ? ' ' + cls : ''); }
+
+  function render() {
+    var both = !!(S.a.hip && S.b.hip);
+    result = null;
+    setInfo('');
+
+    // validate the rename rule first so a half-typed regex never blanks the screen
+    try { ['a', 'b'].forEach(function (k) { HoudiniReader.makeRenamer(ruleFor(k)); }); }
+    catch (err) { setInfo('Invalid pattern: ' + err.message, 'bad'); return; }
+
+    if (both) result = HoudiniReader.diff(S.a.hip, S.b.hip, {
+      renameA: ruleFor('a'), renameB: ruleFor('b'), ignorePosition: $('oPos').checked, groups: activeGroups()
+    });
+
+    $('cmpDrops').classList.toggle('hide', both);
+    $('cmpDiff').classList.toggle('hide', !both);
+    ['cExpand', 'cCollapse', 'cCopy'].forEach(function (id) { $(id).disabled = !both; });
+    renderHeads(); renderDrops(); renderSummary(); renderRuleInfo();
+    renderDiff();
+  }
+
+  function renderHeads() {
+    [['a', 'hA'], ['b', 'hB']].forEach(function (p) {
+      var k = p[0], h = $(p[1]), s = S[k];
+      h.querySelector('.nm').textContent = s.file ? s.file.name : 'No file loaded';
+      var mt = '';
+      if (s.hip) {
+        mt = s.count + ' nodes' + (s.hip.houdiniVersion ? ' · Houdini ' + s.hip.houdiniVersion : '');
+        if (result && result.renamed[k]) mt += ' · ' + result.renamed[k] + ' renamed';
+      }
+      h.querySelector('.mt').textContent = mt;
+      h.querySelector('[data-clear]').disabled = !s.file;
+    });
+  }
+
+  function renderDrops() {
+    [['a', 'dA'], ['b', 'dB']].forEach(function (p) {
+      var k = p[0], d = $(p[1]), s = S[k];
+      d.textContent = '';
+      d.classList.toggle('loaded', !!s.hip);
+      if (s.hip) {
+        d.appendChild(el('div', 'big', '✓'));
+        d.appendChild(el('div', 'fn', s.file.name));
+        d.appendChild(el('div', 't', s.count + ' nodes loaded — waiting for the ' + (k === 'a' ? 'right' : 'left') + ' file'));
+      } else {
+        d.appendChild(el('div', 'big', '⬇'));
+        d.appendChild(el('div', '', 'Drop the ' + (k === 'a' ? 'left (A)' : 'right (B)') + ' .hip / .hipnc / .hiplc here'));
+        d.appendChild(el('div', 't', 'or click to browse · you can also drop both files at once'));
+        if (s.err) d.appendChild(el('div', 'err', s.err));
+      }
+    });
+  }
+
+  function renderSummary() {
+    var box = $('cmpSum'); box.textContent = '';
+    if (!result) { box.appendChild(el('span', 'rinfo', 'Load a file in each panel to compare. Files are read locally — nothing is uploaded.')); return; }
+    var s = result.summary;
+    box.appendChild(el('span', 'pill added', '+' + s.added + ' added (only in B)'));
+    box.appendChild(el('span', 'pill removed', '−' + s.removed + ' removed (only in A)'));
+    box.appendChild(el('span', 'pill changed', '~' + s.changed + ' changed'));
+    box.appendChild(el('span', 'pill same', s.unchanged + ' unchanged'));
+    if (result.warnings.length) {
+      var w = el('span', 'pill warn', '⚠ ' + result.warnings.length + ' rename collision' + (result.warnings.length > 1 ? 's' : ''));
+      w.title = result.warnings.join('\n');
+      box.appendChild(w);
+    }
+  }
+
+  function renderRuleInfo() {
+    if (!$('rSearch').value) return;
+    if (!result) { setInfo('Rule is applied once both files are loaded.'); return; }
+    var applies = $('rSide').value, parts = [];
+    ['a', 'b'].forEach(function (k) {
+      if (applies.indexOf(k) >= 0) parts.push((k === 'a' ? 'A' : 'B') + ': ' + result.renamed[k]);
+    });
+    var total = (applies.indexOf('a') >= 0 ? result.renamed.a : 0) + (applies.indexOf('b') >= 0 ? result.renamed.b : 0);
+    setInfo(total ? 'Node names renamed — ' + parts.join(', ') : 'No node names matched the search text.', total ? '' : 'warn');
+  }
+
+  // ---------- diff tree ----------
+  function vis(d) { return d.hasDiff || $('oSame').checked; }
+
+  function renderDiff() {
+    var box = $('cmpDiff'); box.textContent = ''; ui = [];
+    if (!result) return;
+    if (!result.root.hasDiff && !$('oSame').checked) {
+      var e = el('div', 'cmpEmpty');
+      e.appendChild(el('div', 'big', '✓'));
+      e.appendChild(el('div', '', 'No differences found'));
+      var g = activeGroups();
+      e.appendChild(el('div', 'rinfo', g ? 'No differences in the selected categories (' + (g.join(', ') || 'none selected') + ') — added or removed nodes are always shown.' : 'Both files have the same nodes, connections and parameters' + (result.renamed.a + result.renamed.b ? ' (after renaming)' : '') + '.'));
+      box.appendChild(e);
+      return;
+    }
+    var autoDet = result.summary.changed <= 120;     // keep huge diffs collapsed
+    var frag = document.createDocumentFragment();
+    result.root.children.forEach(function (c) { if (vis(c)) frag.appendChild(buildNode(c, 0, autoDet, 'same')); });
+    box.appendChild(frag);
+  }
+
+  function badgeText(d) {
+    return d.status === 'changed' ? d.props.length + (d.props.length > 1 ? ' changes' : ' change') : d.status;
+  }
+
+  function buildNode(d, depth, autoDet, parentStatus) {
+    var ctx = d.status === 'same' && d.hasDiff;
+    var wrap = el('div', 'dn st-' + d.status + (ctx ? ' ctx' : ''));
+    var row = el('div', 'drow');
+    var kidList = d.children.filter(vis);
+    var hasKids = kidList.length > 0, hasDet = d.props.length > 0;
+    var arrows = [];
+
+    ['a', 'b'].forEach(function (k) {
+      var node = d[k];
+      var c = el('div', 'cell ' + k + (node ? '' : ' gap'));
+      c.style.paddingLeft = (8 + depth * 16) + 'px';
+      var ar = el('span', 'arrow'); c.appendChild(ar); arrows.push(ar);
+      if (node) {
+        c.appendChild(el('span', 'nmn', d.name));
+        if (node.name !== d.name) c.appendChild(el('span', 'was', '← ' + node.name));
+        if (node.isSticky) c.appendChild(el('span', '', '📝'));
+        if (node.type) c.appendChild(el('span', 'tag', node.type));
+        var carriesBadge = (d.status === 'removed') ? k === 'a' : k === 'b';
+        if (carriesBadge && !ctx && d.status !== 'same' && (d.status === 'changed' || d.status !== parentStatus)) {
+          c.appendChild(el('span', 'bdg ' + d.status, badgeText(d)));
+        }
+      }
+      row.appendChild(c);
+    });
+    wrap.appendChild(row);
+
+    var det = null, kids = null, builtKids = false;
+    var openK = d.status !== 'added' && d.status !== 'removed';
+    var openD = hasDet && d.status === 'changed' && autoDet;
+
+    function setK(o) {
+      if (!hasKids) return;
+      openK = o;
+      arrows.forEach(function (a) { a.textContent = o ? '▾' : '▸'; });
+      if (o && !builtKids) {                            // build children lazily
+        builtKids = true;
+        kidList.forEach(function (c) { kids.appendChild(buildNode(c, depth + 1, autoDet, d.status)); });
+      }
+      kids.classList.toggle('hidden', !o);
+    }
+    function setD(o) {
+      if (!hasDet) return;
+      openD = o;
+      if (o && !det) { det = buildDetails(d, depth); wrap.insertBefore(det, kids || null); }
+      if (det) det.classList.toggle('hidden', !o);
+    }
+
+    if (hasKids) { kids = el('div', 'dkids'); wrap.appendChild(kids); }
+    row.onclick = function () { if (hasDet) setD(!openD); else if (hasKids) setK(!openK); };
+    arrows.forEach(function (a) { a.onclick = function (e) { e.stopPropagation(); setK(!openK); }; });
+    ui.push({ setK: setK, setD: setD, changed: d.status === 'changed' });
+    if (hasKids) setK(openK);
+    if (openD) setD(true);
+    return wrap;
+  }
+
+  function buildDetails(d, depth) {
+    var det = el('div', 'ddet'), last = null;
+    d.props.forEach(function (p) {
+      if (p.group !== last) {
+        var g = el('div', 'pgrp', p.group); g.style.paddingLeft = (30 + depth * 16) + 'px';
+        det.appendChild(g); last = p.group;
+      }
+      var r = el('div', 'prow'), parts = (p.a !== undefined && p.b !== undefined) ? splitDiff(p.a, p.b) : null;
+      ['a', 'b'].forEach(function (k) { r.appendChild(propCell(k, p, d, depth, parts)); });
+      det.appendChild(r);
+    });
+    return det;
+  }
+
+  function propCell(k, p, d, depth, parts) {
+    var v = p[k], c = el('div', 'pcell ' + k);
+    c.style.paddingLeft = (30 + depth * 16) + 'px';
+    if (!d[k]) { c.classList.add('gap'); return c; }                 // whole node missing on this side
+    if (v === undefined) {                                           // property absent (= default) on this side
+      c.classList.add('gap');
+      c.appendChild(el('span', 'pk', p.key));
+      c.appendChild(el('span', 'pv none', p.group === 'Parameters' ? '(default)' : '—'));
+      return c;
+    }
+    c.appendChild(el('span', 'pk', p.key));
+    var pv = el('span', 'pv');
+    if (v === '') { pv.className = 'pv none'; pv.textContent = '(empty)'; }
+    else if (parts) {
+      var seg = parts[k];
+      pv.appendChild(document.createTextNode(seg[0]));
+      if (seg[1]) pv.appendChild(el('mark', 'm', seg[1]));
+      pv.appendChild(document.createTextNode(seg[2]));
+    } else pv.textContent = v;
+    c.appendChild(pv);
+    if (d.status === 'changed') c.classList.add(p.a !== undefined && p.b !== undefined ? 'mod' : 'only');
+    return c;
+  }
+
+  // highlight the part that differs: trim common prefix / suffix
+  function splitDiff(x, y) {
+    if (x.length > 4000 || y.length > 4000) return null;
+    var n = Math.min(x.length, y.length), i = 0, j = 0;
+    while (i < n && x.charCodeAt(i) === y.charCodeAt(i)) i++;
+    while (j < n - i && x.charCodeAt(x.length - 1 - j) === y.charCodeAt(y.length - 1 - j)) j++;
+    function cut(t) { return [t.slice(0, i), t.slice(i, t.length - j), t.slice(t.length - j)]; }
+    return { a: cut(x), b: cut(y) };
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

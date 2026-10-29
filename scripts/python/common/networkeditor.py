@@ -79,25 +79,37 @@ def cycle_display_flag():
     return True
 
 
+
+@common.hou_utils.create_undo_group("Paste Object Merge")
 def paste_objectmerge():
-    """Create an Object Merge node with the path to the nodes in the clipboard"""
-    pane = hou.ui.paneTabUnderCursor()
-    if isinstance(pane, hou.NetworkEditor):
-        position = pane.cursorPosition()
-    else:
-        return None, False
-    parent = pane.pwd()
+    """Add clipboard node paths to the selected Object Merge, or create a new one."""
     clipboard = hou.ui.getTextFromClipboard().split()
-    merge = None
-    for index, path in enumerate(clipboard):
-        if hou.node(path):
-            name = os.path.basename(os.path.normpath(path))
-            if not merge:
-                merge = common.hou_utils.create_node(parent, 'object_merge', name, {'objpath1': '%FILEPATH%'}, position, path)
-            else:
-                parm = merge.parm('numobj')
-                parm.insertMultiParmInstance(index)
-                merge.setParms({'objpath{}'.format(str(index+1)): path})
+    nodes = [node for path in clipboard if (node := hou.node(path))]
+    if not nodes:
+        return None, False
+
+    merge = next((n for n in hou.selectedNodes() if n.type().name() == 'object_merge'), None)
+
+    if merge:
+        current_count = merge.parm('numobj').eval()
+        # If the node has just 1 slot and it's empty, treat it as empty
+        if current_count == 1 and not merge.parm('objpath1').eval().strip():
+            current_count = 0
+            existing_paths = set()
+        else:
+            existing_paths = {merge.parm(f'objpath{i}').eval() for i in range(1, current_count + 1)}
+        nodes = [n for n in nodes if merge.relativePathTo(n) not in existing_paths]
+        if not nodes:
+            return merge, False
+    else:
+        pane = hou.ui.paneTabUnderCursor()
+        if not isinstance(pane, hou.NetworkEditor):
+            return None, False
+        merge = common.hou_utils.create_node(pane.pwd(), 'object_merge', 'auto_merge', position=pane.cursorPosition())
+        current_count = 0
+
+    merge.parm('numobj').set(current_count + len(nodes))
+    merge.setParms({f'objpath{i}': merge.relativePathTo(node) for i, node in enumerate(nodes, start=current_count+1)})
     return merge, True
 
 

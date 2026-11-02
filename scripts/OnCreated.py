@@ -1,5 +1,6 @@
 import traceback
 import hou
+import hdefereval
 import common.events
 import common.hou_utils
 

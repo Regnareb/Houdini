@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menuDocument>
+    <menu>
+        <subMenu id="opmenu.save_menu">
+            <label>Save</label>
+            <scriptItem id="opmenu.save_items_to_cpio">
+                <label>Export Selection to .cpio...</label>
+                <scriptCode><![CDATA[
+import tools.export_selection
+items = kwargs.get('items')
+print(kwargs)
+tools.export_selection.export_nodes_to_file(items, '.cpio', kwargs['networkeditor'])
+]]></scriptCode>
+            </scriptItem>
+
+            <!-- 2. Standalone .hip Export via Background hython -->
+            <scriptItem id="opmenu.export_selection_to_hip">
+                <label>Export Selection to .hip...</label>
+                <scriptCode><![CDATA[
+import tools.export_selection
+items = kwargs.get('items')
+tools.export_selection.export_nodes_to_file(items, editor=kwargs['networkeditor'])
+]]></scriptCode>
+            </scriptItem>
+        </subMenu>
+    </menu>
+</menuDocument>

@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import logging
 import functools
@@ -136,6 +137,32 @@ def get_houdini_version():
     return float(v)
 
 
+def get_allowed_extensions() -> dict[str, str]:
+    """Retrieve allowed scene and digital asset file extensions for the active license."""
+    category = hou.licenseCategory()
+    # Not every Houdini version exposes all of these members, so only use the ones that exist
+    non_commercial = tuple(getattr(hou.licenseCategoryType, name) for name in ('Education', 'Apprentice', 'ApprenticeHD') if hasattr(hou.licenseCategoryType, name))
+    if category == hou.licenseCategoryType.Indie:
+        return {'scene': '.hiplc', 'hda': '.hdalc'}
+    elif category in non_commercial:
+        return {'scene': '.hipnc', 'hda': '.hdanc'}
+    else:
+        return {'scene': '.hip', 'hda': '.hda'}
+
+
+def get_hython_binary() -> str:
+    """Locates the hython executable for the current Houdini session."""
+    exe_name = 'hython.exe' if sys.platform == 'win32' else 'hython'
+    hfs_candidate = os.path.join(hou.text.expandString('$HFS'), 'bin', exe_name)
+    if os.path.exists(hfs_candidate):
+        return hfs_candidate
+    bin_dir = os.path.dirname(sys.executable)
+    candidate = os.path.join(bin_dir, exe_name)
+    if os.path.exists(candidate):
+        return candidate
+    return exe_name
+
+
 def load_hda_library(folder_path):
     """Load all the HDA files from a folder
 
@@ -180,6 +207,18 @@ def is_qlib_installed():
 
 def is_aelib_installed():
     return bool(hou.nodeType(hou.sopNodeTypeCategory(), 'ae::Clip::1'))
+
+def validate_same_parent(items: list[hou.NetworkMovableItem], error: str | None = 'All selected nodes must belong to the same parent network') -> bool:
+    """Validates that all provided nodes or network items share the same parent network."""
+    if not items:
+        return True  # Empty selection is permitted
+
+    parent = items[0].parent()
+    if not all(i.parent() == parent for i in items):
+        if error:
+            hou.ui.displayMessage(error, severity=hou.severityType.Error)
+        return False
+    return True
 
 
 def check_preference(preference, value):

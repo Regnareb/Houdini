@@ -76,7 +76,7 @@ def dropAccept(files):
         extension = filter(filepath.lower().endswith, list(FILETYPES) + list(common.constants.IMAGE_FORMATS))
         for ext in extension:
             if ext in common.constants.IMAGE_FORMATS:
-                if isinstance(pane, hou.NetworkEditor) and any(ctrl, alt, shift):
+                if isinstance(pane, hou.NetworkEditor) and any([ctrl, alt, shift]):
                     common.networkeditor.add_background_image_to_editor(pane, filepath, position)
                     break
                 categories = [hou.vopNodeTypeCategory()]

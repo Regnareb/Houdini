@@ -179,25 +179,39 @@ def load_hda_library(folder_path):
 
 
 def save_node_stats(nodetype):
-    """Increment the count creation of a node type in a .json. Also track the consecutive nodes creation by checking how long after the previous one it was created."""
+    """Increment the creation count of a node type in a .json.
+    Also tracks consecutive node creation (created < 5 s after the previous
+    one), plus per-day and per-hour creation counts for the timeline view.
+    """
     filepath = os.path.join(hou.homeHoudiniDirectory(), 'br_nodestats.json')
     try:
         data = iopath.json_load(filepath)
-        data[nodetype]['count'] += 1
     except FileNotFoundError:
-        data = {nodetype: {'count': 1, 'next': {}}, '_br_previous': {'type': '', 'timestamp': 0}}
-    except KeyError:
-        data[nodetype] = {'count': 1, 'next': {}}
+        data = {}
+    previous = data.setdefault('_br_previous', {'type': '', 'timestamp': 0})
 
-    if time.time() - data['_br_previous']['timestamp'] < 5:
-        try:
-            previous = data['_br_previous']['type']
-            data[previous]['next'][nodetype] += 1
-        except KeyError:
-            data[previous]['next'][nodetype] = 1
+    now = time.time()
+    local = time.localtime(now)
 
-    data['_br_previous']['type'] = nodetype
-    data['_br_previous']['timestamp'] = time.time()
+    entry = data.setdefault(nodetype, {'count': 0, 'next': {}})
+    entry['count'] = entry.get('count', 0) + 1
+    entry.setdefault('next', {})
+
+    # time tracking 
+    day = time.strftime('%Y-%m-%d', local)
+    daily = entry.setdefault('daily', {})
+    daily[day] = daily.get(day, 0) + 1
+
+    hourly = entry.setdefault('hourly', [0] * 24)
+    hourly[local.tm_hour] += 1
+
+    # consecutive creation tracking 
+    if now - previous['timestamp'] < 5 and previous['type'] in data:
+        following = data[previous['type']].setdefault('next', {})
+        following[nodetype] = following.get(nodetype, 0) + 1
+
+    previous['type'] = nodetype
+    previous['timestamp'] = now
     iopath.json_write(data, filepath)
 
 

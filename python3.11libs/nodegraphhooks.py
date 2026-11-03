@@ -41,8 +41,7 @@ def createEventHandler(uievent, pending_actions):
        uievent.rawkey == 'Ctrl+V' and \
        hou.getPreference('custom.regnareb.paste_images_to_network') == '1':
         editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
-        common.networkeditor.paste_clipboard_images(editor, editor.cursorPosition())
-        return None, True
+        return None, common.networkeditor.paste_clipboard_images(editor, editor.cursorPosition())
 
     return None, False
 
